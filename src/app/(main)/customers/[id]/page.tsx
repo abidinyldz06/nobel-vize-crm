@@ -12,6 +12,7 @@ import ProfileAnalysisButton from "@/components/ProfileAnalysisButton";
 import PdfExportButton from "@/components/PdfExportButton";
 import FamilyMembersPanel from "@/components/FamilyMembersPanel";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
+import WhatsAppTemplates from "@/components/WhatsAppTemplates";
 
 export const revalidate = 0;
 
@@ -239,18 +240,10 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                 )}
               </div>
 
-              {/* Evrak Listesini Gönder */}
-              {documents && documents.length > 0 && customer.phone && (
+              {/* WhatsApp Mesaj Şablonları */}
+              {customer.phone && (
                 <div className="px-4 py-3 border-t border-slate-200 dark:border-[#1f2937] flex flex-wrap gap-2">
-                  <a
-                    href={`https://wa.me/90${customer.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(
-                      `Merhaba ${customer.first_name} Bey/Hanım,\n\n${activeApp?.country || ''} vize başvurunuz için gereken evraklar:\n\n${documents.map((d: any, i: number) => `${i + 1}. ${d.document_type} ${d.status === 'tamamlandi' ? '✅' : '⏳'}`).join('\n')}\n\n⏳ = Bekliyor, ✅ = Tamamlandı\n\nSaygılarımızla,\nNobel Vize`
-                    )}`}
-                    target="_blank"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-slate-900 dark:text-white text-[11px] font-semibold rounded-lg transition-all"
-                  >
-                    📱 WhatsApp ile Gönder
-                  </a>
+                  <WhatsAppTemplates customer={customer} activeApp={activeApp} documents={documents || []} payments={payments || []} />
                   {customer.email && (
                     <a
                       href={`mailto:${customer.email}?subject=${encodeURIComponent(`${activeApp?.country || ''} Vize Başvurusu — Evrak Listesi`)}&body=${encodeURIComponent(
