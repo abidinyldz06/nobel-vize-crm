@@ -25,7 +25,7 @@ export default function DocumentItem({ doc }: { doc: any }) {
       const { data: { user } } = await supabase.auth.getUser();
       await supabase.from("activity_log").insert([{
         application_id: doc.application_id,
-        action: `Evrak güncellendi: "${doc.document_name}" -> ${newStatus === 'tamamlandi' ? 'Tamamlandı' : 'Bekliyor'}`,
+        action: `Evrak güncellendi: "${doc.document_type}" -> ${newStatus === 'tamamlandi' ? 'Tamamlandı' : 'Bekliyor'}`,
         performed_by: user?.email || "Danışman"
       }]);
 
@@ -72,12 +72,6 @@ export default function DocumentItem({ doc }: { doc: any }) {
           }
         }
 
-        // Activity log
-        await supabase.from('activity_log').insert([{
-          application_id: doc.application_id,
-          action: `Evrak ${newStatus === 'tamamlandi' ? 'tamamlandı' : 'beklemeye alındı'}: ${doc.document_type}`,
-          performed_by: 'Danışman',
-        }])
       }
 
       router.refresh();

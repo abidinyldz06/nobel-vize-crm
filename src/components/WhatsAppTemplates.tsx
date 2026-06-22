@@ -29,7 +29,7 @@ export default function WhatsAppTemplates({ customer, activeApp, documents, paym
   const phoneParam = rawPhone.startsWith('90') ? rawPhone : `90${rawPhone}`;
 
   // Hesaplamalar
-  const totalPaid = payments?.filter(p => p.status === 'odendi').reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+  const totalPaid = payments?.filter(p => p.status === 'alindi').reduce((sum, p) => sum + Number(p.amount), 0) || 0;
   const totalFee = activeApp?.total_fee || 0;
   const kalanTutar = Math.max(0, totalFee - totalPaid);
   
