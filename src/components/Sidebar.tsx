@@ -39,16 +39,23 @@ export default function Sidebar() {
     fetchUser();
   }, []);
 
-  const links = [
+  const baseLinks = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/customers", icon: Users, label: "Müşteriler" },
     { href: "/countries", icon: Globe, label: "Ülke & Evraklar" },
     { href: "/appointments", icon: Calendar, label: "Randevular" },
-    { href: "/staff", icon: UserCog, label: "Personel" },
-    { href: "/reports", icon: BarChart3, label: "Raporlar" },
-    { href: "/profile", icon: UserCog, label: "Profilim" },
-    { href: "/settings", icon: Settings, label: "Ayarlar" },
   ];
+
+  if (userRole === "Yönetici") {
+    baseLinks.push({ href: "/staff", icon: UserCog, label: "Personel" });
+  }
+
+  baseLinks.push(
+    { href: "/reports", icon: BarChart3, label: "Raporlar" },
+    { href: "/settings", icon: Settings, label: "Ayarlar" }
+  );
+
+  const links = baseLinks;
 
   const handleLogout = async () => {
     const supabase = createSupabaseBrowserClient();
