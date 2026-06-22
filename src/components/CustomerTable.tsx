@@ -1,6 +1,7 @@
 "use client"
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Search, Filter, MoreVertical, Clock, CheckCircle2, AlertCircle, FileText, Calendar, Loader, XCircle } from "lucide-react";
 
 type Customer = {
@@ -29,7 +30,8 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
 };
 
 export default function CustomerTable({ customers }: { customers: Customer[] }) {
-  const [search, setSearch] = useState("");
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [statusFilter, setStatusFilter] = useState("all");
 
   const filtered = useMemo(() => {

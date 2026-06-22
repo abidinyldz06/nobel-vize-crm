@@ -1,7 +1,7 @@
 "use client"
 import Sidebar from "@/components/Sidebar";
 import { Search, Bell, Sun, Moon } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -17,6 +17,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 export default function MainLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,6 +76,12 @@ export default function MainLayoutClient({ children }: { children: React.ReactNo
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => { if (searchResults.length > 0) setShowDropdown(true); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim()) {
+                  setShowDropdown(false);
+                  router.push(`/customers?search=${encodeURIComponent(searchQuery)}`);
+                }
+              }}
               placeholder="Müşteri ara (İsim, Tel, Pasaport)..."
               className="w-72 pl-10 pr-4 py-2 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-700 dark:text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-blue-500 transition-all"
             />
