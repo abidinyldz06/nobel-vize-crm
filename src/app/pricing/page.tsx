@@ -14,7 +14,9 @@ export default function PricingPage() {
             <span className="font-bold text-xl tracking-tight">Antigravity CRM</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors">Müşteri Girişi</Link>
+            <Link href="/" className="px-5 py-2.5 text-sm font-semibold text-slate-900 bg-white hover:bg-slate-50 rounded-xl transition-all border border-slate-200">
+              Giriş Yap
+            </Link>
           </div>
         </div>
       </header>
