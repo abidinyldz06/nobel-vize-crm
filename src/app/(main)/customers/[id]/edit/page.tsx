@@ -49,6 +49,9 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Telefon</label>
                 <input required name="phone" type="tel" defaultValue={customer.phone || ''}
+                  pattern="0[0-9]{10}" maxLength={11}
+                  title="Telefon 0 ile başlamalı ve 11 haneli olmalı (örn: 05551234567)"
+                  placeholder="0XXXXXXXXXX"
                   className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
               </div>
               <div className="space-y-1.5">
