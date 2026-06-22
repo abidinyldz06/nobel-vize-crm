@@ -1,0 +1,148 @@
+@import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #3b82f6;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  /* Gündüz (Light) Modu Renkleri */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --input-text: #0f172a;
+}
+
+.dark {
+  /* Gece (Dark) Modu Renkleri (Mevcut Tasarım) */
+  --background: #0a0f1a;
+  --foreground: #f1f5f9;
+  
+  --card-bg: #0d1420;
+  --card-border: #1f2937;
+  
+  --input-bg: #060d1a;
+  --input-border: #1f2937;
+  --input-text: #f1f5f9;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* CARD — solid dark card like the mockups */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+}
+
+.card-md {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+}
+
+.card-lg {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+}
+
+/* Kept for any legacy usage */
+.glass {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+}
+
+/* Sidebar active item glow */
+.sidebar-active {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(37, 99, 235, 0.1));
+  border: 1px solid rgba(37, 99, 235, 0.4);
+  color: #3b82f6;
+}
+
+/* Input fields */
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  color: var(--input-text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Badge / Status pills */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Glow on primary buttons */
+.btn-primary {
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 10px;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.35);
+}
+
+/* Timeline connector line */
+.step-done { color: #22c55e; }
+.step-active { color: #3b82f6; }
+.step-pending { color: #4b5563; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+.dark ::-webkit-scrollbar-thumb { background: #1f2937; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+/* Subtle hover row */
+.table-row:hover { background: rgba(255,255,255,0.02); }
+
+/* Stat card accent top border */
+.stat-card-blue  { border-top: 2px solid #2563eb; }
+.stat-card-green { border-top: 2px solid #22c55e; }
+.stat-card-amber { border-top: 2px solid #f59e0b; }
+.stat-card-purple{ border-top: 2px solid #8b5cf6; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.2s ease; }
