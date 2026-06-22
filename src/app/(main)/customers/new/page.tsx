@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createCustomerWithApplication } from "@/app/actions/customer";
 import { UserPlus, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -23,6 +23,7 @@ const COUNTRY_LIST = [
 ];
 
 export default async function NewCustomerPage() {
+  const supabase = await createSupabaseServerClient();
   // countries tablosundan kayıtlı ülkeleri çek
   const { data: dbCountries } = await supabase.from('countries').select('id, name').order('name');
   // staff tablosundan danışmanları çek

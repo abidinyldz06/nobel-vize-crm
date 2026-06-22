@@ -1,6 +1,6 @@
 import { Edit, MoreHorizontal, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import StatusTimeline from "@/components/StatusTimeline";
 import DocumentItem from "@/components/DocumentItem";
 import NotesPanel from "@/components/NotesPanel";
@@ -16,6 +16,7 @@ export const revalidate = 0;
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const supabase = await createSupabaseServerClient();
 
   const { data: customer } = await supabase.from('customers').select('*').eq('id', id).single();
   const { data: applications } = await supabase

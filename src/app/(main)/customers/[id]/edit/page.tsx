@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { updateCustomer } from "@/app/actions/update-customer";
 import { Edit2, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -7,6 +7,7 @@ export const revalidate = 0;
 
 export default async function EditCustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const supabase = await createSupabaseServerClient();
   const { data: customer } = await supabase.from('customers').select('*').eq('id', id).single();
   const { data: staffList } = await supabase.from('staff').select('id, full_name, role').eq('is_active', true).order('full_name');
 

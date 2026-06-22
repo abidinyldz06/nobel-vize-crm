@@ -1,10 +1,11 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Settings } from "lucide-react";
 import SettingsClient from "@/components/SettingsClient";
 
 export const revalidate = 0;
 
 export default async function SettingsPage() {
+  const supabase = await createSupabaseServerClient();
   let tenant = null;
   try {
     const { data } = await supabase.from('tenants').select('*').limit(1).single();
