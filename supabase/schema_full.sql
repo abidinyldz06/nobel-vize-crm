@@ -72,11 +72,28 @@ CREATE TABLE IF NOT EXISTS countries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   visa_system TEXT,
-  base_fee DECIMAL,
-  document_checklist JSONB,
+  appointment_system TEXT,
+  base_fee_visa DECIMAL,
+  base_fee_service DECIMAL,
+  active BOOLEAN DEFAULT true,
+  notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Country Visa Requirements
+CREATE TABLE IF NOT EXISTS country_visa_requirements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  country_id UUID REFERENCES countries(id) ON DELETE CASCADE,
+  visa_type TEXT NOT NULL,
+  documents JSONB NOT NULL,
+  processing_time TEXT,
+  validity TEXT,
+  max_stay TEXT,
+  multiple_entry BOOLEAN DEFAULT true,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(country_id, visa_type)
+);
 -- Applications
 CREATE TABLE IF NOT EXISTS applications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -98,6 +115,9 @@ CREATE TABLE IF NOT EXISTS documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
   document_type TEXT,
+  category TEXT,
+  is_required BOOLEAN DEFAULT true,
+  description TEXT,
   status TEXT DEFAULT 'bekleniyor',
   requested_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

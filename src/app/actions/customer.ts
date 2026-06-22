@@ -63,14 +63,25 @@ export async function createCustomerWithApplication(formData: FormData) {
   // 2. Determine country info
   let resolvedCountryName = countryName || ''
   let baseFee = 0
-  let checklist: string[] = []
+  let checklist: { name: string; category: string; required: boolean; description?: string }[] = []
 
   if (countryId) {
     const { data: country } = await supabase.from('countries').select('*').eq('id', countryId).single()
     if (country) {
       resolvedCountryName = country.name
-      baseFee = country.base_fee || 0
-      checklist = country.document_checklist || []
+      baseFee = country.base_fee_service || 0 // Default to service fee
+      
+      // Fetch specific visa requirements
+      const { data: requirement } = await supabase
+        .from('country_visa_requirements')
+        .select('documents')
+        .eq('country_id', countryId)
+        .eq('visa_type', visaType)
+        .single()
+        
+      if (requirement && requirement.documents) {
+        checklist = requirement.documents
+      }
     }
   }
 
@@ -110,7 +121,10 @@ export async function createCustomerWithApplication(formData: FormData) {
     if (checklist.length > 0) {
       const docs = checklist.map(doc => ({
         application_id: application.id,
-        document_type: doc,
+        document_type: doc.name,
+        category: doc.category || 'diger',
+        is_required: doc.required !== undefined ? doc.required : true,
+        description: doc.description || null,
         status: 'bekleniyor'
       }))
       await supabase.from('documents').insert(docs)

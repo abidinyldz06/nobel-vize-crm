@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createCustomerWithApplication } from "@/app/actions/customer";
 import { UserPlus, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import CountryVisaSelect from "@/components/CountryVisaSelect";
 
 export const revalidate = 0;
 
@@ -26,6 +27,7 @@ export default async function NewCustomerPage() {
   const supabase = await createSupabaseServerClient();
   // countries tablosundan kayıtlı ülkeleri çek
   const { data: dbCountries } = await supabase.from('countries').select('id, name').order('name');
+  const { data: allRequirements } = await supabase.from('country_visa_requirements').select('country_id, visa_type');
   // staff tablosundan danışmanları çek
   const { data: staffList } = await supabase.from('staff').select('id, full_name, role').eq('is_active', true).order('full_name');
 
@@ -116,65 +118,8 @@ export default async function NewCustomerPage() {
             </div>
             <div className="px-6 py-5 space-y-4">
 
-              {/* Hedef Ülke */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Hedef Ülke <span className="text-red-400">*</span></label>
-                {dbCountries && dbCountries.length > 0 ? (
-                  <select name="countryId" required
-                    className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer">
-                    <option value="">— Ülke Seçin —</option>
-                    {dbCountries.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <>
-                    <select name="countryName" required
-                      className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer">
-                      <option value="">— Ülke Seçin —</option>
-                      {COUNTRY_LIST.map(group => (
-                        <optgroup key={group.group} label={group.group}>
-                          {group.countries.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                    <p className="text-[10px] text-slate-600">Ülke & Evraklar sayfasından ülke eklerseniz evrak listesi otomatik oluşur.</p>
-                  </>
-                )}
-              </div>
-
-              {/* Vize Türü */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Vize Türü</label>
-                  <select name="visaType"
-                    className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 transition-all appearance-none cursor-pointer">
-                    <option value="turist">🏖️ Turist Vizesi</option>
-                    <option value="is">💼 İş Vizesi</option>
-                    <option value="ogrenci">🎓 Öğrenci Vizesi</option>
-                    <option value="aile">👨‍👩‍👧 Aile Birleşimi</option>
-                    <option value="transit">✈️ Transit Vize</option>
-                    <option value="tedavi">🏥 Tedavi Vizesi</option>
-                  </select>
-                </div>
-
-                {/* Ücretlendirme */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Konsolosluk Harcı (₺/€)</label>
-                  <input name="consulateFee" type="number" min="0" step="50"
-                    className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                    placeholder="Örn: 3000" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ofis Hizmet Bedeli (₺/€)</label>
-                  <input name="serviceFee" type="number" min="0" step="50"
-                    className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                    placeholder="Örn: 2500" />
-                  <p className="text-[10px] text-slate-600">Boş bırakılırsa ülke baz ücretinden alır.</p>
-                </div>
-              </div>
+              {/* Ülke ve Vize Seçimi (Client Component) */}
+              <CountryVisaSelect dbCountries={dbCountries || []} allRequirements={allRequirements || []} />
 
               {/* Danışman Ataması */}
               <div className="space-y-1.5">

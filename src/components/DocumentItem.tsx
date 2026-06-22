@@ -154,17 +154,32 @@ export default function DocumentItem({ doc }: { doc: any }) {
       isCompleted ? 'bg-slate-50 dark:bg-[#0a101a] border border-slate-200 dark:border-[#1f2937]' : 'bg-white dark:bg-[#0d1420] hover:bg-slate-100 dark:bg-[#1a2232] border border-slate-200 dark:border-[#1f2937]'
     }`} onClick={toggleStatus}>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-3">
         {/* Custom Checkbox */}
-        <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${
+        <div className={`mt-0.5 w-4 h-4 shrink-0 rounded flex items-center justify-center border transition-colors ${
           isCompleted ? 'bg-blue-600 border-blue-600 shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'bg-transparent border-[#4b5563]'
         }`}>
           {isCompleted && <Check className="w-3 h-3 text-slate-900 dark:text-white" />}
         </div>
         
-        <span className={`text-sm ${isCompleted ? 'text-slate-700 dark:text-slate-300 line-through' : 'text-slate-500 dark:text-slate-400'}`}>
-          {doc.document_type}
-        </span>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <span className={`text-sm font-medium ${isCompleted ? 'text-slate-500 dark:text-slate-500 line-through' : 'text-slate-700 dark:text-slate-200'}`}>
+              {doc.document_type}
+            </span>
+            {doc.is_required !== false && (
+              <span className="text-[9px] px-1.5 py-0.5 bg-red-500/10 text-red-500 rounded border border-red-500/20 uppercase tracking-wide">Zorunlu</span>
+            )}
+            {doc.is_required === false && (
+              <span className="text-[9px] px-1.5 py-0.5 bg-slate-500/10 text-slate-500 rounded border border-slate-500/20 uppercase tracking-wide">Opsiyonel</span>
+            )}
+          </div>
+          {doc.description && (
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              {doc.description}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-4">

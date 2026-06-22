@@ -11,7 +11,7 @@ import VisaHistoryPanel from "@/components/VisaHistoryPanel";
 import ProfileAnalysisButton from "@/components/ProfileAnalysisButton";
 import PdfExportButton from "@/components/PdfExportButton";
 import FamilyMembersPanel from "@/components/FamilyMembersPanel";
-import { VISA_TYPE_LABELS } from "@/lib/visa-types";
+import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
 import WhatsAppTemplates from "@/components/WhatsAppTemplates";
 import CustomerActionMenu from "@/components/CustomerActionMenu";
 
@@ -251,12 +251,28 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   </div>
                 </div>
               )}
-              <div className="p-3 flex-1 overflow-y-auto max-h-64">
-                {documents?.map((doc: any) => (
-                  <DocumentItem key={doc.id} doc={doc} />
-                ))}
-                {(!documents || documents.length === 0) && (
+              <div className="p-0 flex-1 overflow-y-auto max-h-96">
+                {(!documents || documents.length === 0) ? (
                   <p className="text-center text-slate-600 text-xs py-6">Evrak listesi boş.</p>
+                ) : (
+                  <div className="space-y-4 p-3">
+                    {Object.keys(DOCUMENT_CATEGORIES).map(catKey => {
+                      const catDocs = documents.filter((d: any) => (d.category || 'diger') === catKey);
+                      if (catDocs.length === 0) return null;
+                      return (
+                        <div key={catKey} className="bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl overflow-hidden">
+                          <div className="px-3 py-2 bg-slate-100 dark:bg-[#1a2232] border-b border-slate-200 dark:border-[#1f2937]">
+                            <h4 className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{DOCUMENT_CATEGORIES[catKey]}</h4>
+                          </div>
+                          <div className="divide-y divide-slate-100 dark:divide-[#1f2937]">
+                            {catDocs.map((doc: any) => (
+                              <DocumentItem key={doc.id} doc={doc} />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
 

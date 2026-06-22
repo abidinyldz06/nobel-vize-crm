@@ -26,6 +26,10 @@ export default async function CountriesPage() {
     .select("*")
     .order("name");
 
+  const { data: requirements } = await supabase
+    .from("country_visa_requirements")
+    .select("*");
+
   // Get application count per country
   const { data: appStats } = await supabase
     .from("applications")
@@ -39,7 +43,7 @@ export default async function CountriesPage() {
   const enriched = (countries ?? []).map((c: any) => ({
     ...c,
     appCount: countMap[c.name] || 0,
-    docCount: Array.isArray(c.document_checklist) ? c.document_checklist.length : 0,
+    requirements: requirements?.filter(r => r.country_id === c.id) || []
   }));
 
   return (
