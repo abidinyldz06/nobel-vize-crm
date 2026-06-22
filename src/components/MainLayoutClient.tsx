@@ -121,10 +121,7 @@ export default function MainLayoutClient({ children }: { children: React.ReactNo
             >
               {mounted ? (theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />) : <div className="w-4 h-4" />}
             </button>
-            <button className="relative p-2 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#1a2232] transition-all">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_6px_rgba(59,130,246,0.8)]"></span>
-            </button>
+
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-purple-700 flex items-center justify-center text-slate-900 dark:text-white text-xs font-bold shadow-md">
               N
             </div>
