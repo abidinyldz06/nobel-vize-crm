@@ -11,6 +11,7 @@ import VisaHistoryPanel from "@/components/VisaHistoryPanel";
 import ProfileAnalysisButton from "@/components/ProfileAnalysisButton";
 import PdfExportButton from "@/components/PdfExportButton";
 import FamilyMembersPanel from "@/components/FamilyMembersPanel";
+import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 
 export const revalidate = 0;
 
@@ -198,7 +199,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h2 className="text-slate-900 dark:text-white font-semibold">Başvuru Akışı</h2>
-                  <p className="text-slate-500 text-xs">{activeApp.country} · {activeApp.visa_type || 'Turist'} Vizesi</p>
+                  <p className="text-slate-500 text-xs">{activeApp.country} · {activeApp.visa_type ? VISA_TYPE_LABELS[activeApp.visa_type] || activeApp.visa_type : 'Turist'} Vizesi</p>
                 </div>
                 <button className="text-slate-500 hover:text-slate-700 dark:text-slate-300">
                   <MoreHorizontal className="w-5 h-5" />
