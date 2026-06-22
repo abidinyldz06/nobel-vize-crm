@@ -9,14 +9,25 @@ export const revalidate = 0;
 export default async function CustomersPage() {
   const supabase = await createSupabaseServerClient();
   
-  // Join customers with their latest application to get country + status
-  const { data: customers, error } = await supabase
+  // Get current user and staff record
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
+  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  const staffId = staffRecord?.id;
+
+  const query = supabase
     .from('customers')
     .select(`
       id, first_name, last_name, phone, email, created_at, profile_score,
       applications (country, status, created_at)
     `)
     .order('created_at', { ascending: false });
+
+  if (!isAdmin && staffId) {
+    query.eq('assigned_staff_id', staffId);
+  }
+
+  const { data: customers, error } = await query;
 
   if (error) console.error("Supabase Error:", error);
 
@@ -51,7 +62,7 @@ export default async function CustomersPage() {
         </div>
       </div>
 
-      <CustomerTable customers={flat} />
+      <CustomerTable customers={flat} isAdmin={isAdmin} />
     </div>
   );
 }

@@ -6,6 +6,21 @@ export const revalidate = 0;
 
 export default async function SettingsPage() {
   const supabase = await createSupabaseServerClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    const { redirect } = await import("next/navigation");
+    redirect("/");
+  }
+  
+  const { data: staffRecord } = await supabase.from('staff').select('role').eq('user_id', user?.id).single();
+  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  
+  if (!isAdmin) {
+    const { redirect } = await import("next/navigation");
+    redirect("/dashboard");
+  }
+
   let tenant = null;
   try {
     const { data } = await supabase.from('tenants').select('*').limit(1).single();

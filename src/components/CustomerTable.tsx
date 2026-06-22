@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Search, Filter, MoreVertical, Clock, CheckCircle2, AlertCircle, FileText, Calendar, Loader, XCircle } from "lucide-react";
+import CustomerActionMenu from "./CustomerActionMenu";
 
 type Customer = {
   id: string;
@@ -29,7 +30,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
   kapandi:            { label: "Kapandı",             color: "text-slate-500 bg-slate-800/50",    icon: XCircle },
 };
 
-export default function CustomerTable({ customers }: { customers: Customer[] }) {
+export default function CustomerTable({ customers, isAdmin }: { customers: Customer[], isAdmin: boolean }) {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -146,9 +147,11 @@ export default function CustomerTable({ customers }: { customers: Customer[] }) 
                       {new Date(customer.created_at).toLocaleDateString('tr-TR')}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link href={`/customers/${customer.id}`} className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors inline-flex">
-                        <MoreVertical className="w-4 h-4" />
-                      </Link>
+                      <CustomerActionMenu 
+                        customerId={customer.id} 
+                        isAdmin={isAdmin} 
+                        currentStaffId={(customer as any).assigned_staff_id} 
+                      />
                     </td>
                   </tr>
                 );

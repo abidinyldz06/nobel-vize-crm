@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { Check, MoreHorizontal, UploadCloud, File, Trash2, Loader2 } from "lucide-react";
 
@@ -8,6 +8,7 @@ export default function DocumentItem({ doc }: { doc: any }) {
   const [status, setStatus] = useState(doc.status);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const supabase = createSupabaseBrowserClient();
   const router = useRouter();
 
   const toggleStatus = async () => {

@@ -20,34 +20,64 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const trendStartDate = new Date(startDate);
   trendStartDate.setMonth(trendStartDate.getMonth() - 5);
 
+  // Get current user and staff record
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
+  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  const staffId = staffRecord?.id;
+
+  const totalCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true });
+  const monthlyCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true }).gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString());
+  const allAppsQuery = supabase.from('applications').select('id, customer_id, country, status, total_fee, created_at').gte('created_at', trendStartDate.toISOString());
+  const allCustomersQuery = supabase.from('customers').select('id, assigned_staff_id');
+
+  if (!isAdmin && staffId) {
+    totalCustomersQuery.eq('assigned_staff_id', staffId);
+    monthlyCustomersQuery.eq('assigned_staff_id', staffId);
+    allAppsQuery.eq('assigned_staff_id', staffId);
+    allCustomersQuery.eq('assigned_staff_id', staffId);
+  }
+
   const [
     { count: totalCustomers },
     { count: monthlyCustomers },
     { data: allApplications },
-    { data: allDocs },
-    { data: allPayments },
     { data: allStaff },
     { data: allCustomers },
   ] = await Promise.all([
-    supabase.from('customers').select('*', { count: 'exact', head: true }),
-    supabase.from('customers').select('*', { count: 'exact', head: true })
-      .gte('created_at', startDate.toISOString())
-      .lt('created_at', endDate.toISOString()),
-    supabase.from('applications').select('id, customer_id, country, status, total_fee, created_at')
-      .gte('created_at', trendStartDate.toISOString()),
-    supabase.from('documents').select('status')
-      .gte('created_at', startDate.toISOString())
-      .lt('created_at', endDate.toISOString()),
-    supabase.from('payments').select('application_id, amount, status, created_at')
-      .gte('created_at', trendStartDate.toISOString()),
+    totalCustomersQuery,
+    monthlyCustomersQuery,
+    allAppsQuery,
     supabase.from('staff').select('id, full_name'),
-    supabase.from('customers').select('id, assigned_staff_id'),
+    allCustomersQuery,
   ]);
 
-  const monthlyApps = allApplications?.filter(a => new Date(a.created_at) >= startDate && new Date(a.created_at) < endDate) || [];
+  let allDocs: any[] | null = [];
+  let allPayments: any[] | null = [];
+
+  if (!isAdmin && staffId) {
+    const appIds = allApplications?.map((a: any) => a.id) || [];
+    if (appIds.length > 0) {
+      const [{ data: docs }, { data: payments }] = await Promise.all([
+        supabase.from('documents').select('status').gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString()).in('application_id', appIds),
+        supabase.from('payments').select('application_id, amount, status, created_at').gte('created_at', trendStartDate.toISOString()).in('application_id', appIds)
+      ]);
+      allDocs = docs;
+      allPayments = payments;
+    }
+  } else {
+    const [{ data: docs }, { data: payments }] = await Promise.all([
+      supabase.from('documents').select('status').gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString()),
+      supabase.from('payments').select('application_id, amount, status, created_at').gte('created_at', trendStartDate.toISOString())
+    ]);
+    allDocs = docs;
+    allPayments = payments;
+  }
+
+  const monthlyApps = allApplications?.filter((a: any) => new Date(a.created_at) >= startDate && new Date(a.created_at) < endDate) || [];
 
   const totalApps = monthlyApps.length;
-  const approved = monthlyApps.filter(a => a.status === 'onaylandi').length;
+  const approved = monthlyApps.filter((a: any) => a.status === 'onaylandi').length;
   const rejected = monthlyApps.filter(a => a.status === 'reddedildi').length;
   const approvalRate = totalApps > 0 ? ((approved / totalApps) * 100).toFixed(1) : "—";
 

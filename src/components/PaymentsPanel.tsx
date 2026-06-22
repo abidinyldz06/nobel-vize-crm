@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { CreditCard, Plus, Check, Clock, Loader2, Banknote, X } from "lucide-react";
 
@@ -52,6 +52,7 @@ export default function PaymentsPanel({
     currency: "TRY",
     note: "",
   });
+  const supabase = createSupabaseBrowserClient();
   const router = useRouter();
 
   const totalPaid = payments

@@ -1,5 +1,6 @@
 "use server"
-import { supabase } from "@/lib/supabase";
+import { supabase as anonClient } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -18,12 +19,12 @@ export async function createStaff(formData: FormData) {
   const role = formData.get('role') as string;
   const phone = formData.get('phone') as string;
 
-  const randomPassword = generateRandomPassword();
+  const defaultPassword = '123456';
 
-  // Auth user oluştur (Rastgele şifre ile)
-  const { data: authData, error: authError } = await supabase.auth.signUp({
+  // Auth user oluştur (Anonim client ile, mevcut admin session'ını bozmamak için)
+  const { data: authData, error: authError } = await anonClient.auth.signUp({
     email,
-    password: randomPassword,
+    password: defaultPassword,
   });
 
   if (authError) {
@@ -33,7 +34,9 @@ export async function createStaff(formData: FormData) {
 
   const userId = authData.user?.id;
 
-  const { error } = await supabase.from('staff').insert([{
+  // Veritabanı işlemleri için yetkili server client kullan (RLS'yi geçmek için)
+  const serverClient = await createSupabaseServerClient();
+  const { error } = await serverClient.from('staff').insert([{
     user_id: userId,
     full_name: fullName,
     email,
@@ -43,13 +46,12 @@ export async function createStaff(formData: FormData) {
   }]);
 
   if (error) {
-    // Tablo yoksa bilgi ver
     console.error("Staff insert error:", error.message);
     redirect('/staff?error=' + encodeURIComponent(error.message));
   }
 
   revalidatePath('/staff');
-  redirect('/staff?success=' + encodeURIComponent(`Personel eklendi. Geçici şifre: ${randomPassword}`));
+  redirect('/staff?success=' + encodeURIComponent(`Personel eklendi. Geçici şifre: ${defaultPassword}`));
 }
 
 export async function updateStaff(formData: FormData) {
@@ -60,7 +62,8 @@ export async function updateStaff(formData: FormData) {
   const phone = formData.get('phone') as string;
   const isActive = formData.get('isActive') === 'true';
 
-  const { error } = await supabase.from('staff').update({
+  const serverClient = await createSupabaseServerClient();
+  const { error } = await serverClient.from('staff').update({
     full_name: fullName,
     email,
     role,

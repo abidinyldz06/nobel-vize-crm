@@ -46,6 +46,7 @@ export default function Sidebar() {
     { href: "/appointments", icon: Calendar, label: "Randevular" },
     { href: "/staff", icon: UserCog, label: "Personel" },
     { href: "/reports", icon: BarChart3, label: "Raporlar" },
+    { href: "/profile", icon: UserCog, label: "Profilim" },
     { href: "/settings", icon: Settings, label: "Ayarlar" },
   ];
 

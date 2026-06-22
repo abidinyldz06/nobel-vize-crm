@@ -14,9 +14,10 @@ export default async function StaffPage() {
     redirect("/");
   }
   
-  const { data: currentUserStaff } = await supabase.from('staff').select('role').eq('user_id', user?.id).single();
-  // Staff tablosu boşsa veya kayıt yoksa admin olarak davran (dashboard ile aynı mantık)
-  if (currentUserStaff && currentUserStaff.role !== 'admin') {
+  const { data: staffRecord } = await supabase.from('staff').select('role').eq('user_id', user?.id).single();
+  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  
+  if (!isAdmin) {
     const { redirect } = await import("next/navigation");
     redirect("/dashboard");
   }
@@ -25,6 +26,34 @@ export default async function StaffPage() {
     .from('staff')
     .select('*')
     .order('created_at', { ascending: false });
+
+  // --- AUTO CLEANUP DUPLICATES ---
+  if (staff && staff.length > 0) {
+    const emails = new Set();
+    const toDelete = [];
+    for (const member of staff) {
+      if (emails.has(member.email)) {
+        toDelete.push(member.id);
+      } else {
+        emails.add(member.email);
+      }
+    }
+    if (toDelete.length > 0) {
+      for (const id of toDelete) {
+        await supabase.from('staff').delete().eq('id', id);
+      }
+      // Re-fetch after cleaning
+      const { data: refreshedStaff } = await supabase
+        .from('staff')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (refreshedStaff) {
+        staff.length = 0;
+        staff.push(...refreshedStaff);
+      }
+    }
+  }
+  // -------------------------------
 
   // Get customer count per staff
   const { data: customerCounts } = await supabase

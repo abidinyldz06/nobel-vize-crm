@@ -13,6 +13,7 @@ import PdfExportButton from "@/components/PdfExportButton";
 import FamilyMembersPanel from "@/components/FamilyMembersPanel";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import WhatsAppTemplates from "@/components/WhatsAppTemplates";
+import CustomerActionMenu from "@/components/CustomerActionMenu";
 
 export const revalidate = 0;
 
@@ -20,7 +21,26 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
+  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  const staffId = staffRecord?.id;
+
   const { data: customer } = await supabase.from('customers').select('*').eq('id', id).single();
+  if (!customer) return <div className="p-6 text-slate-500 dark:text-slate-400">Müşteri bulunamadı.</div>;
+
+  if (!isAdmin && staffId && customer.assigned_staff_id !== staffId) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center bg-white dark:bg-[#060d1a]">
+        <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-center max-w-sm">
+          <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
+          <h2 className="text-red-500 font-bold text-lg mb-1">Erişim Engellendi</h2>
+          <p className="text-red-400 text-sm">Bu müşteri size atanmamış.</p>
+        </div>
+      </div>
+    );
+  }
+
   const { data: applications } = await supabase
     .from('applications')
     .select('*')
@@ -63,8 +83,6 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     visaHistory = visaData;
     familyMembers = familyData;
   }
-
-  if (!customer) return <div className="p-6 text-slate-500 dark:text-slate-400">Müşteri bulunamadı.</div>;
 
   const completedDocs = documents?.filter(d => d.status === 'tamamlandi').length || 0;
   const totalDocs = documents?.length || 0;
@@ -202,9 +220,11 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   <h2 className="text-slate-900 dark:text-white font-semibold">Başvuru Akışı</h2>
                   <p className="text-slate-500 text-xs">{activeApp.country} · {activeApp.visa_type ? VISA_TYPE_LABELS[activeApp.visa_type] || activeApp.visa_type : 'Turist'} Vizesi</p>
                 </div>
-                <button className="text-slate-500 hover:text-slate-700 dark:text-slate-300">
-                  <MoreHorizontal className="w-5 h-5" />
-                </button>
+                <CustomerActionMenu 
+                  customerId={customer.id} 
+                  isAdmin={isAdmin} 
+                  currentStaffId={customer.assigned_staff_id} 
+                />
               </div>
               <StatusTimeline applicationId={activeApp.id} currentStatus={activeApp.status || 'profil_analizi'} />
             </div>

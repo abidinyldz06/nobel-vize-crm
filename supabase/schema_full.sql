@@ -203,52 +203,103 @@ BEGIN
 END $$;
 
 -- Tenants
-CREATE POLICY "Authenticated Read" ON tenants FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON tenants FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Tenants All" ON tenants FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+);
 
 -- Staff
-CREATE POLICY "Authenticated Read" ON staff FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON staff FOR ALL TO authenticated USING (true) WITH CHECK (true);
-
--- Customers
-CREATE POLICY "Authenticated Read" ON customers FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON customers FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Staff All" ON staff FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+);
 
 -- Countries
-CREATE POLICY "Authenticated Read" ON countries FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON countries FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Countries All" ON countries FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+);
+
+-- Customers
+CREATE POLICY "Customers Select" ON customers FOR SELECT TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+  OR assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid())
+);
+CREATE POLICY "Customers Insert" ON customers FOR INSERT TO authenticated WITH CHECK (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+);
+CREATE POLICY "Customers Update" ON customers FOR UPDATE TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+);
+CREATE POLICY "Customers Delete" ON customers FOR DELETE TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+);
 
 -- Applications
-CREATE POLICY "Authenticated Read" ON applications FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON applications FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Applications All" ON applications FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+  OR assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid())
+  OR customer_id IN (SELECT id FROM customers WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid()))
+);
 
 -- Documents
-CREATE POLICY "Authenticated Read" ON documents FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON documents FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Documents All" ON documents FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+  OR application_id IN (
+    SELECT id FROM applications 
+    WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid())
+       OR customer_id IN (SELECT id FROM customers WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid()))
+  )
+);
 
 -- Notes
-CREATE POLICY "Authenticated Read" ON notes FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON notes FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Notes All" ON notes FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+  OR application_id IN (
+    SELECT id FROM applications 
+    WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid())
+       OR customer_id IN (SELECT id FROM customers WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid()))
+  )
+);
 
 -- Payments
-CREATE POLICY "Authenticated Read" ON payments FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON payments FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Payments All" ON payments FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+  OR application_id IN (
+    SELECT id FROM applications 
+    WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid())
+       OR customer_id IN (SELECT id FROM customers WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid()))
+  )
+);
 
 -- Activity Log
-CREATE POLICY "Authenticated Read" ON activity_log FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON activity_log FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Activity Log All" ON activity_log FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+  OR customer_id IN (SELECT id FROM customers WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid()))
+  OR application_id IN (
+    SELECT id FROM applications 
+    WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid())
+  )
+);
 
 -- Communications
-CREATE POLICY "Authenticated Read" ON communications FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON communications FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Communications All" ON communications FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+  OR customer_id IN (SELECT id FROM customers WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid()))
+  OR application_id IN (
+    SELECT id FROM applications 
+    WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid())
+  )
+);
 
 -- Visa History
-CREATE POLICY "Authenticated Read" ON visa_history FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON visa_history FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Visa History All" ON visa_history FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+  OR customer_id IN (SELECT id FROM customers WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid()))
+);
 
 -- Family Members
-CREATE POLICY "Authenticated Read" ON family_members FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated Write" ON family_members FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Family Members All" ON family_members FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM staff WHERE staff.user_id = auth.uid() AND staff.role = 'admin')
+  OR customer_id IN (SELECT id FROM customers WHERE assigned_staff_id = (SELECT id FROM staff WHERE user_id = auth.uid()))
+);
 
 -- ==========================================
 -- 4. STORAGE & BUCKETS

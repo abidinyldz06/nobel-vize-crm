@@ -22,6 +22,16 @@ export async function createCustomerWithApplication(formData: FormData) {
   const passportExpiry = formData.get('passportExpiry') as string
   const passportIssuingCountry = formData.get('passportIssuingCountry') as string || 'Türkiye'
 
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
+  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+
+  let finalAssignedStaffId = assignedStaffId;
+  // Danışmansa, her halükarda sadece kendisine atayabilir
+  if (!isAdmin && staffRecord?.id) {
+    finalAssignedStaffId = staffRecord.id;
+  }
+
   // 1. Create Customer
   const customerData: any = {
     first_name: firstName,
@@ -35,8 +45,8 @@ export async function createCustomerWithApplication(formData: FormData) {
     passport_issuing_country: passportIssuingCountry,
   }
 
-  if (assignedStaffId) {
-    customerData.assigned_staff_id = assignedStaffId
+  if (finalAssignedStaffId) {
+    customerData.assigned_staff_id = finalAssignedStaffId;
   }
 
   const { data: customer, error: customerError } = await supabase
@@ -81,8 +91,8 @@ export async function createCustomerWithApplication(formData: FormData) {
       visa_type: visaType,
     }
 
-    if (assignedStaffId) {
-      appData.assigned_staff_id = assignedStaffId
+    if (finalAssignedStaffId) {
+      appData.assigned_staff_id = finalAssignedStaffId
     }
 
     const { data: application, error: appError } = await supabase

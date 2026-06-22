@@ -24,29 +24,30 @@ export default async function Dashboard() {
   const customerQuery = supabase.from('customers').select('*', { count: 'exact', head: true });
   const appQuery = supabase.from('applications').select('status, country, total_fee, created_at, customers(id, first_name, last_name)');
   const recentCustomerQuery = supabase.from('customers').select('id, first_name, last_name, created_at, assigned_staff_id');
+  const todayAppsQuery = supabase.from('applications').select('id, country, status').gte('created_at', new Date().toISOString().split('T')[0]);
+  const monthlyAppsQuery = supabase.from('applications').select('total_fee');
+  const appointmentsQuery = supabase.from('applications').select('id, appointment_date, appointment_location, customers(id, first_name, last_name)').not('appointment_date', 'is', null).gte('appointment_date', new Date().toISOString()).order('appointment_date', { ascending: true }).limit(4);
 
   // Danışman: filter by assigned_staff_id
   if (!isAdmin && staffId) {
     customerQuery.eq('assigned_staff_id', staffId);
     recentCustomerQuery.eq('assigned_staff_id', staffId);
+    appQuery.eq('assigned_staff_id', staffId);
+    todayAppsQuery.eq('assigned_staff_id', staffId);
+    monthlyAppsQuery.eq('assigned_staff_id', staffId);
+    appointmentsQuery.eq('assigned_staff_id', staffId);
   }
 
   const [
     { count: totalCustomers },
-    { data: allDocs },
     { data: allApps },
     { data: recentCustomers },
-    { data: allPayments },
     { data: todayApps },
   ] = await Promise.all([
     customerQuery,
-    supabase.from('documents').select('status'),
     appQuery.order('created_at', { ascending: false }).limit(5),
     recentCustomerQuery.order('created_at', { ascending: false }).limit(6),
-    supabase.from('payments').select('amount, status, created_at'),
-    supabase.from('applications')
-      .select('id, country, status')
-      .gte('created_at', new Date().toISOString().split('T')[0]),
+    todayAppsQuery,
   ]);
 
   // Yeni Sorgular (Faz 2)
@@ -54,20 +55,40 @@ export default async function Dashboard() {
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
   
-  const { data: monthlyApps } = await supabase
-    .from('applications')
-    .select('total_fee')
-    .gte('created_at', startOfMonth.toISOString());
-    
+  if (!isAdmin && staffId) {
+    monthlyAppsQuery.gte('created_at', startOfMonth.toISOString());
+  } else {
+    monthlyAppsQuery.gte('created_at', startOfMonth.toISOString());
+  }
+
+  const { data: monthlyApps } = await monthlyAppsQuery;
   const expectedMonthlyRevenue = monthlyApps?.reduce((sum, app) => sum + Number(app.total_fee || 0), 0) || 0;
 
-  const { data: upcomingAppointments } = await supabase
-    .from('applications')
-    .select('id, appointment_date, appointment_location, customers(id, first_name, last_name)')
-    .not('appointment_date', 'is', null)
-    .gte('appointment_date', new Date().toISOString())
-    .order('appointment_date', { ascending: true })
-    .limit(4);
+  const { data: upcomingAppointments } = await appointmentsQuery;
+
+  // Documents and payments: fetch application IDs first if not admin
+  let allDocs: any[] | null = [];
+  let allPayments: any[] | null = [];
+  
+  if (!isAdmin && staffId) {
+    const { data: staffApps } = await supabase.from('applications').select('id').eq('assigned_staff_id', staffId);
+    const appIds = staffApps?.map(a => a.id) || [];
+    if (appIds.length > 0) {
+      const [{ data: d }, { data: p }] = await Promise.all([
+        supabase.from('documents').select('status').in('application_id', appIds),
+        supabase.from('payments').select('amount, status, created_at').in('application_id', appIds)
+      ]);
+      allDocs = d;
+      allPayments = p;
+    }
+  } else {
+    const [{ data: d }, { data: p }] = await Promise.all([
+      supabase.from('documents').select('status'),
+      supabase.from('payments').select('amount, status, created_at')
+    ]);
+    allDocs = d;
+    allPayments = p;
+  }
 
   const pendingDocs = allDocs?.filter(d => d.status === 'bekleniyor').length || 0;
   const completedDocs = allDocs?.filter(d => d.status === 'tamamlandi').length || 0;

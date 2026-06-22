@@ -32,6 +32,10 @@ export async function updateCustomer(formData: FormData) {
   // Max 100
   profileScore = Math.min(100, profileScore)
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single()
+  const isAdmin = !staffRecord || staffRecord.role === 'admin'
+
   const updateData: any = {
     first_name: firstName,
     last_name: lastName,
@@ -41,10 +45,14 @@ export async function updateCustomer(formData: FormData) {
     monthly_income: monthlyIncome,
     notes: notes || null,
     profile_score: profileScore,
-    assigned_staff_id: assignedStaffId || null,
     passport_no: passportNo || null,
     passport_expiry: passportExpiry || null,
     passport_issuing_country: passportIssuingCountry,
+  }
+
+  // Sadece adminler atama değiştirebilir. Danışmanlar değiştiremez.
+  if (isAdmin) {
+    updateData.assigned_staff_id = assignedStaffId || null;
   }
 
   const { error } = await supabase
@@ -57,7 +65,6 @@ export async function updateCustomer(formData: FormData) {
     redirect(`/customers/${id}/edit?error=` + encodeURIComponent(error.message))
   }
 
-  const { data: { user } } = await supabase.auth.getUser()
   await supabase.from('activity_log').insert([{
     customer_id: id,
     action: "Müşteri bilgileri güncellendi",
