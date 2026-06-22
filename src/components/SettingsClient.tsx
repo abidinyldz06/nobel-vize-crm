@@ -1,7 +1,7 @@
 "use client"
-import { useState } from "react";
-import { Building2, Palette, Save, Bell, Shield, Globe, ChevronRight, Loader2, Check } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { useState, useEffect } from "react";
+import { Building2, Palette, Save, Bell, Shield, Globe, ChevronRight, Loader2, Check, AlertCircle } from "lucide-react";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const TABS = [
   { id: "company", label: "Şirket Bilgileri", icon: Building2 },
@@ -22,47 +22,148 @@ const COLORS = [
 ];
 
 export default function SettingsClient({ tenant }: { tenant: any }) {
+  const supabase = createSupabaseBrowserClient();
   const [activeTab, setActiveTab] = useState("company");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [selectedColor, setSelectedColor] = useState("#2563eb");
-  
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Company State
   const [companyName, setCompanyName] = useState(tenant?.company_name || "Nobel Vize");
   const [subdomain, setSubdomain] = useState(tenant?.subdomain || "nobelvize");
   const [email, setEmail] = useState(tenant?.email || "");
   const [phone, setPhone] = useState(tenant?.phone || "");
 
-  const handleSave = async () => {
-    setSaving(true);
+  // Appearance State
+  const [selectedColor, setSelectedColor] = useState(tenant?.primary_color || "#2563eb");
+
+  // Notifications State
+  const [notifyEmail, setNotifyEmail] = useState(tenant?.notify_email ?? true);
+  const [notifyWhatsapp, setNotifyWhatsapp] = useState(tenant?.notify_whatsapp ?? true);
+  const [notifyReminder, setNotifyReminder] = useState(tenant?.notify_reminder ?? true);
+  const [notifyStatusChange, setNotifyStatusChange] = useState(tenant?.notify_status_change ?? true);
+
+  // Security State
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    // Sayfa ilk yüklendiğinde tenant'dan gelen rengi CSS'e uygula
+    if (tenant?.primary_color) {
+      document.documentElement.style.setProperty('--color-primary', tenant.primary_color);
+    }
+  }, [tenant]);
+
+  const handleColorSelect = (hex: string) => {
+    setSelectedColor(hex);
+    document.documentElement.style.setProperty('--color-primary', hex);
+  };
+
+  const saveTenantData = async (payload: any) => {
+    payload.updated_at = new Date().toISOString();
     
-    const payload = {
+    let error;
+    if (tenant?.id) {
+      const result = await supabase.from('tenants').update(payload).eq('id', tenant.id);
+      error = result.error;
+    } else {
+      const result = await supabase.from('tenants').insert([payload]);
+      error = result.error;
+    }
+
+    if (error) throw new Error(error.message);
+  };
+
+  const handleSaveCompany = async () => {
+    await saveTenantData({
       company_name: companyName,
       subdomain: subdomain,
       email: email,
       phone: phone,
-      theme_color: selectedColor,
-      updated_at: new Date().toISOString()
-    };
+    });
+  };
 
-    if (tenant?.id) {
-      await supabase.from('tenants').update(payload).eq('id', tenant.id);
-    } else {
-      await supabase.from('tenants').insert([payload]);
+  const handleSaveAppearance = async () => {
+    await saveTenantData({
+      primary_color: selectedColor,
+    });
+  };
+
+  const handleSaveNotifications = async () => {
+    await saveTenantData({
+      notify_email: notifyEmail,
+      notify_whatsapp: notifyWhatsapp,
+      notify_reminder: notifyReminder,
+      notify_status_change: notifyStatusChange,
+    });
+  };
+
+  const handleSaveSecurity = async () => {
+    if (!currentPassword) throw new Error("Mevcut şifrenizi girmelisiniz.");
+    if (newPassword.length < 6) throw new Error("Yeni şifre en az 6 karakter olmalıdır.");
+    if (newPassword !== confirmPassword) throw new Error("Yeni şifreler eşleşmiyor.");
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) throw new Error("Kullanıcı bilgisi alınamadı.");
+
+    // Mevcut şifreyi doğrula
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+
+    if (signInError) {
+      throw new Error("Mevcut şifre hatalı.");
     }
 
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    // Şifreyi güncelle
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (updateError) {
+      throw new Error("Şifre güncellenirken bir hata oluştu: " + updateError.message);
+    }
+
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setErrorMsg(null);
+    setSaved(false);
+    
+    try {
+      if (activeTab === "company") {
+        await handleSaveCompany();
+      } else if (activeTab === "appearance") {
+        await handleSaveAppearance();
+      } else if (activeTab === "notifications") {
+        await handleSaveNotifications();
+      } else if (activeTab === "security") {
+        await handleSaveSecurity();
+      }
+      
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Kaydetme işlemi başarısız oldu.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col md:flex-row gap-6">
       {/* Tab List */}
-      <div className="w-52 shrink-0 space-y-1">
+      <div className="w-full md:w-52 shrink-0 space-y-1">
         {TABS.map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => { setActiveTab(tab.id); setErrorMsg(null); setSaved(false); }}
             className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               activeTab === tab.id
                 ? "bg-blue-600/15 border border-blue-500/30 text-blue-400"
@@ -80,6 +181,22 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
 
       {/* Tab Content */}
       <div className="flex-1 space-y-5">
+        
+        {/* Hata ve Başarı Mesajları */}
+        {errorMsg && (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3 text-red-500">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <p className="text-sm font-medium">{errorMsg}</p>
+          </div>
+        )}
+        {saved && (
+          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3 text-emerald-500">
+            <Check className="w-5 h-5 shrink-0" />
+            <p className="text-sm font-medium">Değişiklikler başarıyla kaydedildi!</p>
+          </div>
+        )}
+
+        {/* Company Tab */}
         {activeTab === "company" && (
           <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a]">
@@ -141,6 +258,7 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
           </div>
         )}
 
+        {/* Appearance Tab */}
         {activeTab === "appearance" && (
           <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a]">
@@ -155,7 +273,7 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
                     <button
                       key={c.hex}
                       title={c.name}
-                      onClick={() => setSelectedColor(c.hex)}
+                      onClick={() => handleColorSelect(c.hex)}
                       className={`w-10 h-10 rounded-full border-2 transition-all hover:scale-110 ${
                         selectedColor === c.hex ? "border-white scale-110 shadow-lg" : "border-transparent opacity-70"
                       }`}
@@ -177,7 +295,7 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
                     <p className="text-xs" style={{ color: selectedColor }}>CRM Sistemi</p>
                   </div>
                 </div>
-                <button className="mt-3 w-full py-2 text-slate-900 dark:text-white text-sm font-semibold rounded-xl transition-all" style={{ backgroundColor: selectedColor }}>
+                <button className="mt-3 w-full py-2 text-white text-sm font-semibold rounded-xl transition-all" style={{ backgroundColor: selectedColor }}>
                   Giriş Yap →
                 </button>
               </div>
@@ -185,32 +303,59 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
           </div>
         )}
 
+        {/* Notifications Tab */}
         {activeTab === "notifications" && (
           <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a]">
               <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Bildirim Ayarları</h2>
             </div>
             <div className="divide-y divide-slate-200 dark:divide-[#1f2937]">
-              {[
-                { label: "Yeni Müşteri Kaydı", desc: "Her yeni müşteri eklendiğinde e-posta al" },
-                { label: "Evrak Tamamlandı", desc: "Bir müşteri evrakını yüklediğinde bildir" },
-                { label: "Randevu Hatırlatması", desc: "Randevudan 24 saat önce hatırlatma gönder" },
-                { label: "Ödeme Alındı", desc: "İyzico'dan ödeme geldiğinde e-posta ile bildir" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between px-6 py-4 hover:bg-slate-100 dark:bg-[#1a2232] transition-colors">
-                  <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-200">{item.label}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
-                  </div>
-                  <div className="w-10 h-6 bg-blue-600 rounded-full relative cursor-pointer shadow-[0_0_10px_rgba(37,99,235,0.4)]">
-                    <div className="absolute right-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm" />
-                  </div>
+              
+              <div className="flex items-center justify-between px-6 py-4 hover:bg-slate-100 dark:bg-[#1a2232] transition-colors" onClick={() => setNotifyEmail(!notifyEmail)}>
+                <div className="cursor-pointer">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-200">E-posta Bildirimleri</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Sistem içi önemli güncellemeleri e-postanıza göndeririz.</p>
                 </div>
-              ))}
+                <div className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors ${notifyEmail ? "bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.4)]" : "bg-slate-300 dark:bg-slate-600"}`}>
+                  <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all ${notifyEmail ? "right-0.5" : "left-0.5"}`} />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between px-6 py-4 hover:bg-slate-100 dark:bg-[#1a2232] transition-colors" onClick={() => setNotifyWhatsapp(!notifyWhatsapp)}>
+                <div className="cursor-pointer">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-200">WhatsApp Bildirimleri</p>
+                  <p className="text-xs text-slate-500 mt-0.5">WhatsApp üzerinden müşterilerinize otomatik mesajlar gönderilsin.</p>
+                </div>
+                <div className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors ${notifyWhatsapp ? "bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.4)]" : "bg-slate-300 dark:bg-slate-600"}`}>
+                  <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all ${notifyWhatsapp ? "right-0.5" : "left-0.5"}`} />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between px-6 py-4 hover:bg-slate-100 dark:bg-[#1a2232] transition-colors" onClick={() => setNotifyReminder(!notifyReminder)}>
+                <div className="cursor-pointer">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-200">Randevu Hatırlatmaları</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Yaklaşan randevulardan 24 saat önce hatırlatma alın.</p>
+                </div>
+                <div className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors ${notifyReminder ? "bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.4)]" : "bg-slate-300 dark:bg-slate-600"}`}>
+                  <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all ${notifyReminder ? "right-0.5" : "left-0.5"}`} />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between px-6 py-4 hover:bg-slate-100 dark:bg-[#1a2232] transition-colors" onClick={() => setNotifyStatusChange(!notifyStatusChange)}>
+                <div className="cursor-pointer">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-200">Durum Değişikliği Bildirimleri</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Müşteri başvurularında bir durum güncellendiğinde haberdar olun.</p>
+                </div>
+                <div className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors ${notifyStatusChange ? "bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.4)]" : "bg-slate-300 dark:bg-slate-600"}`}>
+                  <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all ${notifyStatusChange ? "right-0.5" : "left-0.5"}`} />
+                </div>
+              </div>
+
             </div>
           </div>
         )}
 
+        {/* Security Tab */}
         {activeTab === "security" && (
           <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a]">
@@ -219,32 +364,47 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
             <div className="px-6 py-5 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mevcut Şifre</label>
-                <input type="password" placeholder="••••••••"
-                  className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+                <input 
+                  type="password" 
+                  value={currentPassword}
+                  onChange={e => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" 
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Yeni Şifre</label>
-                <input type="password" placeholder="••••••••"
-                  className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+                <input 
+                  type="password" 
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" 
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Yeni Şifre (Tekrar)</label>
-                <input type="password" placeholder="••••••••"
-                  className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+                <input 
+                  type="password" 
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" 
+                />
               </div>
               <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
-                Şifreniz en az 8 karakter, bir büyük harf ve bir özel karakter içermelidir.
+                Şifreniz en az 6 karakter olmalıdır. Şifrenizi güvenli tutmak için güçlü bir kombinasyon seçin.
               </div>
             </div>
           </div>
         )}
 
         {/* Save Button */}
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-2">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30 disabled:opacity-60"
+            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30 disabled:opacity-60"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
             {saving ? "Kaydediliyor..." : saved ? "Kaydedildi!" : "Değişiklikleri Kaydet"}

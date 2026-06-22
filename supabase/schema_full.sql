@@ -30,6 +30,10 @@ CREATE TABLE IF NOT EXISTS tenants (
   phone TEXT,
   plan TEXT,
   primary_color TEXT,
+  notify_email BOOLEAN DEFAULT true,
+  notify_whatsapp BOOLEAN DEFAULT true,
+  notify_reminder BOOLEAN DEFAULT true,
+  notify_status_change BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
