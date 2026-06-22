@@ -18,9 +18,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   const [
     { count: totalCustomers },
+    { count: monthlyCustomers },
     { data: allApplications },
     { data: allDocs },
   ] = await Promise.all([
+    supabase.from('customers').select('*', { count: 'exact', head: true }),
     supabase.from('customers').select('*', { count: 'exact', head: true })
       .gte('created_at', startDate.toISOString())
       .lt('created_at', endDate.toISOString()),
@@ -71,6 +73,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg border-t-2 border-t-blue-500">
           <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1 uppercase tracking-wider"><Users className="w-3 h-3" /> Toplam Müşteri</p>
           <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{totalCustomers ?? 0}</h3>
+          <p className="text-xs text-blue-500 mt-1 font-medium">+{monthlyCustomers ?? 0} bu ay eklendi</p>
         </div>
         <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg border-t-2 border-t-purple-500">
           <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Toplam Başvuru</p>
