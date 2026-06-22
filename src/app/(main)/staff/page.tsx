@@ -15,7 +15,8 @@ export default async function StaffPage() {
   }
   
   const { data: currentUserStaff } = await supabase.from('staff').select('role').eq('user_id', user?.id).single();
-  if (currentUserStaff?.role !== 'admin') {
+  // Staff tablosu boşsa veya kayıt yoksa admin olarak davran (dashboard ile aynı mantık)
+  if (currentUserStaff && currentUserStaff.role !== 'admin') {
     const { redirect } = await import("next/navigation");
     redirect("/dashboard");
   }

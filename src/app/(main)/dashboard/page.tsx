@@ -92,6 +92,7 @@ export default async function Dashboard() {
     basvuru_yapildi:    { label: "Başvuru Yapıldı",     color: "text-purple-400",  dot: "bg-purple-500" },
     onaylandi:          { label: "Onaylandı",           color: "text-emerald-400", dot: "bg-emerald-500" },
     reddedildi:         { label: "Reddedildi",          color: "text-red-400",     dot: "bg-red-500" },
+    kapandi:            { label: "Kapandı",             color: "text-slate-400",   dot: "bg-slate-500" },
   };
 
   return (

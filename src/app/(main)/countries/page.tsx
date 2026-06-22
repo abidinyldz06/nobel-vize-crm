@@ -8,7 +8,7 @@ export default async function CountriesPage() {
   const supabase = await createSupabaseServerClient();
   const { data: countries } = await supabase
     .from("countries")
-    .select("*, documents:documents(count)")
+    .select("*")
     .order("name");
 
   // Get application count per country
