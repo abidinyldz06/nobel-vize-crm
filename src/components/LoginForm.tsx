@@ -1,11 +1,16 @@
 "use client"
 import { useState } from "react"
 import { loginAction } from "@/app/actions/auth"
-import { Globe, Mail, Lock, ArrowRight, Shield, Loader2, AlertCircle } from "lucide-react"
+import { Globe, Mail, Lock, ArrowRight, Shield, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const [isResetMode, setIsResetMode] = useState(false)
+  const [resetEmail, setResetEmail] = useState("")
+  const [resetMessage, setResetMessage] = useState<{type: 'success' | 'error', text: string} | null>(null)
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -15,7 +20,26 @@ export default function LoginForm() {
       setError(result.error)
       setLoading(false)
     }
-    // If success: redirect happens server-side, no need to handle
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault()
+    if (!resetEmail) return
+    
+    setLoading(true)
+    setResetMessage(null)
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+
+    if (error) {
+      setResetMessage({ type: 'error', text: "E-posta gönderilemedi" })
+    } else {
+      setResetMessage({ type: 'success', text: "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi" })
+      setResetEmail("")
+    }
+    setLoading(false)
   }
 
   return (
@@ -47,7 +71,55 @@ export default function LoginForm() {
         </div>
 
         {/* Card */}
-        <form action={handleSubmit} className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1e2d45] rounded-2xl p-7 shadow-2xl shadow-black/60">
+        {isResetMode ? (
+          <form onSubmit={handleResetPassword} className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1e2d45] rounded-2xl p-7 shadow-2xl shadow-black/60">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Şifre Sıfırlama</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Sisteme kayıtlı e-posta adresinizi girin, size bir sıfırlama bağlantısı göndereceğiz.</p>
+            
+            {resetMessage && (
+              <div className={`mb-4 p-3 rounded-xl border flex items-center gap-2 text-sm ${resetMessage.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-500 dark:text-red-400'}`}>
+                {resetMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+                {resetMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input
+                    type="email"
+                    required
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    disabled={loading}
+                    placeholder="ornek@nobelvize.com"
+                    className="w-full pl-10 pr-4 py-3 bg-[#060c18] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col gap-3">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center items-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/40 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Bağlantı Gönder'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsResetMode(false); setResetMessage(null); }}
+                  className="w-full py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
+                  Giriş Ekranına Dön
+                </button>
+              </div>
+            </div>
+          </form>
+        ) : (
+          <form action={handleSubmit} className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1e2d45] rounded-2xl p-7 shadow-2xl shadow-black/60">
           
           {/* Error */}
           {error && (
@@ -76,7 +148,7 @@ export default function LoginForm() {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Şifre</label>
-                <a href="#" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Şifremi Unuttum</a>
+                <button type="button" onClick={() => setIsResetMode(true)} className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Şifremi Unuttum</button>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -117,6 +189,7 @@ export default function LoginForm() {
             </div>
           </div>
         </form>
+        )}
 
         {/* Footer */}
         <div className="mt-6 text-center flex items-center justify-center gap-2 text-slate-600 text-xs">
