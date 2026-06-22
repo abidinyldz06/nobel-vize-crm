@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { addAppointment } from "@/app/actions/update-customer";
 import { Calendar, Save, ArrowLeft, AlertCircle } from "lucide-react";
 import Link from "next/link";
@@ -7,6 +7,7 @@ export const revalidate = 0;
 
 export default async function AddAppointmentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const supabase = await createSupabaseServerClient();
 
   const { data: customer } = await supabase.from('customers').select('*').eq('id', id).single();
   const { data: applications } = await supabase

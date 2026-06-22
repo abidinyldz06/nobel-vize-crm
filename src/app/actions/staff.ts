@@ -1,5 +1,4 @@
 "use server"
-import { supabase as anonClient } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -21,8 +20,9 @@ export async function createStaff(formData: FormData) {
 
   const defaultPassword = '123456';
 
-  // Auth user oluştur (Anonim client ile, mevcut admin session'ını bozmamak için)
-  const { data: authData, error: authError } = await anonClient.auth.signUp({
+  // Auth user oluştur
+  const serverClient = await createSupabaseServerClient();
+  const { data: authData, error: authError } = await serverClient.auth.signUp({
     email,
     password: defaultPassword,
   });
@@ -35,7 +35,6 @@ export async function createStaff(formData: FormData) {
   const userId = authData.user?.id;
 
   // Veritabanı işlemleri için yetkili server client kullan (RLS'yi geçmek için)
-  const serverClient = await createSupabaseServerClient();
   const { error } = await serverClient.from('staff').insert([{
     user_id: userId,
     full_name: fullName,
