@@ -2,6 +2,22 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ==========================================
+-- 0. CLEANUP (DROP EXISTING TABLES)
+-- ==========================================
+DROP TABLE IF EXISTS family_members CASCADE;
+DROP TABLE IF EXISTS visa_history CASCADE;
+DROP TABLE IF EXISTS communications CASCADE;
+DROP TABLE IF EXISTS activity_log CASCADE;
+DROP TABLE IF EXISTS payments CASCADE;
+DROP TABLE IF EXISTS notes CASCADE;
+DROP TABLE IF EXISTS documents CASCADE;
+DROP TABLE IF EXISTS applications CASCADE;
+DROP TABLE IF EXISTS countries CASCADE;
+DROP TABLE IF EXISTS customers CASCADE;
+DROP TABLE IF EXISTS staff CASCADE;
+DROP TABLE IF EXISTS tenants CASCADE;
+
+-- ==========================================
 -- 1. TABLES CREATION
 -- ==========================================
 
