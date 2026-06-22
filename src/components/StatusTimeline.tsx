@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase as globalSupabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { Check, Clock, Edit2, AlertCircle } from "lucide-react";
 
@@ -47,17 +48,22 @@ export default function StatusTimeline({
   const updateStatus = async (newStatus: string) => {
     if (newStatus === currentStatus) return;
     setLoading(true);
+    
+    const supabase = createSupabaseBrowserClient();
     const { error } = await supabase
       .from("applications")
       .update({ status: newStatus })
       .eq("id", applicationId);
 
     if (!error) {
+      // Get logged in user
+      const { data: { user } } = await supabase.auth.getUser();
+
       // Log activity
       await supabase.from("activity_log").insert([{
         application_id: applicationId,
         action: `Durum güncellendi: ${STATUS_CONFIG[newStatus]?.label || newStatus}`,
-        performed_by: "Danışman",
+        performed_by: user?.email || "Danışman",
       }]);
       router.refresh();
     } else {
