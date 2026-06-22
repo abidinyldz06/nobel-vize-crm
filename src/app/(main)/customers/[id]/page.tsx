@@ -247,7 +247,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   {customer.email && (
                     <a
                       href={`mailto:${customer.email}?subject=${encodeURIComponent(`${activeApp?.country || ''} Vize Başvurusu — Evrak Listesi`)}&body=${encodeURIComponent(
-                        `Merhaba ${customer.first_name} Bey/Hanım,\n\n${activeApp?.country || ''} vize başvurunuz için gereken evraklar:\n\n${documents.map((d: any, i: number) => `${i + 1}. ${d.document_type} - ${d.status === 'tamamlandi' ? 'Tamamlandı ✓' : 'Bekleniyor'}`).join('\n')}\n\nSaygılarımızla,\nNobel Vize`
+                        `Merhaba ${customer.first_name} Bey/Hanım,\n\n${activeApp?.country || ''} vize başvurunuz için gereken evraklar:\n\n${(documents || []).map((d: any, i: number) => `${i + 1}. ${d.document_type} - ${d.status === 'tamamlandi' ? 'Tamamlandı ✓' : 'Bekleniyor'}`).join('\n')}\n\nSaygılarımızla,\nNobel Vize`
                       )}`}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-[11px] font-semibold rounded-lg transition-all"
                     >

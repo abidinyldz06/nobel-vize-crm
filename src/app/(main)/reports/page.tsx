@@ -1,4 +1,4 @@
-import { BarChart3, TrendingUp, ArrowUpRight, Users, FileCheck, Globe } from "lucide-react";
+import { BarChart3, TrendingUp, ArrowUpRight, Users, FileCheck, Globe, Banknote, Wallet, CreditCard, Percent, UserCog, Calendar } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import ReportFilters from "@/components/ReportFilters";
 
@@ -16,27 +16,39 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const endDate = new Date(startDate);
   endDate.setMonth(endDate.getMonth() + 1);
 
+  // 6 months trend start date
+  const trendStartDate = new Date(startDate);
+  trendStartDate.setMonth(trendStartDate.getMonth() - 5);
+
   const [
     { count: totalCustomers },
     { count: monthlyCustomers },
     { data: allApplications },
     { data: allDocs },
+    { data: allPayments },
+    { data: allStaff },
+    { data: allCustomers },
   ] = await Promise.all([
     supabase.from('customers').select('*', { count: 'exact', head: true }),
     supabase.from('customers').select('*', { count: 'exact', head: true })
       .gte('created_at', startDate.toISOString())
       .lt('created_at', endDate.toISOString()),
-    supabase.from('applications').select('country, status, total_fee')
-      .gte('created_at', startDate.toISOString())
-      .lt('created_at', endDate.toISOString()),
+    supabase.from('applications').select('id, customer_id, country, status, total_fee, created_at')
+      .gte('created_at', trendStartDate.toISOString()),
     supabase.from('documents').select('status')
       .gte('created_at', startDate.toISOString())
       .lt('created_at', endDate.toISOString()),
+    supabase.from('payments').select('application_id, amount, status, created_at')
+      .gte('created_at', trendStartDate.toISOString()),
+    supabase.from('staff').select('id, full_name'),
+    supabase.from('customers').select('id, assigned_staff_id'),
   ]);
 
-  const totalApps = allApplications?.length ?? 0;
-  const approved = allApplications?.filter(a => a.status === 'onaylandi').length ?? 0;
-  const rejected = allApplications?.filter(a => a.status === 'reddedildi').length ?? 0;
+  const monthlyApps = allApplications?.filter(a => new Date(a.created_at) >= startDate && new Date(a.created_at) < endDate) || [];
+
+  const totalApps = monthlyApps.length;
+  const approved = monthlyApps.filter(a => a.status === 'onaylandi').length;
+  const rejected = monthlyApps.filter(a => a.status === 'reddedildi').length;
   const approvalRate = totalApps > 0 ? ((approved / totalApps) * 100).toFixed(1) : "—";
 
   const pendingDocs = allDocs?.filter(d => d.status === 'bekleniyor').length ?? 0;
@@ -46,13 +58,95 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   // Country distribution
   const countryMap: Record<string, number> = {};
-  allApplications?.forEach(a => {
+  monthlyApps.forEach(a => {
     if (a.country) countryMap[a.country] = (countryMap[a.country] || 0) + 1;
   });
   const countryStats = Object.entries(countryMap)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
   const maxCount = countryStats[0]?.[1] || 1;
+
+  // A. AYLIK GELİR KARTLARI
+  const monthlyPayments = allPayments?.filter(p => new Date(p.created_at) >= startDate && new Date(p.created_at) < endDate) || [];
+  const tahsilEdilen = monthlyPayments.filter(p => p.status === 'alindi').reduce((sum, p) => sum + Number(p.amount), 0);
+  const bekleyen = monthlyPayments.filter(p => p.status === 'bekliyor').reduce((sum, p) => sum + Number(p.amount), 0);
+  const toplamBeklenen = monthlyApps.reduce((sum, a) => sum + Number(a.total_fee || 0), 0);
+  const tahsilatOrani = toplamBeklenen > 0 ? ((tahsilEdilen / toplamBeklenen) * 100).toFixed(1) : "0";
+
+  // B. DANIŞMAN BAZINDA GELİR
+  const staffIncomeMap: Record<string, { name: string, customerCount: Set<string>, collected: number, pending: number }> = {};
+  allStaff?.forEach(s => {
+    staffIncomeMap[s.id] = { name: s.full_name, customerCount: new Set(), collected: 0, pending: 0 };
+  });
+
+  const customerStaffMap: Record<string, string> = {};
+  allCustomers?.forEach(c => {
+    if (c.assigned_staff_id) customerStaffMap[c.id] = c.assigned_staff_id;
+  });
+
+  const appCustomerMap: Record<string, string> = {};
+  allApplications?.forEach(a => {
+    if (a.customer_id) appCustomerMap[a.id] = a.customer_id;
+  });
+
+  allPayments?.forEach(p => {
+    const custId = appCustomerMap[p.application_id];
+    if (!custId) return;
+    const staffId = customerStaffMap[custId];
+    if (!staffId || !staffIncomeMap[staffId]) return;
+
+    staffIncomeMap[staffId].customerCount.add(custId);
+    if (p.status === 'alindi') staffIncomeMap[staffId].collected += Number(p.amount);
+    if (p.status === 'bekliyor') staffIncomeMap[staffId].pending += Number(p.amount);
+  });
+
+  const staffStats = Object.values(staffIncomeMap)
+    .filter(s => s.collected > 0 || s.pending > 0 || s.customerCount.size > 0)
+    .sort((a, b) => b.collected - a.collected);
+
+  // C. ÜLKE BAZINDA GELİR
+  const countryIncomeMap: Record<string, { apps: number, expected: number, collected: number }> = {};
+  allApplications?.forEach(a => {
+    if (!a.country) return;
+    if (!countryIncomeMap[a.country]) {
+      countryIncomeMap[a.country] = { apps: 0, expected: 0, collected: 0 };
+    }
+    countryIncomeMap[a.country].apps += 1;
+    countryIncomeMap[a.country].expected += Number(a.total_fee || 0);
+  });
+  allPayments?.forEach(p => {
+    const app = allApplications?.find(a => a.id === p.application_id);
+    if (app?.country && p.status === 'alindi') {
+      if (!countryIncomeMap[app.country]) countryIncomeMap[app.country] = { apps: 0, expected: 0, collected: 0 };
+      countryIncomeMap[app.country].collected += Number(p.amount);
+    }
+  });
+
+  const countryIncomeStats = Object.entries(countryIncomeMap)
+    .map(([country, stats]) => ({ country, ...stats }))
+    .sort((a, b) => b.collected - a.collected);
+
+  // D. SON 6 AY TREND
+  const monthsData: Record<string, { label: string, collected: number, pending: number }> = {};
+  const formatter = new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' });
+  
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(startDate);
+    d.setMonth(d.getMonth() - i);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    monthsData[key] = { label: formatter.format(d), collected: 0, pending: 0 };
+  }
+
+  allPayments?.forEach(p => {
+    const d = new Date(p.created_at);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    if (monthsData[key]) {
+      if (p.status === 'alindi') monthsData[key].collected += Number(p.amount);
+      if (p.status === 'bekliyor') monthsData[key].pending += Number(p.amount);
+    }
+  });
+
+  const trendStats = Object.values(monthsData);
 
   const COLORS = ["bg-blue-500", "bg-purple-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"];
 
@@ -155,6 +249,109 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               Evrak durumu: <span className="text-amber-400 font-medium">{pendingDocs} bekliyor</span>,&nbsp;
               <span className="text-emerald-400 font-medium">{completedDocs} tamamlandı</span>
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* GELİR ÖZETİ SECTION */}
+      <div className="mt-10">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-6">
+          <Wallet className="w-5 h-5 text-emerald-500" /> Gelir Detayları
+        </h2>
+
+        {/* 4 Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg border-t-2 border-t-emerald-500 hover:-translate-y-1 transition-transform">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1 uppercase tracking-wider"><Banknote className="w-3 h-3 text-emerald-500" /> Tahsil Edilen</p>
+            <h3 className="text-3xl font-bold text-emerald-500 dark:text-emerald-400">₺{tahsilEdilen.toLocaleString('tr-TR')}</h3>
+            <p className="text-xs text-slate-500 mt-1 font-medium">Bu ay</p>
+          </div>
+          <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg border-t-2 border-t-amber-500 hover:-translate-y-1 transition-transform">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider flex items-center gap-1"><CreditCard className="w-3 h-3 text-amber-500"/> Bekleyen</p>
+            <h3 className="text-3xl font-bold text-amber-500 dark:text-amber-400">₺{bekleyen.toLocaleString('tr-TR')}</h3>
+            <p className="text-xs text-slate-500 mt-1 font-medium">Bu ay</p>
+          </div>
+          <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg border-t-2 border-t-blue-500 hover:-translate-y-1 transition-transform">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1 uppercase tracking-wider"><Wallet className="w-3 h-3 text-blue-500" /> Toplam Beklenen</p>
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-white">₺{toplamBeklenen.toLocaleString('tr-TR')}</h3>
+            <p className="text-xs text-slate-500 mt-1 font-medium">Yeni başvurular</p>
+          </div>
+          <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg border-t-2 border-t-purple-500 hover:-translate-y-1 transition-transform">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1 uppercase tracking-wider"><Percent className="w-3 h-3 text-purple-500" /> Tahsilat Oranı</p>
+            <h3 className="text-3xl font-bold text-purple-500 dark:text-purple-400">%{tahsilatOrani}</h3>
+            <p className="text-xs text-slate-500 mt-1 font-medium">Başarı</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Staff Income */}
+          <div className="xl:col-span-1 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-6 rounded-2xl shadow-lg overflow-x-auto">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+              <UserCog className="w-4 h-4 text-emerald-500" /> Danışman Bazında Gelir
+            </h3>
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-[#1f2937]">
+                  <th className="pb-3 text-slate-500 font-medium">Danışman</th>
+                  <th className="pb-3 text-slate-500 font-medium text-right">Tahsil</th>
+                  <th className="pb-3 text-slate-500 font-medium text-right">Bekleyen</th>
+                </tr>
+              </thead>
+              <tbody>
+                {staffStats.map(s => (
+                  <tr key={s.name} className="border-b border-slate-100 dark:border-[#1f2937]/50 hover:bg-slate-50 dark:hover:bg-[#1a2232] transition-colors">
+                    <td className="py-3 font-medium text-slate-900 dark:text-white">{s.name} <span className="text-xs text-slate-400 font-normal">({s.customerCount.size} M)</span></td>
+                    <td className="py-3 text-right text-emerald-500 font-semibold">₺{s.collected.toLocaleString('tr-TR')}</td>
+                    <td className="py-3 text-right text-amber-500">₺{s.pending.toLocaleString('tr-TR')}</td>
+                  </tr>
+                ))}
+                {staffStats.length === 0 && <tr><td colSpan={3} className="py-4 text-center text-slate-500">Veri bulunamadı.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Country Income */}
+          <div className="xl:col-span-1 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-6 rounded-2xl shadow-lg overflow-x-auto">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-blue-500" /> Ülke Bazında Gelir
+            </h3>
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-[#1f2937]">
+                  <th className="pb-3 text-slate-500 font-medium">Ülke</th>
+                  <th className="pb-3 text-slate-500 font-medium text-right">Tahsil</th>
+                  <th className="pb-3 text-slate-500 font-medium text-right">Beklenen</th>
+                </tr>
+              </thead>
+              <tbody>
+                {countryIncomeStats.slice(0, 8).map(c => (
+                  <tr key={c.country} className="border-b border-slate-100 dark:border-[#1f2937]/50 hover:bg-slate-50 dark:hover:bg-[#1a2232] transition-colors">
+                    <td className="py-3 font-medium text-slate-900 dark:text-white">{c.country} <span className="text-xs text-slate-400 font-normal">({c.apps} B)</span></td>
+                    <td className="py-3 text-right text-emerald-500 font-semibold">₺{c.collected.toLocaleString('tr-TR')}</td>
+                    <td className="py-3 text-right text-slate-500 dark:text-slate-400">₺{c.expected.toLocaleString('tr-TR')}</td>
+                  </tr>
+                ))}
+                {countryIncomeStats.length === 0 && <tr><td colSpan={3} className="py-4 text-center text-slate-500">Veri bulunamadı.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 6 Month Trend */}
+          <div className="xl:col-span-1 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-6 rounded-2xl shadow-lg">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-purple-500" /> Son 6 Ay Gelir Trendi
+            </h3>
+            <div className="space-y-4">
+              {trendStats.map((t, i) => (
+                <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] hover:-translate-y-0.5 transition-transform">
+                  <div className="font-medium text-slate-900 dark:text-white text-sm capitalize">{t.label}</div>
+                  <div className="text-right text-xs">
+                    <div className="text-emerald-500 font-bold text-sm">₺{t.collected.toLocaleString('tr-TR')}</div>
+                    <div className="text-amber-500 mt-0.5">₺{t.pending.toLocaleString('tr-TR')} bekleyen</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
