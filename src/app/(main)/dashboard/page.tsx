@@ -14,7 +14,7 @@ export default async function Dashboard() {
   const { data: staffRecord } = await supabase
     .from('staff')
     .select('*')
-    .eq('email', user?.email || '')
+    .eq('user_id', user?.id)
     .single();
 
   const isAdmin = !staffRecord || staffRecord.role === 'admin';
