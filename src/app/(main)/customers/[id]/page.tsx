@@ -234,8 +234,8 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
             {/* Documents */}
-            <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg flex flex-col">
-              <div className="px-5 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a] flex justify-between items-center">
+            <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl shadow-lg flex flex-col">
+              <div className="px-5 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a] rounded-t-2xl flex justify-between items-center">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Evrak Listesi</h3>
                 <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-200 dark:bg-[#1f2937] text-slate-500 dark:text-slate-400">
                   {completedDocs}/{totalDocs}
