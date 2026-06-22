@@ -3,16 +3,27 @@ import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+function generateRandomPassword(): string {
+  const chars = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%';
+  let pass = '';
+  for (let i = 0; i < 8; i++) {
+    pass += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return pass;
+}
+
 export async function createStaff(formData: FormData) {
   const fullName = formData.get('fullName') as string;
   const email = formData.get('email') as string;
   const role = formData.get('role') as string;
   const phone = formData.get('phone') as string;
 
-  // Auth user oluştur (Geçici şifre ile)
+  const randomPassword = generateRandomPassword();
+
+  // Auth user oluştur (Rastgele şifre ile)
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
-    password: 'Nobel123!',
+    password: randomPassword,
   });
 
   if (authError) {
@@ -38,7 +49,7 @@ export async function createStaff(formData: FormData) {
   }
 
   revalidatePath('/staff');
-  redirect('/staff?success=' + encodeURIComponent("Personel eklendi. Geçici şifre: Nobel123!"));
+  redirect('/staff?success=' + encodeURIComponent(`Personel eklendi. Geçici şifre: ${randomPassword}`));
 }
 
 export async function updateStaff(formData: FormData) {
