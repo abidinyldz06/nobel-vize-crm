@@ -2,7 +2,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Customers Table
-CREATE TABLE customers (
+CREATE TABLE IF NOT EXISTS customers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE customers (
 );
 
 -- Countries Table (Evrak konfigürasyonu)
-CREATE TABLE countries (
+CREATE TABLE IF NOT EXISTS countries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   visa_system TEXT,
@@ -23,7 +23,7 @@ CREATE TABLE countries (
 );
 
 -- Applications Table (Başvurular)
-CREATE TABLE applications (
+CREATE TABLE IF NOT EXISTS applications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
   country TEXT,
@@ -33,7 +33,7 @@ CREATE TABLE applications (
 );
 
 -- Documents Table (Evraklar)
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
   document_type TEXT,
