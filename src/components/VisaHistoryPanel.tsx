@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { CheckCircle, XCircle, FileText, Plus, Loader2, AlertTriangle, Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -8,32 +8,33 @@ type VisaHistory = {
   id: string;
   country: string;
   visa_type: string;
-  status: string; // 'onay', 'ret'
-  issue_date: string;
+  result: string; // 'onay', 'ret'
+  application_date: string;
   expiry_date?: string;
   notes?: string;
   created_at: string;
 };
 
 export default function VisaHistoryPanel({ customerId, initialHistory }: { customerId: string; initialHistory: VisaHistory[] }) {
-  const [history, setHistory] = useState<VisaHistory[]>(initialHistory);
+  const [history, setHistory] = useState<VisaHistory[]>(initialHistory || []);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const supabase = createSupabaseBrowserClient();
   const router = useRouter();
 
   const [form, setForm] = useState({
     country: "",
     visa_type: "Turist",
-    status: "onay",
-    issue_date: "",
+    result: "onay",
+    application_date: "",
     expiry_date: "",
     notes: ""
   });
 
   const handleAdd = async () => {
-    if (!form.country || !form.issue_date) {
-      setErrorMsg("Ülke ve Karar Tarihi zorunludur.");
+    if (!form.country || !form.application_date) {
+      setErrorMsg("Ülke ve Başvuru Tarihi zorunludur.");
       return;
     }
     setSaving(true);
@@ -45,8 +46,8 @@ export default function VisaHistoryPanel({ customerId, initialHistory }: { custo
         customer_id: customerId,
         country: form.country,
         visa_type: form.visa_type,
-        status: form.status,
-        issue_date: form.issue_date,
+        result: form.result,
+        application_date: form.application_date,
         expiry_date: form.expiry_date || null,
         notes: form.notes || null
       }])
@@ -55,7 +56,7 @@ export default function VisaHistoryPanel({ customerId, initialHistory }: { custo
 
     if (!error && data) {
       setHistory(prev => [data, ...prev]);
-      setForm({ country: "", visa_type: "Turist", status: "onay", issue_date: "", expiry_date: "", notes: "" });
+      setForm({ country: "", visa_type: "Turist", result: "onay", application_date: "", expiry_date: "", notes: "" });
       setShowForm(false);
       router.refresh();
     } else {
@@ -88,34 +89,40 @@ export default function VisaHistoryPanel({ customerId, initialHistory }: { custo
           )}
           
           <div className="grid grid-cols-2 gap-3 mb-3">
-            <input
-              type="text"
-              value={form.country}
-              onChange={e => setForm({...form, country: e.target.value})}
-              placeholder="Ülke (Örn: Almanya)"
-              className="px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
-            />
-            <input
-              type="text"
-              value={form.visa_type}
-              onChange={e => setForm({...form, visa_type: e.target.value})}
-              placeholder="Vize Türü (Örn: Turist)"
-              className="px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 mb-3">
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-500">Karar Tarihi</label>
+              <label className="text-[10px] text-slate-500 uppercase font-semibold">Ülke *</label>
               <input
-                type="date"
-                value={form.issue_date}
-                onChange={e => setForm({...form, issue_date: e.target.value})}
+                type="text"
+                value={form.country}
+                onChange={e => setForm({...form, country: e.target.value})}
+                placeholder="Örn: Almanya"
                 className="w-full px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-500">Bitiş Tarihi (Opsiyonel)</label>
+              <label className="text-[10px] text-slate-500 uppercase font-semibold">Vize Türü</label>
+              <input
+                type="text"
+                value={form.visa_type}
+                onChange={e => setForm({...form, visa_type: e.target.value})}
+                placeholder="Örn: Turist"
+                className="w-full px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 uppercase font-semibold">Başvuru Tarihi *</label>
+              <input
+                type="date"
+                value={form.application_date}
+                onChange={e => setForm({...form, application_date: e.target.value})}
+                className="w-full px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 uppercase font-semibold">Bitiş Tarihi</label>
               <input
                 type="date"
                 value={form.expiry_date}
@@ -125,22 +132,28 @@ export default function VisaHistoryPanel({ customerId, initialHistory }: { custo
             </div>
           </div>
 
-          <select
-            value={form.status}
-            onChange={e => setForm({...form, status: e.target.value})}
-            className="w-full mb-3 px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
-          >
-            <option value="onay">Onaylandı</option>
-            <option value="ret">Reddedildi</option>
-          </select>
+          <div className="space-y-1 mb-3">
+            <label className="text-[10px] text-slate-500 uppercase font-semibold">Sonuç</label>
+            <select
+              value={form.result}
+              onChange={e => setForm({...form, result: e.target.value})}
+              className="w-full px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+            >
+              <option value="onay">Onaylandı</option>
+              <option value="ret">Reddedildi</option>
+            </select>
+          </div>
 
-          <input
-            type="text"
-            value={form.notes}
-            onChange={e => setForm({...form, notes: e.target.value})}
-            placeholder="Not (Örn: 9. Maddeden ret, 1 yıllık vize vb.)"
-            className="w-full mb-3 px-4 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-emerald-500 transition-all"
-          />
+          <div className="space-y-1 mb-3">
+            <label className="text-[10px] text-slate-500 uppercase font-semibold">Not (İsteğe Bağlı)</label>
+            <input
+              type="text"
+              value={form.notes}
+              onChange={e => setForm({...form, notes: e.target.value})}
+              placeholder="Örn: 9. Maddeden ret, 1 yıllık vize vb."
+              className="w-full px-4 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-emerald-500 transition-all"
+            />
+          </div>
 
           <div className="flex justify-end">
             <button
@@ -158,8 +171,8 @@ export default function VisaHistoryPanel({ customerId, initialHistory }: { custo
       <div className="max-h-64 overflow-y-auto divide-y divide-slate-200 dark:divide-[#1f2937]">
         {history.length > 0 ? history.map(item => (
           <div key={item.id} className="px-5 py-3.5 hover:bg-slate-100 dark:bg-[#1a2232] transition-colors flex gap-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${item.status === 'onay' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
-              {item.status === 'onay' ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${item.result === 'onay' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
+              {item.result === 'onay' ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
@@ -167,7 +180,7 @@ export default function VisaHistoryPanel({ customerId, initialHistory }: { custo
                 <span className="text-[10px] text-slate-500 px-1.5 py-0.5 bg-slate-200 dark:bg-[#1f2937] rounded-md">{item.visa_type}</span>
               </div>
               <div className="text-[10px] text-slate-500 mb-1">
-                Tarih: {new Date(item.issue_date).toLocaleDateString('tr-TR')} 
+                Tarih: {new Date(item.application_date).toLocaleDateString('tr-TR')} 
                 {item.expiry_date && ` - Bitiş: ${new Date(item.expiry_date).toLocaleDateString('tr-TR')}`}
               </div>
               {item.notes && (

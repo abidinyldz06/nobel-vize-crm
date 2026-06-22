@@ -154,6 +154,8 @@ CREATE TABLE IF NOT EXISTS visa_history (
   visa_type TEXT,
   result TEXT,
   application_date DATE,
+  expiry_date DATE,
+  notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
