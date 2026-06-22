@@ -41,14 +41,85 @@ CREATE TABLE documents (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Eklenen verilerin herkes tarafından okunabilmesi (MVP aşaması için Public, daha sonra RLS ile sınırlandırılacak)
+-- 1. Enable RLS
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE countries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE staff ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE communications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE visa_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE family_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
 
--- Şimdilik herkesin okuyup yazabilmesi için geçici poliçeler (Auth gelince admin/danışman ayrımı yapılacak)
-CREATE POLICY "Public Access" ON customers FOR ALL USING (true);
-CREATE POLICY "Public Access" ON countries FOR ALL USING (true);
-CREATE POLICY "Public Access" ON applications FOR ALL USING (true);
-CREATE POLICY "Public Access" ON documents FOR ALL USING (true);
+-- 2. Drop existing policies to prevent conflicts
+DROP POLICY IF EXISTS "Public Access" ON customers;
+DROP POLICY IF EXISTS "Public Access" ON countries;
+DROP POLICY IF EXISTS "Public Access" ON applications;
+DROP POLICY IF EXISTS "Public Access" ON documents;
+DROP POLICY IF EXISTS "Public Access" ON staff;
+DROP POLICY IF EXISTS "Public Access" ON notes;
+DROP POLICY IF EXISTS "Public Access" ON payments;
+DROP POLICY IF EXISTS "Public Access" ON activity_log;
+DROP POLICY IF EXISTS "Public Access" ON communications;
+DROP POLICY IF EXISTS "Public Access" ON visa_history;
+DROP POLICY IF EXISTS "Public Access" ON family_members;
+DROP POLICY IF EXISTS "Public Access" ON tenants;
+
+DROP POLICY IF EXISTS "Enable read access for all users" ON family_members;
+DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON family_members;
+DROP POLICY IF EXISTS "Enable update for authenticated users only" ON family_members;
+DROP POLICY IF EXISTS "Enable delete for authenticated users only" ON family_members;
+DROP POLICY IF EXISTS "Enable read/write for auth users" ON tenants;
+
+-- 3. Create Authenticated Read/Write policies
+-- Customers
+CREATE POLICY "Authenticated Read" ON customers FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON customers FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Countries
+CREATE POLICY "Authenticated Read" ON countries FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON countries FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Applications
+CREATE POLICY "Authenticated Read" ON applications FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON applications FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Documents
+CREATE POLICY "Authenticated Read" ON documents FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON documents FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Staff
+CREATE POLICY "Authenticated Read" ON staff FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON staff FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Notes
+CREATE POLICY "Authenticated Read" ON notes FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON notes FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Payments
+CREATE POLICY "Authenticated Read" ON payments FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON payments FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Activity Log
+CREATE POLICY "Authenticated Read" ON activity_log FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON activity_log FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Communications
+CREATE POLICY "Authenticated Read" ON communications FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON communications FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Visa History
+CREATE POLICY "Authenticated Read" ON visa_history FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON visa_history FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Family Members
+CREATE POLICY "Authenticated Read" ON family_members FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON family_members FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Tenants
+CREATE POLICY "Authenticated Read" ON tenants FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated Write" ON tenants FOR ALL TO authenticated USING (true) WITH CHECK (true);
