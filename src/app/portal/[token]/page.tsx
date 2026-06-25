@@ -39,7 +39,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
   // GÜVENLİK: Sadece gerekli başvuru bilgileri çekilir
   const { data: applications } = await supabase
     .from('applications')
-    .select('id, country, visa_type, status, created_at, updated_at, appointment_date, appointment_location, total_fee')
+    .select('id, country, visa_type, status, created_at, appointment_date, appointment_location, total_fee')
     .eq('customer_id', customer.id)
     .order('created_at', { ascending: false });
     
@@ -51,9 +51,9 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
   if (activeApp) {
     const [{ data: docs }, { data: pays }] = await Promise.all([
       // GÜVENLİK: Sadece evrak tipi, durumu ve notu
-      supabase.from('documents').select('id, document_type, status, notes').eq('application_id', activeApp.id).order('created_at', { ascending: true }),
-      // GÜVENLİK: Sadece miktar, ödeme yöntemi ve tarih. Başka hiçbir finansal kalem/konsolosluk harcı vs gösterilmez.
-      supabase.from('payments').select('amount, status, created_at, payment_method').eq('application_id', activeApp.id).order('created_at', { ascending: false })
+      supabase.from('documents').select('id, document_type, status').eq('application_id', activeApp.id).order('created_at', { ascending: true }),
+      // GÜVENLİK: Sadece miktar ve tarih. Başka hiçbir finansal kalem/konsolosluk harcı vs gösterilmez.
+      supabase.from('payments').select('amount, status, created_at').eq('application_id', activeApp.id).order('created_at', { ascending: false })
     ]);
     documents = docs;
     payments = pays;
