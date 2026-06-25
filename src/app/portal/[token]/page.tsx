@@ -1,0 +1,369 @@
+import { supabase } from "@/lib/supabase";
+import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
+import { Check, Clock, AlertCircle, Calendar, FileText, CreditCard, MapPin, Phone, MessageCircle, CheckCircle2, Globe } from "lucide-react";
+
+export const revalidate = 0;
+
+const STATUS_STEPS = [
+  { key: "profil_analizi",     label: "Profil Analizi",       short: "Profil" },
+  { key: "evrak_bekleniyor",   label: "Evrak Bekleniyor",     short: "Evrak" },
+  { key: "randevu_bekleniyor", label: "Randevu Bekleniyor",   short: "Randevu" },
+  { key: "randevu_alindi",     label: "Randevu Alındı",       short: "Randevu" },
+  { key: "evrak_hazirlaniyor", label: "Evrak Hazırlanıyor",   short: "Hazırlık" },
+  { key: "basvuru_yapildi",    label: "Başvuru Yapıldı",      short: "Başvuru" },
+];
+
+export default async function PortalPage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  
+  // Müşteriyi bul (Anon client ile)
+  const { data: customer } = await supabase
+    .from('customers')
+    .select('*')
+    .eq('portal_token', token)
+    .single();
+  
+  if (!customer) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#060d1a] p-6">
+        <div className="max-w-md w-full bg-white dark:bg-[#0d1420] p-8 rounded-3xl shadow-xl text-center border border-slate-200 dark:border-[#1f2937]">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-5 opacity-90" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Geçersiz Bağlantı</h1>
+          <p className="text-slate-500 text-sm">Bu portal bağlantısı geçersiz veya süresi dolmuş olabilir. Lütfen danışmanınızla iletişime geçin.</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Aktif başvuruyu çek
+  const { data: applications } = await supabase
+    .from('applications')
+    .select('*')
+    .eq('customer_id', customer.id)
+    .order('created_at', { ascending: false });
+    
+  const activeApp = applications?.[0];
+
+  let documents = null;
+  let payments = null;
+
+  if (activeApp) {
+    const [{ data: docs }, { data: pays }] = await Promise.all([
+      supabase.from('documents').select('*').eq('application_id', activeApp.id).order('created_at', { ascending: true }),
+      supabase.from('payments').select('amount, status, created_at, payment_method').eq('application_id', activeApp.id).order('created_at', { ascending: false })
+    ]);
+    documents = docs;
+    payments = pays;
+  }
+  
+  // Timeline calculations
+  const currentStatus = activeApp?.status || 'profil_analizi';
+  const isFinalState = ['onaylandi', 'reddedildi', 'itiraz', 'kapandi'].includes(currentStatus);
+  const currentIndex = STATUS_STEPS.findIndex(s => s.key === currentStatus);
+  const progress = isFinalState ? 100 : Math.max(0, Math.min(100, (currentIndex / (STATUS_STEPS.length - 1)) * 100));
+
+  // Document calculations
+  const totalDocs = documents?.length || 0;
+  const completedDocs = documents?.filter((d: any) => d.status === 'tamamlandi').length || 0;
+  const docProgress = totalDocs > 0 ? (completedDocs / totalDocs) * 100 : 0;
+
+  // Payment calculations
+  const totalFee = activeApp?.total_fee || 0;
+  const totalPaid = payments?.filter((p: any) => p.status === 'alindi').reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
+  const remainingFee = Math.max(0, totalFee - totalPaid);
+  const payProgress = totalFee > 0 ? (totalPaid / totalFee) * 100 : 0;
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-[#060d1a] font-sans pb-20 selection:bg-blue-500/30">
+      
+      {/* Header Area - Gradient Background */}
+      <div className="bg-gradient-to-b from-blue-600 to-blue-900 pt-10 pb-20 px-6 rounded-b-[40px] shadow-lg relative overflow-hidden">
+        {/* Dekoratif Çemberler */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl translate-x-1/4 translate-y-1/4 pointer-events-none" />
+
+        <div className="max-w-2xl mx-auto relative z-10">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 shadow-sm">
+                <Globe className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-xl font-bold text-white tracking-tight">Nobel Vize</h1>
+            </div>
+            <div className="px-3.5 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm">
+              <span className="text-white text-xs font-semibold tracking-wide">Müşteri Portalı</span>
+            </div>
+          </div>
+          
+          <div className="text-white">
+            <p className="text-blue-200 text-sm font-medium mb-1.5 opacity-90">Hoş Geldiniz,</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">{customer.first_name} {customer.last_name}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 -mt-10 space-y-6">
+        
+        {activeApp ? (
+          <>
+            {/* Status Card */}
+            <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-xl shadow-blue-900/5 border border-slate-100 dark:border-[#1f2937] relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    {activeApp.country} Vizesi
+                  </h3>
+                  <p className="text-sm font-medium text-slate-500 mt-1">{activeApp.visa_type ? VISA_TYPE_LABELS[activeApp.visa_type] || activeApp.visa_type : 'Turist'} Başvurusu</p>
+                </div>
+                
+                {/* Status Badge */}
+                {isFinalState ? (
+                  <div className={`px-5 py-2.5 rounded-2xl border ${
+                    currentStatus === 'onaylandi' ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400' :
+                    currentStatus === 'reddedildi' ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400' :
+                    currentStatus === 'itiraz' ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400' :
+                    'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                  }`}>
+                    <span className="font-bold text-sm capitalize">{currentStatus === 'onaylandi' ? '✓ Onaylandı' : currentStatus === 'reddedildi' ? '✗ Reddedildi' : currentStatus}</span>
+                  </div>
+                ) : (
+                  <div className="px-5 py-2.5 rounded-2xl border bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400">
+                    <span className="font-bold text-sm capitalize flex items-center gap-1.5"><Clock className="w-4 h-4" /> Devam Ediyor</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Timeline */}
+              <div className="relative pt-2 pb-4">
+                {/* Arka plan yolu */}
+                <div className="absolute top-[20px] left-[5%] right-[5%] h-1.5 bg-slate-100 dark:bg-[#1f2937] rounded-full z-0" />
+                {/* Aktif dolum yolu */}
+                <div
+                  className={`absolute top-[20px] left-[5%] h-1.5 rounded-full z-0 transition-all duration-1000 ${
+                    currentStatus === 'reddedildi' ? 'bg-red-500' :
+                    currentStatus === 'itiraz' ? 'bg-amber-500' :
+                    currentStatus === 'kapandi' ? 'bg-slate-500' :
+                    'bg-blue-500'
+                  }`}
+                  style={{ width: `${progress * 0.9}%` }}
+                />
+                
+                <div className="relative z-10 flex justify-between px-[2%]">
+                  {STATUS_STEPS.map((step, i) => {
+                    const isDone = isFinalState || currentIndex > i;
+                    const isCurrent = !isFinalState && currentIndex === i;
+                    
+                    return (
+                      <div key={step.key} className="flex flex-col items-center gap-2.5 w-14">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-500 border-[3px] bg-white dark:bg-[#0d1420] ${
+                          isDone ? "border-blue-500" :
+                          isCurrent ? "border-blue-500 shadow-[0_0_0_4px_rgba(59,130,246,0.15)]" :
+                          "border-slate-200 dark:border-[#2d3f55]"
+                        }`}>
+                          {isDone ? (
+                            <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
+                              <Check className="w-4 h-4 text-white" />
+                            </div>
+                          ) : isCurrent ? (
+                            <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                          ) : (
+                            <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-[#2d3f55]" />
+                          )}
+                        </div>
+                        <p className={`text-[10px] sm:text-xs font-semibold text-center leading-tight ${
+                          isCurrent ? "text-blue-600 dark:text-blue-400" : 
+                          isDone ? "text-slate-800 dark:text-slate-200" : "text-slate-400"
+                        }`}>{step.short}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Evrak Listesi */}
+            <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  Evrak Listesi
+                </h2>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-full whitespace-nowrap border border-slate-200 dark:border-slate-700">
+                  <span className="text-blue-600 dark:text-blue-400">{completedDocs}</span> / {totalDocs} Tamamlandı
+                </span>
+              </div>
+              
+              {totalDocs > 0 && (
+                <div className="w-full h-2.5 bg-slate-100 dark:bg-[#1f2937] rounded-full overflow-hidden mb-8">
+                  <div className="h-full bg-blue-500 rounded-full transition-all duration-1000 relative overflow-hidden" style={{ width: `${docProgress}%` }}>
+                    <div className="absolute top-0 bottom-0 left-0 right-0 bg-white/20 w-full animate-pulse" />
+                  </div>
+                </div>
+              )}
+
+              {(!documents || documents.length === 0) ? (
+                <div className="text-center py-8 bg-slate-50 dark:bg-[#1a2232] rounded-2xl border border-dashed border-slate-200 dark:border-[#2d3f55]">
+                  <FileText className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-500 font-medium text-sm">Evrak listeniz danışmanınız tarafından hazırlanıyor.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {documents.map((doc: any) => (
+                    <div key={doc.id} className={`flex items-start justify-between p-4 rounded-2xl border transition-all hover:shadow-sm ${
+                      doc.status === 'tamamlandi' 
+                        ? 'bg-white dark:bg-[#0d1420] border-slate-100 dark:border-[#1f2937] opacity-75 hover:opacity-100' 
+                        : 'bg-amber-50/50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20 shadow-[0_2px_10px_-4px_rgba(245,158,11,0.1)]'
+                    }`}>
+                      <div className="flex-1 pr-4">
+                        <p className={`font-bold text-sm ${doc.status === 'tamamlandi' ? 'text-slate-700 dark:text-slate-300' : 'text-amber-900 dark:text-amber-400'}`}>
+                          {doc.document_type}
+                        </p>
+                        {doc.notes && <p className={`text-xs mt-1 font-medium ${doc.status === 'tamamlandi' ? 'text-slate-400' : 'text-amber-700/70 dark:text-amber-400/70'}`}>{doc.notes}</p>}
+                      </div>
+                      <div className="shrink-0 mt-0.5">
+                        {doc.status === 'tamamlandi' ? (
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500">
+                            <Check className="w-5 h-5" />
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 bg-white dark:bg-[#0d1420] shadow-sm border border-amber-200 dark:border-amber-500/20 px-3 py-1.5 rounded-xl text-xs font-bold">
+                            <Clock className="w-4 h-4" /> Bekliyor
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Randevu Bilgisi */}
+              <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937] h-full">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  Randevu
+                </h2>
+                {activeApp.appointment_date ? (
+                  <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-6 rounded-3xl text-white shadow-xl shadow-purple-500/20 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl translate-x-1/3 -translate-y-1/3" />
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-purple-100 text-xs font-semibold uppercase tracking-wider">Tarih</p>
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col items-center justify-center shadow-inner">
+                          <span className="text-base font-extrabold leading-none">{new Date(activeApp.appointment_date).getDate()}</span>
+                          <span className="text-[10px] uppercase font-bold tracking-wide">{new Date(activeApp.appointment_date).toLocaleString('tr-TR', { month: 'short' })}</span>
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-black mb-1">{new Date(activeApp.appointment_date).toLocaleString('tr-TR', { dateStyle: 'full', timeStyle: 'short' })}</h3>
+                      <div className="flex items-start gap-2 text-purple-50 text-sm mt-4 pt-4 border-t border-white/20 font-medium">
+                        <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+                        <span className="leading-snug">{activeApp.appointment_location || 'Lokasyon belirtilmedi'}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-10 bg-slate-50 dark:bg-[#1a2232] rounded-3xl border border-dashed border-slate-200 dark:border-[#2d3f55] h-[calc(100%-60px)] flex flex-col items-center justify-center">
+                    <Calendar className="w-8 h-8 text-slate-300 dark:text-slate-600 mb-3" />
+                    <p className="text-slate-500 font-medium text-sm">Randevunuz henüz alınmadı.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Ödeme Durumu */}
+              <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937] h-full">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+                    <CreditCard className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  Ödeme
+                </h2>
+                
+                {totalFee > 0 ? (
+                  <div className="flex flex-col h-[calc(100%-60px)]">
+                    <div className="flex justify-between items-end mb-3">
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Toplam</p>
+                        <p className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">₺{totalFee.toLocaleString('tr-TR')}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kalan</p>
+                        <p className="text-lg font-bold text-amber-500 mt-0.5">₺{remainingFee.toLocaleString('tr-TR')}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="w-full h-2.5 bg-slate-100 dark:bg-[#1f2937] rounded-full overflow-hidden mb-6">
+                      <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 relative" style={{ width: `${payProgress}%` }}>
+                        <div className="absolute inset-0 bg-white/20 w-full" />
+                      </div>
+                    </div>
+                    
+                    {payments && payments.length > 0 && (
+                      <div className="mt-auto">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Son İşlemler</p>
+                        <div className="space-y-2.5">
+                          {payments.filter((p: any) => p.status === 'alindi').slice(0, 3).map((p: any, i: number) => (
+                            <div key={i} className="flex justify-between items-center py-2.5 px-3 bg-slate-50 dark:bg-[#1a2232] rounded-xl border border-slate-100 dark:border-[#2d3f55]">
+                              <div className="flex items-center gap-3">
+                                <div className="w-7 h-7 rounded-full bg-white dark:bg-[#0d1420] flex items-center justify-center shadow-sm">
+                                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                                </div>
+                                <div>
+                                  <p className="text-xs font-bold text-slate-900 dark:text-white">{p.payment_method || 'Nakit/Transfer'}</p>
+                                  <p className="text-[10px] font-medium text-slate-500">{new Date(p.created_at).toLocaleDateString('tr-TR')}</p>
+                                </div>
+                              </div>
+                              <span className="font-bold text-sm text-emerald-600 dark:text-emerald-400">₺{Number(p.amount).toLocaleString('tr-TR')}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-10 bg-slate-50 dark:bg-[#1a2232] rounded-3xl border border-dashed border-slate-200 dark:border-[#2d3f55] h-[calc(100%-60px)] flex flex-col items-center justify-center">
+                    <CreditCard className="w-8 h-8 text-slate-300 dark:text-slate-600 mb-3" />
+                    <p className="text-slate-500 font-medium text-sm">Ödeme kaydı bulunmuyor.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </>
+        ) : (
+          <div className="bg-white dark:bg-[#0d1420] p-12 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937] text-center">
+            <div className="w-20 h-20 bg-slate-50 dark:bg-[#1a2232] rounded-full flex items-center justify-center mx-auto mb-5 border border-slate-100 dark:border-[#2d3f55]">
+              <FileText className="w-8 h-8 text-slate-400" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Başvuru Bulunamadı</h2>
+            <p className="text-slate-500 max-w-md mx-auto leading-relaxed">Henüz adınıza oluşturulmuş aktif bir vize başvurusu bulunmamaktadır. İşlemlerinizin başlatılması için danışmanınız ile iletişime geçebilirsiniz.</p>
+          </div>
+        )}
+
+        {/* Footer / İletişim */}
+        <div className="bg-slate-900 dark:bg-[#0a101a] p-8 md:p-10 rounded-[32px] text-white text-center mt-12 shadow-2xl relative overflow-hidden border border-slate-800">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+          <div className="relative z-10">
+            <Globe className="w-10 h-10 text-blue-400 mx-auto mb-5 opacity-75" />
+            <h3 className="text-xl font-bold mb-3 tracking-tight">Sorularınız için buradayız</h3>
+            <p className="text-slate-400 text-sm font-medium mb-8 max-w-sm mx-auto leading-relaxed">Vize sürecinizle ilgili aklınıza takılan her şey için bize doğrudan ulaşabilirsiniz.</p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+              <a href="tel:+908500000000" className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all text-sm font-bold w-full backdrop-blur-md">
+                <Phone className="w-4 h-4 text-blue-400" /> Bizi Arayın
+              </a>
+              <a href="https://wa.me/908500000000" target="_blank" className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/20 text-[#25D366] rounded-2xl transition-all text-sm font-bold w-full backdrop-blur-md">
+                <MessageCircle className="w-4 h-4" /> WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
