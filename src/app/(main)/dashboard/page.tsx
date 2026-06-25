@@ -22,20 +22,20 @@ export default async function Dashboard() {
 
   // Build query filters based on role
   const customerQuery = supabase.from('customers').select('*', { count: 'exact', head: true });
-  const appQuery = supabase.from('applications').select('status, country, total_fee, created_at, customers(id, first_name, last_name)');
+  const appQuery = supabase.from('applications').select('status, country, total_fee, created_at, customer_id, customers!inner(id, first_name, last_name)');
   const recentCustomerQuery = supabase.from('customers').select('id, first_name, last_name, created_at, assigned_staff_id');
-  const todayAppsQuery = supabase.from('applications').select('id, country, status').gte('created_at', new Date().toISOString().split('T')[0]);
-  const monthlyAppsQuery = supabase.from('applications').select('total_fee');
-  const appointmentsQuery = supabase.from('applications').select('id, appointment_date, appointment_location, customers(id, first_name, last_name)').not('appointment_date', 'is', null).gte('appointment_date', new Date().toISOString()).order('appointment_date', { ascending: true }).limit(4);
+  const todayAppsQuery = supabase.from('applications').select('id, country, status, customer_id, customers!inner(id)').gte('created_at', new Date().toISOString().split('T')[0]);
+  const monthlyAppsQuery = supabase.from('applications').select('total_fee, customer_id, customers!inner(id)');
+  const appointmentsQuery = supabase.from('applications').select('id, appointment_date, appointment_location, customer_id, customers!inner(id, first_name, last_name)').not('appointment_date', 'is', null).gte('appointment_date', new Date().toISOString()).order('appointment_date', { ascending: true }).limit(4);
 
-  // Danışman: filter by assigned_staff_id
+  // Danışman: filter by assigned_staff_id on the customers table
   if (!isAdmin && staffId) {
     customerQuery.eq('assigned_staff_id', staffId);
     recentCustomerQuery.eq('assigned_staff_id', staffId);
-    appQuery.eq('assigned_staff_id', staffId);
-    todayAppsQuery.eq('assigned_staff_id', staffId);
-    monthlyAppsQuery.eq('assigned_staff_id', staffId);
-    appointmentsQuery.eq('assigned_staff_id', staffId);
+    appQuery.eq('customers.assigned_staff_id', staffId);
+    todayAppsQuery.eq('customers.assigned_staff_id', staffId);
+    monthlyAppsQuery.eq('customers.assigned_staff_id', staffId);
+    appointmentsQuery.eq('customers.assigned_staff_id', staffId);
   }
 
   const [
@@ -55,23 +55,20 @@ export default async function Dashboard() {
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
   
-  if (!isAdmin && staffId) {
-    monthlyAppsQuery.gte('created_at', startOfMonth.toISOString());
-  } else {
-    monthlyAppsQuery.gte('created_at', startOfMonth.toISOString());
-  }
+  monthlyAppsQuery.gte('created_at', startOfMonth.toISOString());
 
   const { data: monthlyApps } = await monthlyAppsQuery;
   const expectedMonthlyRevenue = monthlyApps?.reduce((sum, app) => sum + Number(app.total_fee || 0), 0) || 0;
 
   const { data: upcomingAppointments } = await appointmentsQuery;
 
-  // Documents and payments: fetch application IDs first if not admin
+  // Documents and payments
   let allDocs: any[] | null = [];
   let allPayments: any[] | null = [];
   
   if (!isAdmin && staffId) {
-    const { data: staffApps } = await supabase.from('applications').select('id').eq('assigned_staff_id', staffId);
+    // Danışmanın müşterilerinin başvuru ID'lerini bulalım
+    const { data: staffApps } = await supabase.from('applications').select('id, customers!inner(id)').eq('customers.assigned_staff_id', staffId);
     const appIds = staffApps?.map(a => a.id) || [];
     if (appIds.length > 0) {
       const [{ data: d }, { data: p }] = await Promise.all([

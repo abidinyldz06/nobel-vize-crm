@@ -36,7 +36,28 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
   const [activeTab, setActiveTab] = useState<string>("turistik");
   
   // Local state for the actively edited requirement
-  const [activeReq, setActiveReq] = useState<VisaRequirement | null>(null);
+  // Initialize with the first country's requirement if available
+  const [activeReq, setActiveReq] = useState<VisaRequirement | null>(() => {
+    if (!initialCountries[0]) return null;
+    const req = initialCountries[0].requirements.find(r => r.visa_type === "turistik");
+    if (req) {
+      let docs = req.documents;
+      if (typeof docs === 'string') {
+        try { docs = JSON.parse(docs); } catch (e) { docs = []; }
+      }
+      return { ...req, documents: Array.isArray(docs) ? docs : [] };
+    }
+    return {
+      country_id: initialCountries[0].id,
+      visa_type: "turistik",
+      documents: [],
+      processing_time: "",
+      validity: "",
+      max_stay: "",
+      multiple_entry: true,
+      notes: ""
+    };
+  });
   
   const [saving, setSaving] = useState(false);
   const [savingCountry, setSavingCountry] = useState(false);
@@ -59,7 +80,12 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
   const loadRequirement = (country: Country, type: string) => {
     const existing = country.requirements.find(r => r.visa_type === type);
     if (existing) {
-      setActiveReq(JSON.parse(JSON.stringify(existing))); // Deep copy
+      const parsed = JSON.parse(JSON.stringify(existing));
+      if (typeof parsed.documents === 'string') {
+        try { parsed.documents = JSON.parse(parsed.documents); } catch(e) { parsed.documents = []; }
+      }
+      if (!Array.isArray(parsed.documents)) parsed.documents = [];
+      setActiveReq(parsed);
     } else {
       setActiveReq({
         country_id: country.id,

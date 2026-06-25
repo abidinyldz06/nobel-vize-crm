@@ -28,13 +28,13 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   const totalCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true });
   const monthlyCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true }).gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString());
-  const allAppsQuery = supabase.from('applications').select('id, customer_id, country, status, total_fee, created_at').gte('created_at', trendStartDate.toISOString());
+  const allAppsQuery = supabase.from('applications').select('id, customer_id, country, status, total_fee, created_at, customers!inner(id)').gte('created_at', trendStartDate.toISOString());
   const allCustomersQuery = supabase.from('customers').select('id, assigned_staff_id');
 
   if (!isAdmin && staffId) {
     totalCustomersQuery.eq('assigned_staff_id', staffId);
     monthlyCustomersQuery.eq('assigned_staff_id', staffId);
-    allAppsQuery.eq('assigned_staff_id', staffId);
+    allAppsQuery.eq('customers.assigned_staff_id', staffId);
     allCustomersQuery.eq('assigned_staff_id', staffId);
   }
 
