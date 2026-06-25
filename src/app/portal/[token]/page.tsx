@@ -375,12 +375,4 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
       </div>
     </div>
   );
-}             </a>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
 }

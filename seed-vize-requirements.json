@@ -1,0 +1,762 @@
+{
+  "countries": [
+    {
+      "country": "Fransa",
+      "visa_system": "Schengen (VFS)",
+      "appointment_system": "VFS",
+      "base_fee_visa": 90,
+      "base_fee_service": 2500,
+      "requirements": [
+        {
+          "visa_type": "turistik",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "Seyahat sonrası 3+ ay geçerli, 10 yıldan eski olmayan, 2 boş sayfa"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "2 adet, 35x45mm, son 6 ay, beyaz fon"},
+            {"name": "France-Visas Başvuru Formu", "required": true, "category": "temel", "description": "Online doldurulmuş, imzalı, FR referans no"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "Schengen geneli, 30.000€+ teminatlı"},
+            {"name": "Otel Rezervasyonu", "required": true, "category": "seyahat", "description": "Tüm geceler için, iptal edilebilir olur"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş, gerçek bilet ZORUNLU DEĞİL"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 6 AY (3 değil!), kaşeli, imzalı. Günlük min 65€"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf fotokopi"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel, adrese göre konsolosluk bölgesi"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel, barkodlu (çalışanlar için)"},
+            {"name": "İşveren İzin Yazısı", "required": true, "category": "mesleki", "description": "Tarihli, kaşeli, imzalı, maaş bilgili"},
+            {"name": "Maaş Bordrosu", "required": true, "category": "finansal", "description": "Son 6 ay (çalışanlar için)"},
+            {"name": "Tapu/Ruhsat", "required": false, "category": "varlik", "description": "Varsa mal varlığı desteği"},
+            {"name": "Eski Pasaportlar", "required": false, "category": "temel", "description": "Varsa tüm eski pasaportlar"}
+          ],
+          "processing_time": "7-10 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "aile_ziyareti",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "Seyahat sonrası 3+ ay geçerli, 2 boş sayfa"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "2 adet, 35x45mm, son 6 ay, beyaz fon"},
+            {"name": "France-Visas Başvuru Formu", "required": true, "category": "temel", "description": "Online doldurulmuş, imzalı"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+ teminatlı"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 6 ay, kaşeli"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel"},
+            {"name": "Attestation d'accueil", "required": true, "category": "davet", "description": "Fransa belediye onaylı davetiye — ZORUNLU"},
+            {"name": "Davet Edenin Kimlik/Oturum Belgesi", "required": true, "category": "davet", "description": "Fransa kimlik veya oturum izni kopyası"},
+            {"name": "Davet Edenin Maaş Bordrosu", "required": true, "category": "davet", "description": "Son 3 ay payslip"},
+            {"name": "Davet Edenin Kira Sözleşmesi/Tapu", "required": true, "category": "davet", "description": "Kontrat de location veya tapu"},
+            {"name": "Akrabalık Belgesi", "required": false, "category": "kimlik", "description": "Evlilik/akrabalık belgesi (varsa)"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "is",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli, 2 boş sayfa"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm, son 6 ay"},
+            {"name": "France-Visas Başvuru Formu", "required": true, "category": "temel", "description": "Online, imzalı"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+ teminatlı"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Otel Rezervasyonu", "required": true, "category": "seyahat", "description": "Konaklama kanıtı"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 6 ay"},
+            {"name": "Fransa'daki Şirketten Davetiye", "required": true, "category": "davet", "description": "Resmi davet mektubu"},
+            {"name": "Ticari İlişki Kanıtı", "required": true, "category": "mesleki", "description": "Fatura, sözleşme, yazışma"},
+            {"name": "İşyeri İzin Belgesi", "required": true, "category": "mesleki", "description": "Türkiye'deki şirketten"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel, barkodlu"},
+            {"name": "Şirket Ticari Sicil Gazetesi", "required": true, "category": "mesleki", "description": "Şirket sahipleri için"},
+            {"name": "Vergi Levhası", "required": true, "category": "mesleki", "description": "Şirket sahipleri için"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "ogrenci",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli, 2 boş sayfa"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "France-Visas Başvuru Formu", "required": true, "category": "temel", "description": "Online, imzalı"},
+            {"name": "Kabul Mektubu", "required": true, "category": "egitim", "description": "Okuldan kabul mektubu (lettre d'acceptation)"},
+            {"name": "Öğrenci Belgesi", "required": true, "category": "egitim", "description": "Güncel, onaylı"},
+            {"name": "Sponsor Mektubu", "required": true, "category": "egitim", "description": "Veli sponsor mektubu + noter onaylı"},
+            {"name": "Sponsorun Mali Belgeleri", "required": true, "category": "finansal", "description": "Banka dökümü, SGK, maaş bordrosu"},
+            {"name": "Burs Belgesi", "required": false, "category": "egitim", "description": "Varsa burs kanıtı"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Eğitim ödemesi kanıtı"},
+            {"name": "Konaklama Belgesi", "required": true, "category": "seyahat", "description": "Yurt/kira sözleşmesi"},
+            {"name": "Veli Muvafakatnamesi", "required": false, "category": "egitim", "description": "18 yaş altı, noter onaylı, apostil+tercüme"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel"}
+          ],
+          "processing_time": "15-30 iş günü (D Tipi)",
+          "validity": "90+ gün",
+          "max_stay": "Eğitim süresi",
+          "multiple_entry": true
+        }
+      ]
+    },
+    {
+      "country": "Almanya",
+      "visa_system": "Schengen (iDATA)",
+      "appointment_system": "iDATA",
+      "base_fee_visa": 90,
+      "base_fee_service": 2500,
+      "requirements": [
+        {
+          "visa_type": "turistik",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "10 yıldan eski olmayan, 2+ boş sayfa, seyahat sonrası 3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "2 adet, 3.5x4.5cm, son 3 ay. ⚠️ Almanya boyutu farklı!"},
+            {"name": "iDATA Başvuru Formu", "required": true, "category": "temel", "description": "Eksiksiz, ISLAK İMALI zorunlu. Dijital imza kabul edilmez!"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "Schengen geneli, 30.000€+ teminatlı"},
+            {"name": "Otel Rezervasyonu", "required": true, "category": "seyahat", "description": "Konaklama kanıtı"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay, kaşeli, imzalı. 7 gün için 3.000-4.000€ önerilir"},
+            {"name": "Tam Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Barkodlu — Almanya'ya özel ZORUNLU!"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah Belgesi", "required": true, "category": "kimlik", "description": "Güncel"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel, barkodlu (çalışanlar)"},
+            {"name": "İşyerinden İzin Belgesi", "required": true, "category": "mesleki", "description": "Tarihli, kaşeli, imzalı, Almanca/İngilizce"},
+            {"name": "Maaş Bordrosu", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Tapu/Ruhsat", "required": false, "category": "varlik", "description": "Varsa mal varlığı desteği"},
+            {"name": "Eski Pasaportlar", "required": false, "category": "temel", "description": "Varsa"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "aile_ziyareti",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli, 2 boş sayfa"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "3.5x4.5cm, son 3 ay"},
+            {"name": "iDATA Başvuru Formu", "required": true, "category": "temel", "description": "Islak imzalı"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+ teminatlı"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Tam Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Barkodlu — ZORUNLU"},
+            {"name": "Verpflichtungserklärung", "required": true, "category": "davet", "description": "Almanya belediye onaylı mali sorumluluk beyanı — ZORUNLU"},
+            {"name": "Davet Edenin Kimlik/Aufenthaltstitel", "required": true, "category": "davet", "description": "Fotokopi"},
+            {"name": "Davet Edenin Maaş Bordrosu", "required": true, "category": "davet", "description": "Son 3 ay Gehaltsabrechnung"},
+            {"name": "Davet Edenin Kira Sözleşmesi/Tapu", "required": true, "category": "davet", "description": "Wohnungsgeberbestätigung"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "is",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "3.5x4.5cm"},
+            {"name": "iDATA Başvuru Formu", "required": true, "category": "temel", "description": "Islak imzalı"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Tam Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Barkodlu"},
+            {"name": "Almanya'daki Şirketten Davetiye", "required": true, "category": "davet", "description": "Einladungsschreiben"},
+            {"name": "Handelsregister Kaydı", "required": true, "category": "mesleki", "description": "Ticaret odası kaydı"},
+            {"name": "Ticari İlişki Kanıtı", "required": true, "category": "mesleki", "description": "Fatura, sözleşme, yazışma"},
+            {"name": "İşyeri İzin Belgesi", "required": true, "category": "mesleki", "description": "Türkiye'deki şirketten"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "Şirket Ticari Sicil Gazetesi", "required": true, "category": "mesleki", "description": "Şirket sahipleri için"},
+            {"name": "Vergi Levhası", "required": true, "category": "mesleki", "description": "Şirket sahipleri için"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "ogrenci",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "3.5x4.5cm"},
+            {"name": "iDATA Başvuru Formu", "required": true, "category": "temel", "description": "Islak imzalı"},
+            {"name": "Kabul Mektubu", "required": true, "category": "egitim", "description": "Okuldan kabul mektubu (Zulassungsbescheid)"},
+            {"name": "Öğrenci Belgesi", "required": true, "category": "egitim", "description": "Güncel, onaylı"},
+            {"name": "Sponsor Mektubu", "required": true, "category": "egitim", "description": "Veli sponsor, noter onaylı, apostil+tercüme"},
+            {"name": "Sponsorun Mali Belgeleri", "required": true, "category": "finansal", "description": "Banka, SGK, maaş bordrosu"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Eğitim ödemesi kanıtı (Sperrkonto varsa)"},
+            {"name": "Konaklama Belgesi", "required": true, "category": "seyahat", "description": "Yurt/kira sözleşmesi"},
+            {"name": "Veli Muvafakatnamesi", "required": false, "category": "egitim", "description": "18 yaş altı, noter onaylı"},
+            {"name": "Tam Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Barkodlu"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"}
+          ],
+          "processing_time": "4-12 hafta (D Tipi)",
+          "validity": "90+ gün",
+          "max_stay": "Eğitim süresi",
+          "multiple_entry": true
+        }
+      ]
+    },
+    {
+      "country": "İngiltere",
+      "visa_system": "UK Online",
+      "appointment_system": "VFS",
+      "base_fee_visa": 115,
+      "base_fee_service": 3000,
+      "requirements": [
+        {
+          "visa_type": "turistik",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "Seyahat sonrası 6+ ay geçerli (İngiltere'ye özel!)"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "45x35mm, son 6 ay, beyaz fon"},
+            {"name": "Online Başvuru Formu", "required": true, "category": "temel", "description": "gov.uk üzerinden doldurulmuş, print alınmış"},
+            {"name": "Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Tam vukuatlı"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 6 ay, İngilizce veya tercüme"},
+            {"name": "İşveren Yazısı (İngilizce)", "required": true, "category": "mesleki", "description": "Şirket antetli, İngilizce, maaş bilgili"},
+            {"name": "Maaş Bordrosu", "required": true, "category": "finansal", "description": "Son 6 ay, İngilizce tercüme"},
+            {"name": "Otel Rezervasyonu", "required": true, "category": "seyahat", "description": "Tüm günler"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "Tapu/Ruhsat", "required": false, "category": "varlik", "description": "Varsa"},
+            {"name": "Eski Pasaportlar", "required": false, "category": "temel", "description": "Varsa"},
+            {"name": "TB Test Sertifikası", "required": false, "category": "tibbi", "description": "6 aydan uzun kalacaklar için"}
+          ],
+          "processing_time": "15-20 iş günü",
+          "validity": "6 ay (çok girişli)",
+          "max_stay": "180 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "aile_ziyareti",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "6+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "45x35mm"},
+            {"name": "Online Başvuru Formu", "required": true, "category": "temel", "description": "gov.uk"},
+            {"name": "Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Tam vukuatlı"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 6 ay"},
+            {"name": "Davet Mektubu", "required": true, "category": "davet", "description": "İngiltere'deki akrabadan, İngilizce"},
+            {"name": "Davet Edenin Pasaport/Vize Kopyası", "required": true, "category": "davet", "description": "Kimlik kanıtı"},
+            {"name": "Davet Edenin Banka/Maaş Belgesi", "required": false, "category": "davet", "description": "Varsa"},
+            {"name": "Davet Edenin Konaklama Kanıtı", "required": true, "category": "davet", "description": "Kira/tapu/ev adresi"},
+            {"name": "Akrabalık Kanıtı", "required": true, "category": "kimlik", "description": "Evlilik/doğum belgesi, tercüme"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "İşveren Yazısı (İngilizce)", "required": true, "category": "mesleki", "description": "İzin belgesi"}
+          ],
+          "processing_time": "15-20 iş günü",
+          "validity": "6 ay - 2 yıl",
+          "max_stay": "180 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "is",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "6+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "45x35mm"},
+            {"name": "Online Başvuru Formu", "required": true, "category": "temel", "description": "gov.uk"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 6 ay"},
+            {"name": "İngiltere'deki Şirketten Davet Mektubu", "required": true, "category": "davet", "description": "Resmi, antetli, İngilizce"},
+            {"name": "Ticari İlişki Kanıtı", "required": true, "category": "mesleki", "description": "Fatura, sözleşme"},
+            {"name": "İşveren Yazısı (İngilizce)", "required": true, "category": "mesleki", "description": "Türkiye'deki şirketten"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "Şirket Ticari Sicil", "required": true, "category": "mesleki", "description": "Şirket sahipleri için"},
+            {"name": "Vergi Levhası", "required": true, "category": "mesleki", "description": "Şirket sahipleri için"},
+            {"name": "Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Tam vukuatlı"}
+          ],
+          "processing_time": "15-20 iş günü",
+          "validity": "6 ay - 2 yıl",
+          "max_stay": "180 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "ogrenci",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "6+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "45x35mm"},
+            {"name": "Online Başvuru Formu", "required": true, "category": "temel", "description": "gov.uk, Tier 4"},
+            {"name": "CAS (Confirmation of Acceptance)", "required": true, "category": "egitim", "description": "Okuldan CAS numarası — ZORUNLU"},
+            {"name": "Kabul Mektubu", "required": true, "category": "egitim", "description": "Okuldan"},
+            {"name": "İngilizce Yeterlilik (IELTS/TOEFL)", "required": true, "category": "egitim", "description": "Sınav sonucu"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "28 gün+ bakiye, eğitim + yaşam masrafı"},
+            {"name": "Sponsor Mektubu", "required": false, "category": "egitim", "description": "Veli sponsorluğu"},
+            {"name": "TB Test Sertifikası", "required": true, "category": "tibbi", "description": "6 aydan uzun kalacaklar için — ZORUNLU"},
+            {"name": "Veli Muvafakatnamesi", "required": false, "category": "egitim", "description": "18 yaş altı"},
+            {"name": "Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Tam vukuatlı"}
+          ],
+          "processing_time": "15-30 iş günü",
+          "validity": "Eğitim süresi + 4 ay",
+          "max_stay": "Eğitim süresi",
+          "multiple_entry": true
+        }
+      ]
+    },
+    {
+      "country": "ABD",
+      "visa_system": "US DS-160",
+      "appointment_system": "Konsolosluk",
+      "base_fee_visa": 185,
+      "base_fee_service": 3500,
+      "requirements": [
+        {
+          "visa_type": "turistik",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "Seyahat sonrası 6+ ay geçerli (B1/B2 için)"},
+            {"name": "DS-160 Formu", "required": true, "category": "temel", "description": "Online doldurulmuş, confirmation sayfası print"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "5x5cm (2x2 inch), son 6 ay, beyaz fon — boyut farklı!"},
+            {"name": "MRV Ödeme Dekontu", "required": true, "category": "finansal", "description": "Vize harcı ödeme makbuzu ($185)"},
+            {"name": "Randevu Onay Sayfası", "required": true, "category": "temel", "description": "Görüşme randevusu print"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 6 ay, tercüme gerekmez"},
+            {"name": "İşveren Yazısı", "required": true, "category": "mesleki", "description": "Şirket antetli, İngilizce, maaş bilgili"},
+            {"name": "Maaş Bordrosu", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "Tapu/Ruhsat", "required": false, "category": "varlik", "description": "Varsa mal varlığı"},
+            {"name": "Eski Pasaportlar/Vizeler", "required": false, "category": "temel", "description": "Varsa, önceden ABD/Schengen vizesi"}
+          ],
+          "processing_time": "Görüşme sonrası 3-5 iş günü",
+          "validity": "10 yıl (B1/B2)",
+          "max_stay": "180 gün (giriş başına)",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "is",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "6+ ay geçerli"},
+            {"name": "DS-160 Formu", "required": true, "category": "temel", "description": "B1 kategorisi"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "5x5cm"},
+            {"name": "MRV Ödeme Dekontu", "required": true, "category": "finansal", "description": "$185"},
+            {"name": "ABD'deki Şirketten Davet Mektubu", "required": true, "category": "davet", "description": "Resmi, antetli, İngilizce"},
+            {"name": "Ticari İlişki Kanıtı", "required": true, "category": "mesleki", "description": "Fatura, sözleşme, email"},
+            {"name": "İşveren Yazısı", "required": true, "category": "mesleki", "description": "Türkiye'deki şirketten, İngilizce"},
+            {"name": "Şirket Ticari Sicil", "required": true, "category": "mesleki", "description": "Şirket sahipleri için"},
+            {"name": "Vergi Levhası", "required": true, "category": "mesleki", "description": "Şirket sahipleri için"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 6 ay"}
+          ],
+          "processing_time": "Görüşme sonrası 3-5 iş günü",
+          "validity": "10 yıl (B1/B2)",
+          "max_stay": "180 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "ogrenci",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "6+ ay geçerli"},
+            {"name": "DS-160 Formu", "required": true, "category": "temel", "description": "F-1 kategorisi"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "5x5cm"},
+            {"name": "I-20 Formu", "required": true, "category": "egitim", "description": "Okuldan I-20 formu — ZORUNLU (F-1)"},
+            {"name": "SEVIS I-901 Ödeme Dekontu", "required": true, "category": "finansal", "description": "SEVIS fee ödemesi ($350)"},
+            {"name": "MRV Ödeme Dekontu", "required": true, "category": "finansal", "description": "$185"},
+            {"name": "Kabul Mektubu", "required": true, "category": "egitim", "description": "Okuldan"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Eğitim + yaşam masrafı kanıtı"},
+            {"name": "Sponsor Mektubu", "required": false, "category": "egitim", "description": "Veli sponsorluğu, İngilizce"},
+            {"name": "İngilizce Yeterlilik", "required": true, "category": "egitim", "description": "TOEFL/IELTS/Duolingo"},
+            {"name": "Akademik Transkript", "required": true, "category": "egitim", "description": "Diploma + transkript"},
+            {"name": "Eski Pasaportlar", "required": false, "category": "temel", "description": "Varsa"}
+          ],
+          "processing_time": "Görüşme sonrası 3-7 iş günü",
+          "validity": "Eğitim süresi (F-1)",
+          "max_stay": "Eğitim süresi + OPT",
+          "multiple_entry": true
+        }
+      ]
+    },
+    {
+      "country": "İtalya",
+      "visa_system": "Schengen (VFS/iDATA)",
+      "appointment_system": "VFS",
+      "base_fee_visa": 90,
+      "base_fee_service": 2500,
+      "requirements": [
+        {
+          "visa_type": "turistik",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli, 2 boş sayfa"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm, son 6 ay"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "İtalyanca veya İngilizce doldurulmuş"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+ teminatlı"},
+            {"name": "Otel Rezervasyonu", "required": true, "category": "seyahat", "description": "Tüm günler"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay, kaşeli"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "İşveren İzin Yazısı", "required": true, "category": "mesleki", "description": "Tarihli, kaşeli"},
+            {"name": "Maaş Bordrosu", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Tapu/Ruhsat", "required": false, "category": "varlik", "description": "Varsa"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "aile_ziyareti",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "İtalyanca/İngilizce"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Davet Mektubu", "required": true, "category": "davet", "description": "İtalya'daki akrabadan, İtalyanca"},
+            {"name": "Davet Edenin Kimlik Kartı", "required": true, "category": "davet", "description": "Carta d'identità kopyası"},
+            {"name": "Davet Edenin Konaklama Belgesi", "required": true, "category": "davet", "description": "Kira/tapu veya belediye onaylı"},
+            {"name": "Akrabalık Belgesi", "required": false, "category": "kimlik", "description": "Tercüme edilmiş, apostilli"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "is",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "İş amaçlı"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "İtalya'daki Şirketten Davet Mektubu", "required": true, "category": "davet", "description": "Resmi, İtalyanca/İngilizce"},
+            {"name": "Ticari İlişki Kanıtı", "required": true, "category": "mesleki", "description": "Fatura, sözleşme"},
+            {"name": "İşveren Yazısı", "required": true, "category": "mesleki", "description": "Türkiye'deki şirketten"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "Şirket Ticari Sicil", "required": true, "category": "mesleki", "description": "Şirket sahipleri"},
+            {"name": "Vergi Levhası", "required": true, "category": "mesleki", "description": "Şirket sahipleri"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "ogrenci",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "Öğrenci kategorisi"},
+            {"name": "Kabul Mektubu", "required": true, "category": "egitim", "description": "Okuldan"},
+            {"name": "Öğrenci Belgesi", "required": true, "category": "egitim", "description": "Güncel"},
+            {"name": "Sponsor Mektubu", "required": true, "category": "egitim", "description": "Veli, noter onaylı"},
+            {"name": "Sponsorun Mali Belgeleri", "required": true, "category": "finansal", "description": "Banka, SGK, bordro"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Eğitim ödemesi"},
+            {"name": "Konaklama Belgesi", "required": true, "category": "seyahat", "description": "Yurt/kira"},
+            {"name": "Veli Muvafakatnamesi", "required": false, "category": "egitim", "description": "18 yaş altı"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"}
+          ],
+          "processing_time": "15-30 iş günü (D Tipi)",
+          "validity": "90+ gün",
+          "max_stay": "Eğitim süresi",
+          "multiple_entry": true
+        }
+      ]
+    },
+    {
+      "country": "İspanya",
+      "visa_system": "Schengen (VFS)",
+      "appointment_system": "VFS",
+      "base_fee_visa": 90,
+      "base_fee_service": 2500,
+      "requirements": [
+        {
+          "visa_type": "turistik",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli, 2 boş sayfa"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm, son 6 ay"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "İspanyolca veya İngilizce"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+ teminatlı"},
+            {"name": "Otel Rezervasyonu", "required": true, "category": "seyahat", "description": "Tüm günler"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 6 ay, kaşeli"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "İşveren İzin Yazısı", "required": true, "category": "mesleki", "description": "Tarihli, kaşeli"},
+            {"name": "Maaş Bordrosu", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Tapu/Ruhsat", "required": false, "category": "varlik", "description": "Varsa"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "aile_ziyareti",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "Aile ziyareti"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Davet Mektubu (Carta de Invitación)", "required": true, "category": "davet", "description": "İspanya polis onaylı — ZORUNLU"},
+            {"name": "Davet Edenin Kimlik/NIE", "required": true, "category": "davet", "description": "NIE kartyası kopyası"},
+            {"name": "Davet Edenin Konaklama Belgesi", "required": true, "category": "davet", "description": "Kira/tapu"},
+            {"name": "Akrabalık Belgesi", "required": false, "category": "kimlik", "description": "Tercüme, apostil"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "is",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "İş amaçlı"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "İspanya'daki Şirketten Davet Mektubu", "required": true, "category": "davet", "description": "Resmi, İspanyolca/İngilizce"},
+            {"name": "Ticari İlişki Kanıtı", "required": true, "category": "mesleki", "description": "Fatura, sözleşme"},
+            {"name": "İşveren Yazısı", "required": true, "category": "mesleki", "description": "Türkiye'deki şirketten"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "Şirket Ticari Sicil", "required": true, "category": "mesleki", "description": "Şirket sahipleri"},
+            {"name": "Vergi Levhası", "required": true, "category": "mesleki", "description": "Şirket sahipleri"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "ogrenci",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "Öğrenci"},
+            {"name": "Kabul Mektubu", "required": true, "category": "egitim", "description": "Okuldan (Carta de aceptación)"},
+            {"name": "Öğrenci Belgesi", "required": true, "category": "egitim", "description": "Güncel"},
+            {"name": "Sponsor Mektubu", "required": true, "category": "egitim", "description": "Veli, noter onaylı"},
+            {"name": "Sponsorun Mali Belgeleri", "required": true, "category": "finansal", "description": "Banka, SGK, bordro"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Eğitim ödemesi"},
+            {"name": "Konaklama Belgesi", "required": true, "category": "seyahat", "description": "Yurt/kira"},
+            {"name": "Veli Muvafakatnamesi", "required": false, "category": "egitim", "description": "18 yaş altı"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"}
+          ],
+          "processing_time": "15-30 iş günü (D Tipi)",
+          "validity": "90+ gün",
+          "max_stay": "Eğitim süresi",
+          "multiple_entry": true
+        }
+      ]
+    },
+    {
+      "country": "Hollanda",
+      "visa_system": "Schengen (VFS)",
+      "appointment_system": "VFS",
+      "base_fee_visa": 90,
+      "base_fee_service": 2500,
+      "requirements": [
+        {
+          "visa_type": "turistik",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli, 2 boş sayfa"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm, son 6 ay"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "İngilizce/Hollandaca"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+ teminatlı"},
+            {"name": "Otel Rezervasyonu", "required": true, "category": "seyahat", "description": "Tüm günler"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay, kaşeli"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "İşveren İzin Yazısı", "required": true, "category": "mesleki", "description": "Tarihli, kaşeli, İngilizce"},
+            {"name": "Maaş Bordrosu", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Tapu/Ruhsat", "required": false, "category": "varlik", "description": "Varsa"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "aile_ziyareti",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "Aile ziyareti"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Davet Mektubu", "required": true, "category": "davet", "description": "Hollanda'daki akrabadan, İngilizce/Hollandaca"},
+            {"name": "Davet Edenin Kimlik/Oturum", "required": true, "category": "davet", "description": "Pasaport/ID kopyası"},
+            {"name": "Davet Edenin Konaklama Belgesi", "required": true, "category": "davet", "description": "Kira/tapu"},
+            {"name": "Akrabalık Belgesi", "required": false, "category": "kimlik", "description": "Tercüme, apostil"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "İkametgah", "required": true, "category": "kimlik", "description": "Güncel"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "is",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "İş amaçlı"},
+            {"name": "Seyahat Sağlık Sigortası", "required": true, "category": "sigorta", "description": "30.000€+"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": true, "category": "seyahat", "description": "Gidiş-dönüş"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 3 ay"},
+            {"name": "Hollanda'daki Şirketten Davet Mektubu", "required": true, "category": "davet", "description": "Resmi, İngilizce"},
+            {"name": "Ticari İlişki Kanıtı", "required": true, "category": "mesleki", "description": "Fatura, sözleşme"},
+            {"name": "İşveren Yazısı", "required": true, "category": "mesleki", "description": "Türkiye'deki şirketten"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "Şirket Ticari Sicil", "required": true, "category": "mesleki", "description": "Şirket sahipleri"},
+            {"name": "Vergi Levhası", "required": true, "category": "mesleki", "description": "Şirket sahipleri"}
+          ],
+          "processing_time": "10-15 iş günü",
+          "validity": "180 gün / 90 gün",
+          "max_stay": "90 gün",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "ogrenci",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "3+ ay geçerli"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Vize Başvuru Formu", "required": true, "category": "temel", "description": "Öğrenci (MVV)"},
+            {"name": "Kabul Mektubu", "required": true, "category": "egitim", "description": "Okuldan"},
+            {"name": "Öğrenci Belgesi", "required": true, "category": "egitim", "description": "Güncel"},
+            {"name": "Sponsor Mektubu", "required": true, "category": "egitim", "description": "Veli, noter onaylı"},
+            {"name": "Sponsorun Mali Belgeleri", "required": true, "category": "finansal", "description": "Banka, SGK, bordro"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Eğitim ödemesi"},
+            {"name": "Konaklama Belgesi", "required": true, "category": "seyahat", "description": "Yurt/kira"},
+            {"name": "Veli Muvafakatnamesi", "required": false, "category": "egitim", "description": "18 yaş altı"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"}
+          ],
+          "processing_time": "15-30 iş günü (MVV)",
+          "validity": "90+ gün",
+          "max_stay": "Eğitim süresi",
+          "multiple_entry": true
+        }
+      ]
+    },
+    {
+      "country": "Kanada",
+      "visa_system": "Canada Online",
+      "appointment_system": "VFS",
+      "base_fee_visa": 100,
+      "base_fee_service": 3000,
+      "requirements": [
+        {
+          "visa_type": "turistik",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "Seyahat sonrası 6+ ay geçerli"},
+            {"name": "Online Başvuru Formu", "required": true, "category": "temel", "description": "IRCC portal üzerinden"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm, son 6 ay"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "Son 4 ay, İngilizce/Fransızca tercüme"},
+            {"name": "İşveren Yazısı", "required": true, "category": "mesleki", "description": "İngilizce, şirket antetli"},
+            {"name": "Maaş Bordrosu", "required": true, "category": "finansal", "description": "Son 4 ay"},
+            {"name": "SGK Hizmet Dökümü", "required": true, "category": "mesleki", "description": "Güncel"},
+            {"name": "Uçak Bileti Rezervasyonu", "required": false, "category": "seyahat", "description": "Gidiş-dönüş (ödeme kanıtı)"},
+            {"name": "Otel Rezervasyonu", "required": false, "category": "seyahat", "description": "Konaklama"},
+            {"name": "Seyahat Geçmişi", "required": false, "category": "temel", "description": "Eski pasaportlar/vizeler"},
+            {"name": "Tapu/Ruhsat", "required": false, "category": "varlik", "description": "Varsa"},
+            {"name": "Nüfus Cüzdanı Fotokopisi", "required": true, "category": "kimlik", "description": "Çift taraf"},
+            {"name": "Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Tam vukuatlı, tercüme"},
+            {"name": "Biometrics Fee Dekontu", "required": true, "category": "finansal", "description": "Biyometrik ücreti ($85)"}
+          ],
+          "processing_time": "15-30 iş günü",
+          "validity": "10 yıl (veya pasaport bitişine kadar)",
+          "max_stay": "180 gün (giriş başına)",
+          "multiple_entry": true
+        },
+        {
+          "visa_type": "ogrenci",
+          "documents": [
+            {"name": "Pasaport", "required": true, "category": "temel", "description": "6+ ay geçerli"},
+            {"name": "Online Başvuru Formu", "required": true, "category": "temel", "description": "Study Permit"},
+            {"name": "Biyometrik Fotoğraf", "required": true, "category": "temel", "description": "35x45mm"},
+            {"name": "Kabul Mektubu (LOA)", "required": true, "category": "egitim", "description": "Letter of Acceptance — ZORUNLU"},
+            {"name": "CAQ Sertifikası", "required": false, "category": "egitim", "description": "Quebec için gerekli"},
+            {"name": "Banka Hesap Dökümü", "required": true, "category": "finansal", "description": "GIC/eğitim ödemesi kanıtı"},
+            {"name": "Sponsor Mektubu", "required": false, "category": "egitim", "description": "Veli sponsor"},
+            {"name": "İngilizce Yeterlilik", "required": true, "category": "egitim", "description": "IELTS/TOEFL"},
+            {"name": "Akademik Transkript", "required": true, "category": "egitim", "description": "Diploma + transkript, tercüme"},
+            {"name": "Veli Muvafakatnamesi", "required": false, "category": "egitim", "description": "18 yaş altı"},
+            {"name": "Biometrics Fee Dekontu", "required": true, "category": "finansal", "description": "$85"},
+            {"name": "Vukuatlı Nüfus Kayıt Örneği", "required": true, "category": "kimlik", "description": "Tercüme"}
+          ],
+          "processing_time": "4-8 hafta (Study Permit)",
+          "validity": "Eğitim süresi + 90 gün",
+          "max_stay": "Eğitim süresi",
+          "multiple_entry": true
+        }
+      ]
+    }
+  ],
+  "schengen_template": {
+    "note": "Diğer Schengen ülkeleri için Fransa/İtalya template'ini kullan, ülkeye özel farklar aşağıda",
+    "countries_using_template": ["Avusturya", "Belçika", "Çekya", "Danimarka", "Finlandiya", "İsveç", "İsviçre", "Macaristan", "Norveç", "Polonya", "Portekiz", "Yunanistan"],
+    "common_base_documents": [
+      "Pasaport (3+ ay geçerli, 2 boş sayfa)",
+      "Biyometrik Fotoğraf (35x45mm, son 6 ay)",
+      "Vize Başvuru Formu (ülke dilinde veya İngilizce)",
+      "Seyahat Sağlık Sigortası (30.000€+)",
+      "Otel Rezervasyonu",
+      "Uçak Bileti Rezervasyonu",
+      "Banka Hesap Dökümü (son 3-6 ay)",
+      "Nüfus Cüzdanı Fotokopisi",
+      "İkametgah",
+      "SGK Hizmet Dökümü",
+      "İşveren İzin Yazısı",
+      "Maaş Bordrosu (son 3 ay)",
+      "Tapu/Ruhsat (opsiyonel)"
+    ],
+    "country_specific_notes": {
+      "Avusturya": "VFS üzerinden, vukuatlı nüfus kayıt örneği zorunlu",
+      "Belçika": "VFS üzerinden, 6 aylık banka dökümü ister",
+      "Çekya": "VFS üzerinden, davet mektubu varsa noter onaylı olmalı",
+      "Danimarka": "VFS üzerinden, günlük min 350 DKK (~47€) harcama gereksinimi",
+      "Finlandiya": "VFS üzerinden, davet mektubu Finlandiya polis onaylı",
+      "İsveç": "VFS üzerinden, banka dökümü 6 aylık",
+      "İsviçre": "VFS üzerinden, İsviçre'ye özel davet formu (Verpflichtungserklärung)",
+      "Macaristan": "Konsolosluk direkt veya VFS",
+      "Norveç": "VFS üzerinden, günlük min 500 NOK (~43€) gereksinim",
+      "Polonya": "Konsolosluk direkt, bazı iller VFS",
+      "Portekiz": "VFS üzerinden, 6 aylık banka dökümü",
+      "Yunanistan": "VFS üzerinden, günlük min 40€ gereksinim"
+    }
+  },
+  "non_schengen_template": {
+    "note": "Schengen dışı ülkeler için ayrı evrak listesi",
+    "countries": {
+      "Avustralya": {
+        "visa_system": "ETA/eVisitor",
+        "appointment_system": "Online",
+        "base_fee_visa": 20,
+        "notes": "Online başvuru, evrak yok. Biyometrik gerekmez. ETA 1 yıl geçerli, 90 gün kalış."
+      },
+      "BAE": {
+        "visa_system": "Online/Diplomatic",
+        "appointment_system": "Online",
+        "base_fee_visa": 90,
+        "notes": "Online e-vize veya konsolosluk, fotoğraf + pasaport yeterli"
+      },
+      "Çin": {
+        "visa_system": "Konsolosluk",
+        "appointment_system": "Konsolosluk",
+        "base_fee_visa": 60,
+        "notes": "Pasaport, fotoğraf, form, davetiye (iş/turistik), uçuş + otel rezervasyonu"
+      },
+      "Güney Kore": {
+        "visa_system": "Konsolosluk",
+        "appointment_system": "Konsolosluk",
+        "base_fee_visa": 30,
+        "notes": "Pasaport, fotoğraf, form, banka dökümü, işveren yazısı, uçuş + otel"
+      },
+      "Japonya": {
+        "visa_system": "Konsolosluk",
+        "appointment_system": "Konsolosluk",
+        "base_fee_visa": 0,
+        "notes": "Ücretsiz, pasaport, fotoğraf, form, davetiye (garantör), banka dökümü, maaş bordrosu"
+      }
+    }
+  }
+}
