@@ -14,6 +14,7 @@ import FamilyMembersPanel from "@/components/FamilyMembersPanel";
 import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
 import WhatsAppTemplates from "@/components/WhatsAppTemplates";
 import CustomerActionMenu from "@/components/CustomerActionMenu";
+import PortalShareButton from "@/components/PortalShareButton";
 
 export const revalidate = 0;
 
@@ -110,12 +111,19 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
           <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl p-5 shadow-lg">
             <div className="flex justify-between items-start mb-5">
               <h2 className="text-slate-900 dark:text-white font-semibold text-sm">Müşteri Profili</h2>
-              <div className="flex items-center gap-2 print:hidden">
+              <div className="flex items-center gap-2 print:hidden flex-wrap justify-end">
+                <PortalShareButton customer={{
+                  id: customer.id,
+                  first_name: customer.first_name,
+                  last_name: customer.last_name,
+                  phone: customer.phone,
+                  portal_token: customer.portal_token
+                }} />
                 <PdfExportButton />
                 <ProfileAnalysisButton customerId={customer.id} currentScore={customer.profile_score || 0} />
                 <Link
                   href={`/customers/${customer.id}/edit`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-xs font-semibold rounded-lg transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-xs font-semibold rounded-lg transition-all shrink-0"
                 >
                   <Edit className="w-3.5 h-3.5" /> Düzenle
                 </Link>
