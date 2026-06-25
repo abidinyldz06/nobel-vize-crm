@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
-import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
-import { Check, Clock, AlertCircle, Calendar, FileText, CreditCard, MapPin, Phone, MessageCircle, CheckCircle2, Globe } from "lucide-react";
+import { VISA_TYPE_LABELS } from "@/lib/visa-types";
+import { Check, Clock, AlertCircle, Calendar, FileText, CreditCard, MapPin, Phone, MessageCircle, CheckCircle2, Globe, Mail } from "lucide-react";
+import PrintButton from "@/components/Portal/PrintButton";
 
 export const revalidate = 0;
 
@@ -16,17 +17,17 @@ const STATUS_STEPS = [
 export default async function PortalPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   
-  // Müşteriyi bul (Anon client ile)
+  // GÜVENLİK: Sadece id, first_name ve last_name çekiyoruz (diğer hiçbir hassas bilgi cliente inmiyor)
   const { data: customer } = await supabase
     .from('customers')
-    .select('*')
+    .select('id, first_name, last_name')
     .eq('portal_token', token)
     .single();
   
   if (!customer) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#060d1a] p-6">
-        <div className="max-w-md w-full bg-white dark:bg-[#0d1420] p-8 rounded-3xl shadow-xl text-center border border-slate-200 dark:border-[#1f2937]">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#060d1a] p-6 print:bg-white print:p-0">
+        <div className="max-w-md w-full bg-white dark:bg-[#0d1420] p-8 rounded-3xl shadow-xl text-center border border-slate-200 dark:border-[#1f2937] print:border-none print:shadow-none">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-5 opacity-90" />
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Geçersiz Bağlantı</h1>
           <p className="text-slate-500 text-sm">Bu portal bağlantısı geçersiz veya süresi dolmuş olabilir. Lütfen danışmanınızla iletişime geçin.</p>
@@ -35,10 +36,10 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
     );
   }
   
-  // Aktif başvuruyu çek
+  // GÜVENLİK: Sadece gerekli başvuru bilgileri çekilir
   const { data: applications } = await supabase
     .from('applications')
-    .select('*')
+    .select('id, country, visa_type, status, created_at, updated_at, appointment_date, appointment_location, total_fee')
     .eq('customer_id', customer.id)
     .order('created_at', { ascending: false });
     
@@ -49,7 +50,9 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
 
   if (activeApp) {
     const [{ data: docs }, { data: pays }] = await Promise.all([
-      supabase.from('documents').select('*').eq('application_id', activeApp.id).order('created_at', { ascending: true }),
+      // GÜVENLİK: Sadece evrak tipi, durumu ve notu
+      supabase.from('documents').select('id, document_type, status, notes').eq('application_id', activeApp.id).order('created_at', { ascending: true }),
+      // GÜVENLİK: Sadece miktar, ödeme yöntemi ve tarih. Başka hiçbir finansal kalem/konsolosluk harcı vs gösterilmez.
       supabase.from('payments').select('amount, status, created_at, payment_method').eq('application_id', activeApp.id).order('created_at', { ascending: false })
     ]);
     documents = docs;
@@ -74,40 +77,43 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
   const payProgress = totalFee > 0 ? (totalPaid / totalFee) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#060d1a] font-sans pb-20 selection:bg-blue-500/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#060d1a] font-sans pb-20 selection:bg-blue-500/30 print:bg-white print:p-0 print:pb-0">
       
-      {/* Header Area - Gradient Background */}
-      <div className="bg-gradient-to-b from-blue-600 to-blue-900 pt-10 pb-20 px-6 rounded-b-[40px] shadow-lg relative overflow-hidden">
-        {/* Dekoratif Çemberler */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl translate-x-1/4 translate-y-1/4 pointer-events-none" />
+      {/* Header Area */}
+      <div className="bg-gradient-to-b from-blue-600 to-blue-900 pt-10 pb-20 px-6 rounded-b-[40px] shadow-lg relative overflow-hidden print:bg-none print:shadow-none print:text-black print:pb-10 print:pt-4 print:rounded-none">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none print:hidden" />
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl translate-x-1/4 translate-y-1/4 pointer-events-none print:hidden" />
 
         <div className="max-w-2xl mx-auto relative z-10">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 shadow-sm">
-                <Globe className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 shadow-sm print:border-slate-300 print:bg-slate-100 print:shadow-none">
+                <Globe className="w-6 h-6 text-white print:text-blue-600" />
               </div>
-              <h1 className="text-xl font-bold text-white tracking-tight">Nobel Vize</h1>
+              <div>
+                <h1 className="text-xl font-bold text-white tracking-tight print:text-slate-900">Nobel Vize</h1>
+                <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-wider print:text-slate-500">Müşteri Portalı</p>
+              </div>
             </div>
-            <div className="px-3.5 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm">
-              <span className="text-white text-xs font-semibold tracking-wide">Müşteri Portalı</span>
+            
+            <div className="flex items-center gap-3">
+              <PrintButton />
             </div>
           </div>
           
-          <div className="text-white">
-            <p className="text-blue-200 text-sm font-medium mb-1.5 opacity-90">Hoş Geldiniz,</p>
+          <div className="text-white print:text-slate-900">
+            <p className="text-blue-200 text-sm font-medium mb-1.5 opacity-90 print:text-slate-500">Hoş Geldiniz,</p>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">{customer.first_name} {customer.last_name}</h2>
           </div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 -mt-10 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 -mt-10 space-y-6 print:mt-0 print:space-y-8">
         
         {activeApp ? (
           <>
             {/* Status Card */}
-            <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-xl shadow-blue-900/5 border border-slate-100 dark:border-[#1f2937] relative overflow-hidden">
+            <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-xl shadow-blue-900/5 border border-slate-100 dark:border-[#1f2937] relative overflow-hidden print:border-2 print:border-slate-200 print:shadow-none print:rounded-2xl">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                 <div>
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -123,11 +129,11 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                     currentStatus === 'reddedildi' ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400' :
                     currentStatus === 'itiraz' ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400' :
                     'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
-                  }`}>
+                  } print:bg-transparent`}>
                     <span className="font-bold text-sm capitalize">{currentStatus === 'onaylandi' ? '✓ Onaylandı' : currentStatus === 'reddedildi' ? '✗ Reddedildi' : currentStatus}</span>
                   </div>
                 ) : (
-                  <div className="px-5 py-2.5 rounded-2xl border bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400">
+                  <div className="px-5 py-2.5 rounded-2xl border bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 print:bg-transparent">
                     <span className="font-bold text-sm capitalize flex items-center gap-1.5"><Clock className="w-4 h-4" /> Devam Ediyor</span>
                   </div>
                 )}
@@ -135,9 +141,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
 
               {/* Timeline */}
               <div className="relative pt-2 pb-4">
-                {/* Arka plan yolu */}
-                <div className="absolute top-[20px] left-[5%] right-[5%] h-1.5 bg-slate-100 dark:bg-[#1f2937] rounded-full z-0" />
-                {/* Aktif dolum yolu */}
+                <div className="absolute top-[20px] left-[5%] right-[5%] h-1.5 bg-slate-100 dark:bg-[#1f2937] rounded-full z-0 print:bg-slate-200" />
                 <div
                   className={`absolute top-[20px] left-[5%] h-1.5 rounded-full z-0 transition-all duration-1000 ${
                     currentStatus === 'reddedildi' ? 'bg-red-500' :
@@ -157,17 +161,17 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                       <div key={step.key} className="flex flex-col items-center gap-2.5 w-14">
                         <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-500 border-[3px] bg-white dark:bg-[#0d1420] ${
                           isDone ? "border-blue-500" :
-                          isCurrent ? "border-blue-500 shadow-[0_0_0_4px_rgba(59,130,246,0.15)]" :
+                          isCurrent ? "border-blue-500 shadow-[0_0_0_4px_rgba(59,130,246,0.15)] print:shadow-none" :
                           "border-slate-200 dark:border-[#2d3f55]"
                         }`}>
                           {isDone ? (
-                            <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
-                              <Check className="w-4 h-4 text-white" />
+                            <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center print:bg-white print:border-2 print:border-blue-500">
+                              <Check className="w-4 h-4 text-white print:text-blue-600" />
                             </div>
                           ) : isCurrent ? (
                             <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
                           ) : (
-                            <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-[#2d3f55]" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-[#2d3f55] print:bg-slate-300" />
                           )}
                         </div>
                         <p className={`text-[10px] sm:text-xs font-semibold text-center leading-tight ${
@@ -182,24 +186,22 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
             </div>
 
             {/* Evrak Listesi */}
-            <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937]">
+            <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937] print:border-2 print:border-slate-200 print:shadow-none print:rounded-2xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center print:bg-transparent">
                     <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   Evrak Listesi
                 </h2>
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-full whitespace-nowrap border border-slate-200 dark:border-slate-700">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-full whitespace-nowrap border border-slate-200 dark:border-slate-700 print:border-none print:bg-transparent print:p-0">
                   <span className="text-blue-600 dark:text-blue-400">{completedDocs}</span> / {totalDocs} Tamamlandı
                 </span>
               </div>
               
               {totalDocs > 0 && (
-                <div className="w-full h-2.5 bg-slate-100 dark:bg-[#1f2937] rounded-full overflow-hidden mb-8">
-                  <div className="h-full bg-blue-500 rounded-full transition-all duration-1000 relative overflow-hidden" style={{ width: `${docProgress}%` }}>
-                    <div className="absolute top-0 bottom-0 left-0 right-0 bg-white/20 w-full animate-pulse" />
-                  </div>
+                <div className="w-full h-2.5 bg-slate-100 dark:bg-[#1f2937] rounded-full overflow-hidden mb-8 print:border print:border-slate-200">
+                  <div className="h-full bg-blue-500 rounded-full transition-all duration-1000 relative overflow-hidden" style={{ width: `${docProgress}%` }} />
                 </div>
               )}
 
@@ -209,13 +211,13 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                   <p className="text-slate-500 font-medium text-sm">Evrak listeniz danışmanınız tarafından hazırlanıyor.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 print:space-y-2">
                   {documents.map((doc: any) => (
-                    <div key={doc.id} className={`flex items-start justify-between p-4 rounded-2xl border transition-all hover:shadow-sm ${
+                    <div key={doc.id} className={`flex items-start justify-between p-4 rounded-2xl border transition-all ${
                       doc.status === 'tamamlandi' 
-                        ? 'bg-white dark:bg-[#0d1420] border-slate-100 dark:border-[#1f2937] opacity-75 hover:opacity-100' 
-                        : 'bg-amber-50/50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20 shadow-[0_2px_10px_-4px_rgba(245,158,11,0.1)]'
-                    }`}>
+                        ? 'bg-white dark:bg-[#0d1420] border-slate-100 dark:border-[#1f2937] opacity-75 print:opacity-100' 
+                        : 'bg-amber-50/50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20'
+                    } print:rounded-lg print:p-3`}>
                       <div className="flex-1 pr-4">
                         <p className={`font-bold text-sm ${doc.status === 'tamamlandi' ? 'text-slate-700 dark:text-slate-300' : 'text-amber-900 dark:text-amber-400'}`}>
                           {doc.document_type}
@@ -224,11 +226,11 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                       </div>
                       <div className="shrink-0 mt-0.5">
                         {doc.status === 'tamamlandi' ? (
-                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500">
-                            <Check className="w-5 h-5" />
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 print:bg-transparent print:w-auto">
+                            <CheckCircle2 className="w-5 h-5" />
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 bg-white dark:bg-[#0d1420] shadow-sm border border-amber-200 dark:border-amber-500/20 px-3 py-1.5 rounded-xl text-xs font-bold">
+                          <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 bg-white dark:bg-[#0d1420] shadow-sm border border-amber-200 dark:border-amber-500/20 px-3 py-1.5 rounded-xl text-xs font-bold print:border-none print:shadow-none print:bg-transparent print:p-0">
                             <Clock className="w-4 h-4" /> Bekliyor
                           </div>
                         )}
@@ -239,35 +241,35 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:grid-cols-2 print:gap-4">
               {/* Randevu Bilgisi */}
-              <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937] h-full">
+              <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937] h-full print:border-2 print:border-slate-200 print:shadow-none print:rounded-2xl">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center print:bg-transparent">
                     <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   Randevu
                 </h2>
                 {activeApp.appointment_date ? (
-                  <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-6 rounded-3xl text-white shadow-xl shadow-purple-500/20 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl translate-x-1/3 -translate-y-1/3" />
+                  <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-6 rounded-3xl text-white shadow-xl shadow-purple-500/20 relative overflow-hidden print:bg-none print:shadow-none print:text-black print:border print:border-slate-200 print:rounded-xl">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl translate-x-1/3 -translate-y-1/3 print:hidden" />
                     <div className="relative z-10">
                       <div className="flex items-center justify-between mb-4">
-                        <p className="text-purple-100 text-xs font-semibold uppercase tracking-wider">Tarih</p>
-                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col items-center justify-center shadow-inner">
+                        <p className="text-purple-100 text-xs font-semibold uppercase tracking-wider print:text-slate-500">Tarih</p>
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col items-center justify-center shadow-inner print:border-slate-300 print:bg-slate-50 print:shadow-none">
                           <span className="text-base font-extrabold leading-none">{new Date(activeApp.appointment_date).getDate()}</span>
                           <span className="text-[10px] uppercase font-bold tracking-wide">{new Date(activeApp.appointment_date).toLocaleString('tr-TR', { month: 'short' })}</span>
                         </div>
                       </div>
-                      <h3 className="text-2xl font-black mb-1">{new Date(activeApp.appointment_date).toLocaleString('tr-TR', { dateStyle: 'full', timeStyle: 'short' })}</h3>
-                      <div className="flex items-start gap-2 text-purple-50 text-sm mt-4 pt-4 border-t border-white/20 font-medium">
+                      <h3 className="text-xl sm:text-2xl font-black mb-1">{new Date(activeApp.appointment_date).toLocaleString('tr-TR', { dateStyle: 'full', timeStyle: 'short' })}</h3>
+                      <div className="flex items-start gap-2 text-purple-50 text-sm mt-4 pt-4 border-t border-white/20 font-medium print:border-slate-200 print:text-slate-600">
                         <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
                         <span className="leading-snug">{activeApp.appointment_location || 'Lokasyon belirtilmedi'}</span>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-10 bg-slate-50 dark:bg-[#1a2232] rounded-3xl border border-dashed border-slate-200 dark:border-[#2d3f55] h-[calc(100%-60px)] flex flex-col items-center justify-center">
+                  <div className="text-center py-10 bg-slate-50 dark:bg-[#1a2232] rounded-3xl border border-dashed border-slate-200 dark:border-[#2d3f55] h-[calc(100%-60px)] flex flex-col items-center justify-center print:border-solid">
                     <Calendar className="w-8 h-8 text-slate-300 dark:text-slate-600 mb-3" />
                     <p className="text-slate-500 font-medium text-sm">Randevunuz henüz alınmadı.</p>
                   </div>
@@ -275,9 +277,9 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
               </div>
 
               {/* Ödeme Durumu */}
-              <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937] h-full">
+              <div className="bg-white dark:bg-[#0d1420] p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937] h-full print:border-2 print:border-slate-200 print:shadow-none print:rounded-2xl">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center print:bg-transparent">
                     <CreditCard className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   Ödeme
@@ -296,10 +298,8 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                       </div>
                     </div>
                     
-                    <div className="w-full h-2.5 bg-slate-100 dark:bg-[#1f2937] rounded-full overflow-hidden mb-6">
-                      <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 relative" style={{ width: `${payProgress}%` }}>
-                        <div className="absolute inset-0 bg-white/20 w-full" />
-                      </div>
+                    <div className="w-full h-2.5 bg-slate-100 dark:bg-[#1f2937] rounded-full overflow-hidden mb-6 print:border print:border-slate-200">
+                      <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 relative" style={{ width: `${payProgress}%` }} />
                     </div>
                     
                     {payments && payments.length > 0 && (
@@ -307,9 +307,9 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Son İşlemler</p>
                         <div className="space-y-2.5">
                           {payments.filter((p: any) => p.status === 'alindi').slice(0, 3).map((p: any, i: number) => (
-                            <div key={i} className="flex justify-between items-center py-2.5 px-3 bg-slate-50 dark:bg-[#1a2232] rounded-xl border border-slate-100 dark:border-[#2d3f55]">
+                            <div key={i} className="flex justify-between items-center py-2.5 px-3 bg-slate-50 dark:bg-[#1a2232] rounded-xl border border-slate-100 dark:border-[#2d3f55] print:border-none print:p-0 print:bg-transparent print:border-b print:rounded-none">
                               <div className="flex items-center gap-3">
-                                <div className="w-7 h-7 rounded-full bg-white dark:bg-[#0d1420] flex items-center justify-center shadow-sm">
+                                <div className="w-7 h-7 rounded-full bg-white dark:bg-[#0d1420] flex items-center justify-center shadow-sm print:hidden">
                                   <Check className="w-3.5 h-3.5 text-emerald-500" />
                                 </div>
                                 <div>
@@ -325,7 +325,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-10 bg-slate-50 dark:bg-[#1a2232] rounded-3xl border border-dashed border-slate-200 dark:border-[#2d3f55] h-[calc(100%-60px)] flex flex-col items-center justify-center">
+                  <div className="text-center py-10 bg-slate-50 dark:bg-[#1a2232] rounded-3xl border border-dashed border-slate-200 dark:border-[#2d3f55] h-[calc(100%-60px)] flex flex-col items-center justify-center print:border-solid">
                     <CreditCard className="w-8 h-8 text-slate-300 dark:text-slate-600 mb-3" />
                     <p className="text-slate-500 font-medium text-sm">Ödeme kaydı bulunmuyor.</p>
                   </div>
@@ -345,20 +345,37 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
         )}
 
         {/* Footer / İletişim */}
-        <div className="bg-slate-900 dark:bg-[#0a101a] p-8 md:p-10 rounded-[32px] text-white text-center mt-12 shadow-2xl relative overflow-hidden border border-slate-800">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+        <div className="bg-slate-900 dark:bg-[#0a101a] p-8 md:p-10 rounded-[32px] text-white text-center mt-12 shadow-2xl relative overflow-hidden border border-slate-800 print:bg-transparent print:border-t print:border-slate-200 print:text-black print:rounded-none print:shadow-none print:p-4">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none print:hidden" />
           <div className="relative z-10">
-            <Globe className="w-10 h-10 text-blue-400 mx-auto mb-5 opacity-75" />
-            <h3 className="text-xl font-bold mb-3 tracking-tight">Sorularınız için buradayız</h3>
-            <p className="text-slate-400 text-sm font-medium mb-8 max-w-sm mx-auto leading-relaxed">Vize sürecinizle ilgili aklınıza takılan her şey için bize doğrudan ulaşabilirsiniz.</p>
+            <Globe className="w-10 h-10 text-blue-400 mx-auto mb-5 opacity-75 print:hidden" />
+            <h3 className="text-xl font-bold mb-3 tracking-tight print:hidden">Sorularınız için buradayız</h3>
+            <p className="text-slate-400 text-sm font-medium mb-8 max-w-sm mx-auto leading-relaxed print:hidden">Vize sürecinizle ilgili aklınıza takılan her şey için bize doğrudan ulaşabilirsiniz.</p>
             
-            <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto print:hidden">
               <a href="tel:+908500000000" className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all text-sm font-bold w-full backdrop-blur-md">
                 <Phone className="w-4 h-4 text-blue-400" /> Bizi Arayın
               </a>
               <a href="https://wa.me/908500000000" target="_blank" className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/20 text-[#25D366] rounded-2xl transition-all text-sm font-bold w-full backdrop-blur-md">
                 <MessageCircle className="w-4 h-4" /> WhatsApp
               </a>
+            </div>
+
+            <div className="mt-8 pt-8 border-t border-slate-800 print:border-none print:mt-0 print:pt-0 flex flex-col gap-2">
+              <p className="text-xs text-slate-500 font-medium">Bu bilgiler Nobel Vize CRM tarafından sağlanmaktadır.</p>
+              <div className="flex items-center justify-center gap-4 text-xs text-slate-400 print:text-slate-600">
+                <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> info@nobelvize.com</span>
+                <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> 0850 000 00 00</span>
+              </div>
+              <p className="text-[10px] text-slate-600 mt-2">&copy; {new Date().getFullYear()} Nobel Vize. Tüm hakları saklıdır.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}             </a>
             </div>
           </div>
         </div>
