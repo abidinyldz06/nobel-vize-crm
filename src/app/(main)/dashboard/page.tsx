@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Users, FileText, Calendar, AlertCircle, CheckCircle2, Plus, ArrowRight, Clock, TrendingUp, DollarSign } from "lucide-react";
 import Link from "next/link";
 import OverdueDocuments from "@/components/OverdueDocuments";
+import DashboardCharts from "@/components/DashboardCharts";
 
 export const revalidate = 0;
 
@@ -114,6 +115,61 @@ export default async function Dashboard() {
     kapandi:            { label: "Kapandı",             color: "text-slate-400",   dot: "bg-slate-500" },
   };
 
+  // --- CHART DATA PROCESSING ---
+  const sixMonthsAgoDate = new Date();
+  sixMonthsAgoDate.setMonth(sixMonthsAgoDate.getMonth() - 5);
+  sixMonthsAgoDate.setDate(1);
+  sixMonthsAgoDate.setHours(0, 0, 0, 0);
+
+  const chartsAppsQuery = supabase
+    .from('applications')
+    .select('country, status, created_at, customers!inner(assigned_staff_id)')
+    .gte('created_at', sixMonthsAgoDate.toISOString());
+
+  if (!isAdmin && staffId) {
+    chartsAppsQuery.eq('customers.assigned_staff_id', staffId);
+  }
+
+  const { data: chartsApps } = await chartsAppsQuery;
+
+  const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  const last6Months = Array.from({ length: 6 }).map((_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - (5 - i));
+    return { 
+      key: `${d.getFullYear()}-${d.getMonth()}`, 
+      label: `${months[d.getMonth()]} '${d.getFullYear().toString().substring(2)}` 
+    };
+  });
+
+  const monthlyData = last6Months.map(m => ({ month: m.label, count: 0, _key: m.key }));
+  const revenueData = last6Months.map(m => ({ month: m.label, amount: 0, _key: m.key }));
+  const countryMap: Record<string, number> = {};
+  const statusMap: Record<string, number> = {};
+
+  (chartsApps || []).forEach((app: any) => {
+    const d = new Date(app.created_at);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    const mItem = monthlyData.find(m => m._key === key);
+    if (mItem) mItem.count++;
+
+    if (app.country) countryMap[app.country] = (countryMap[app.country] || 0) + 1;
+    const statusLabel = STATUS_CONFIG[app.status]?.label || app.status;
+    statusMap[statusLabel] = (statusMap[statusLabel] || 0) + 1;
+  });
+
+  (allPayments || []).forEach((p: any) => {
+    if (p.status === 'alindi') {
+      const d = new Date(p.created_at);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      const rItem = revenueData.find(r => r._key === key);
+      if (rItem) rItem.amount += Number(p.amount || 0);
+    }
+  });
+
+  const countryData = Object.entries(countryMap).sort((a, b) => b[1] - a[1]).slice(0, 7).map(([name, value]) => ({ name, value }));
+  const statusData = Object.entries(statusMap).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#060d1a] p-6">
       {/* Header */}
@@ -167,6 +223,14 @@ export default async function Dashboard() {
           <Link href="/reports" className="ml-auto text-xs text-amber-400 hover:text-amber-300 underline whitespace-nowrap">Raporlar →</Link>
         </div>
       )}
+
+      {/* Recharts Component */}
+      <DashboardCharts 
+        monthlyData={monthlyData} 
+        countryData={countryData} 
+        statusData={statusData} 
+        revenueData={revenueData} 
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Recent Applications */}
