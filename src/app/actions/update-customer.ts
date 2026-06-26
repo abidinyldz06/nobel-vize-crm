@@ -114,3 +114,36 @@ export async function addAppointment(formData: FormData) {
   revalidatePath(`/customers/${customerId}`)
   redirect(`/customers/${customerId}`)
 }
+
+export async function checkAppointmentDensity(dateStr: string, location: string) {
+  if (!dateStr || !location) return [];
+  
+  const supabase = await createSupabaseServerClient();
+  
+  // Format date boundaries
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return [];
+  
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  // Exact location match (case insensitive if possible, using ilike)
+  const { data, error } = await supabase
+    .from('applications')
+    .select('id, appointment_date, customers!inner(first_name, last_name)')
+    .not('appointment_date', 'is', null)
+    .gte('appointment_date', startOfDay.toISOString())
+    .lte('appointment_date', endOfDay.toISOString())
+    .ilike('appointment_location', `%${location.trim()}%`);
+
+  if (error || !data) return [];
+  
+  return data.map((app: any) => ({
+    id: app.id,
+    time: new Date(app.appointment_date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+    customerName: `${app.customers.first_name} ${app.customers.last_name}`
+  })).sort((a: any, b: any) => a.time.localeCompare(b.time));
+}

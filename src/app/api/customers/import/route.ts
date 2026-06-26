@@ -79,7 +79,7 @@ export async function POST(req: Request) {
         const customerId = newCustomer.id;
 
         // If a country was provided, try to match it
-        let resolvedCountry = null;
+        let resolvedCountry: any = null;
         let checklist: any[] = [];
         let baseFee = 0;
 
