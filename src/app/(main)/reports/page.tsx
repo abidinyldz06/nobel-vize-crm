@@ -2,6 +2,7 @@ import { BarChart3, TrendingUp, ArrowUpRight, Users, FileCheck, Globe, Banknote,
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import ReportFilters from "@/components/ReportFilters";
 import StaffPerformance from "@/components/StaffPerformance";
+import RejectionAnalysis from "@/components/RejectionAnalysis";
 
 export const revalidate = 0;
 
@@ -181,9 +182,17 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   // E. STAFF PERFORMANCE FULL DATA (All time)
   let staffPerfData: any[] = [];
+  let rejectedAppsData: any[] = [];
   if (isAdmin) {
     const { data: perfApps } = await supabase.from('applications').select('id, customer_id, status, created_at, updated_at, customers!inner(assigned_staff_id)');
     const { data: perfPayments } = await supabase.from('payments').select('amount, status, application_id');
+    const { data: rejectedApps } = await supabase
+      .from('applications')
+      .select('rejection_reason, country, visa_type')
+      .eq('status', 'reddedildi')
+      .not('rejection_reason', 'is', null);
+    
+    if (rejectedApps) rejectedAppsData = rejectedApps;
 
     const perfStaffMap: Record<string, any> = {};
     allStaff?.forEach((s: any) => {
@@ -420,7 +429,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                 <tr className="border-b border-slate-200 dark:border-[#1f2937]">
                   <th className="pb-3 text-slate-500 font-medium">Ülke</th>
                   <th className="pb-3 text-slate-500 font-medium text-right">Tahsil</th>
-                  <th className="pb-3 text-slate-500 font-medium text-right">Beklenen</th>
+                  <th className="pb-3 text-slate-500 font-medium text-right">Bekleyen</th>
                 </tr>
               </thead>
               <tbody>
@@ -459,6 +468,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       {/* STAFF PERFORMANCE */}
       {isAdmin && (
         <StaffPerformance data={staffPerfData} />
+      )}
+
+      {/* REJECTION ANALYSIS */}
+      {isAdmin && (
+        <RejectionAnalysis data={rejectedAppsData} />
       )}
     </div>
   );
