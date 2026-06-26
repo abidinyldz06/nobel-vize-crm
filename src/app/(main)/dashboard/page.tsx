@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Users, FileText, Calendar, AlertCircle, CheckCircle2, Plus, ArrowRight, Clock, TrendingUp, DollarSign } from "lucide-react";
 import Link from "next/link";
+import OverdueDocuments from "@/components/OverdueDocuments";
 
 export const revalidate = 0;
 
@@ -217,6 +218,9 @@ export default async function Dashboard() {
 
         {/* Right Panel */}
         <div className="lg:col-span-5 space-y-5">
+          {/* Geciken Evraklar */}
+          <OverdueDocuments isAdmin={isAdmin} staffId={staffId} />
+
           {/* Yaklaşan Randevular (Faz 2) */}
           <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg">
             <div className="px-5 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a] flex justify-between items-center">
