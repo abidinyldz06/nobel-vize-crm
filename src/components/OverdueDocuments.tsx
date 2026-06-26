@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { AlertCircle, Clock } from "lucide-react";
 import Link from "next/link";
+import BulkWhatsAppReminder from "./BulkWhatsAppReminder";
 
 export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: boolean, staffId?: string }) {
   const supabase = await createSupabaseServerClient();
@@ -8,7 +9,7 @@ export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: 
 
   let query = supabase
     .from('documents')
-    .select('id, document_type, requested_at, application_id, applications!inner(id, customer_id, customers(id, first_name, last_name))')
+    .select('id, document_type, requested_at, application_id, applications!inner(id, country, customer_id, customers(id, first_name, last_name, phone))')
     .eq('status', 'bekleniyor')
     .lt('requested_at', threeDaysAgo)
     .order('requested_at', { ascending: true });
@@ -21,9 +22,28 @@ export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: 
     query = query.in('application_id', appIds);
   }
 
-  const { data: overdueDocs } = await query.limit(10);
+  const { data: overdueDocs } = await query.limit(20);
 
   if (!overdueDocs || overdueDocs.length === 0) return null;
+
+  // Grup listesi oluştur (WhatsApp toplu hatırlatma için)
+  const customersMap = new Map();
+  overdueDocs.forEach((doc: any) => {
+    const customer = doc.applications?.customers;
+    const country = doc.applications?.country;
+    if (!customer?.id) return;
+    
+    if (!customersMap.has(customer.id)) {
+      customersMap.set(customer.id, {
+        customer: customer,
+        country: country || "",
+        docs: []
+      });
+    }
+    customersMap.get(customer.id).docs.push(doc.document_type);
+  });
+  
+  const customersList = Array.from(customersMap.values());
 
   return (
     <div className="bg-white dark:bg-[#0d1420] border border-red-200 dark:border-red-900/30 rounded-2xl overflow-hidden shadow-lg mb-5">
@@ -31,6 +51,7 @@ export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: 
         <h2 className="text-sm font-bold text-red-700 dark:text-red-400 flex items-center gap-2">
           <AlertCircle className="w-4 h-4" /> Geciken Evraklar
         </h2>
+        <BulkWhatsAppReminder customersList={customersList} />
       </div>
       <div className="divide-y divide-slate-100 dark:divide-[#1f2937]">
         {overdueDocs.map((doc: any) => {
