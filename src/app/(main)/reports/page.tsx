@@ -1,6 +1,7 @@
 import { BarChart3, TrendingUp, ArrowUpRight, Users, FileCheck, Globe, Banknote, Wallet, CreditCard, Percent, UserCog, Calendar } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import ReportFilters from "@/components/ReportFilters";
+import StaffPerformance from "@/components/StaffPerformance";
 
 export const revalidate = 0;
 
@@ -177,6 +178,75 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   });
 
   const trendStats = Object.values(monthsData);
+
+  // E. STAFF PERFORMANCE FULL DATA (All time)
+  let staffPerfData: any[] = [];
+  if (isAdmin) {
+    const { data: perfApps } = await supabase.from('applications').select('id, customer_id, status, created_at, updated_at, customers!inner(assigned_staff_id)');
+    const { data: perfPayments } = await supabase.from('payments').select('amount, status, application_id');
+
+    const perfStaffMap: Record<string, any> = {};
+    allStaff?.forEach((s: any) => {
+      perfStaffMap[s.id] = { id: s.id, name: s.full_name, totalCustomers: 0, activeApps: 0, approved: 0, rejected: 0, revenue: 0, totalProcessTimeMs: 0, completedCount: 0 };
+    });
+
+    allCustomers?.forEach((c: any) => {
+      if (c.assigned_staff_id && perfStaffMap[c.assigned_staff_id]) {
+        perfStaffMap[c.assigned_staff_id].totalCustomers++;
+      }
+    });
+
+    perfApps?.forEach((a: any) => {
+      const staffId = (a.customers as any).assigned_staff_id;
+      if (!staffId || !perfStaffMap[staffId]) return;
+      
+      const s = perfStaffMap[staffId];
+      if (['onaylandi', 'reddedildi', 'kapandi'].includes(a.status)) {
+        if (a.status === 'onaylandi') s.approved++;
+        if (a.status === 'reddedildi') s.rejected++;
+        
+        // processing time
+        if (a.created_at && a.updated_at) {
+           const timeDiff = new Date(a.updated_at).getTime() - new Date(a.created_at).getTime();
+           if (timeDiff > 0) {
+             s.totalProcessTimeMs += timeDiff;
+             s.completedCount++;
+           }
+        }
+      } else {
+        s.activeApps++;
+      }
+    });
+
+    perfPayments?.forEach((p: any) => {
+      if (p.status === 'alindi') {
+        const app = perfApps?.find((a: any) => a.id === p.application_id);
+        if (app) {
+          const staffId = (app.customers as any).assigned_staff_id;
+          if (staffId && perfStaffMap[staffId]) {
+            perfStaffMap[staffId].revenue += Number(p.amount);
+          }
+        }
+      }
+    });
+
+    staffPerfData = Object.values(perfStaffMap).map((s: any) => {
+      const totalDecided = s.approved + s.rejected;
+      const approvalRate = totalDecided > 0 ? (s.approved / totalDecided) * 100 : 0;
+      const avgProcessTimeDays = s.completedCount > 0 ? (s.totalProcessTimeMs / s.completedCount) / (1000 * 60 * 60 * 24) : null;
+      return {
+        id: s.id,
+        name: s.name,
+        totalCustomers: s.totalCustomers,
+        activeApps: s.activeApps,
+        approved: s.approved,
+        rejected: s.rejected,
+        approvalRate,
+        revenue: s.revenue,
+        avgProcessTimeDays
+      };
+    });
+  }
 
   const COLORS = ["bg-blue-500", "bg-purple-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"];
 
@@ -385,6 +455,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           </div>
         </div>
       </div>
+
+      {/* STAFF PERFORMANCE */}
+      {isAdmin && (
+        <StaffPerformance data={staffPerfData} />
+      )}
     </div>
   );
 }
