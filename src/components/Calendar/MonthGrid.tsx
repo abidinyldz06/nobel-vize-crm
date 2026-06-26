@@ -64,10 +64,18 @@ export default function MonthGrid({
                   {format(day, 'd')}
                 </span>
                 
-                {/* Small indicator dot if mobile or just styling */}
-                {dayApps.length > 0 && (
-                  <span className="lg:hidden w-1.5 h-1.5 rounded-full bg-blue-500 mt-2.5"></span>
-                )}
+                {/* Density indicator dots */}
+                <div className="flex gap-1 mt-2.5">
+                  {dayApps.length > 0 && dayApps.length < 3 && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 lg:hidden" title={`${dayApps.length} randevu`}></span>
+                  )}
+                  {dayApps.length >= 3 && dayApps.length < 5 && (
+                    <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)] animate-pulse" title={`${dayApps.length} randevu (Yoğun)`}></span>
+                  )}
+                  {dayApps.length >= 5 && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.7)] animate-bounce" title={`${dayApps.length} randevu (Çok Yoğun)`}></span>
+                  )}
+                </div>
               </div>
 
               {/* Appointments List (Desktop) */}
