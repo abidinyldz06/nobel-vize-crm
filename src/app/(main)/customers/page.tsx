@@ -39,10 +39,18 @@ export default async function CustomersPage() {
     const latest = sorted[0];
     return {
       ...c,
+      latest_application_id: latest?.id ?? null,
       country: latest?.country ?? null,
       status: latest?.status ?? null,
     };
   });
+
+  // Fetch staff list for bulk assign (only if admin)
+  let staffList: any[] = [];
+  if (isAdmin) {
+    const { data: staff } = await supabase.from('staff').select('id, first_name, last_name, role');
+    staffList = staff || [];
+  }
 
   return (
     <div className="p-6 min-h-screen bg-white dark:bg-[#060d1a]">
@@ -62,7 +70,7 @@ export default async function CustomersPage() {
         </div>
       </div>
 
-      <CustomerTable customers={flat} isAdmin={isAdmin} />
+      <CustomerTable customers={flat} isAdmin={isAdmin} staffList={staffList} />
     </div>
   );
 }
