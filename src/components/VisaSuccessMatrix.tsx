@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Table, ArrowRight, LineChart as LineIcon } from "lucide-react";
+import { Table } from "lucide-react";
 
 interface AppData {
   id: string;

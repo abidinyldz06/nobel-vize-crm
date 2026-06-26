@@ -68,7 +68,6 @@ export default function RejectionAnalysis({ data }: { data: RejectedApp[] }) {
   // 3. Generate Insight
   let insight = "Henüz yeterli veri yok.";
   if (data.length > 0) {
-    const topReason = pieData[0];
     const topCountry = countryStats[0];
     
     if (topCountry) {

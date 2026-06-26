@@ -33,7 +33,7 @@ export default function PortalShareButton({ customer }: PortalShareButtonProps) 
       setIsCopied(true);
       toast.success("Bağlantı kopyalandı!");
       setTimeout(() => setIsCopied(false), 2000);
-    } catch (err) {
+    } catch {
       toast.error("Bağlantı kopyalanamadı.");
     }
   };

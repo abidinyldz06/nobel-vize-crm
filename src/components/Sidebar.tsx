@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, FileText, Calendar, Settings, LogOut, Globe, BarChart3, UserCog } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, Settings, LogOut, Globe, BarChart3, UserCog } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useState, useEffect } from "react";
 

@@ -35,6 +35,7 @@ export default function NotificationCenter() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
     // Her 1 dakikada bir yenile
     const interval = setInterval(fetchNotifications, 60000);

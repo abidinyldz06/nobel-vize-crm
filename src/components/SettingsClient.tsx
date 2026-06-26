@@ -425,6 +425,7 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
             {saving ? "Kaydediliyor..." : saved ? "Kaydedildi!" : "Değişiklikleri Kaydet"}
           </button>
         </div>
+        )}
       </div>
     </div>
   );

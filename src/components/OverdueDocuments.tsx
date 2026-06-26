@@ -5,6 +5,7 @@ import BulkWhatsAppReminder from "./BulkWhatsAppReminder";
 
 export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: boolean, staffId?: string }) {
   const supabase = await createSupabaseServerClient();
+  // eslint-disable-next-line react-hooks/purity
   const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
 
   let query = supabase
@@ -55,6 +56,7 @@ export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: 
       </div>
       <div className="divide-y divide-slate-100 dark:divide-[#1f2937]">
         {overdueDocs.map((doc: any) => {
+          // eslint-disable-next-line react-hooks/purity
           const daysOverdue = Math.floor((Date.now() - new Date(doc.requested_at).getTime()) / (1000 * 60 * 60 * 24));
           const isCritical = daysOverdue >= 7;
           const customer = doc.applications?.customers;

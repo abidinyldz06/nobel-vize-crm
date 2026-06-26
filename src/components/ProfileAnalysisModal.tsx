@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { BrainCircuit, X, Save, Loader2, AlertCircle } from "lucide-react";
+import { BrainCircuit, X, Loader2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ProfileAnalysisModal({ customerId, currentScore, onClose }: { customerId: string, currentScore: number, onClose: () => void }) {
@@ -122,7 +122,7 @@ export default function ProfileAnalysisModal({ customerId, currentScore, onClose
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Çalışma Durumu</label>
                 <select value={form.jobStatus} onChange={e => setForm({...form, jobStatus: e.target.value})}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm focus:border-indigo-500 outline-none">
-                  <option value="calisan">SGK'lı Çalışan</option>
+                  <option value="calisan">SGK&apos;lı Çalışan</option>
                   <option value="isveren">İşveren / Şirket Sahibi</option>
                   <option value="emekli">Emekli</option>
                   <option value="ogrenci">Öğrenci</option>

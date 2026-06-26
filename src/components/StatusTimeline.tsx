@@ -1,6 +1,5 @@
 "use client"
 import { useState } from "react";
-import { supabase as globalSupabase } from "@/lib/supabase";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { Check, Clock, Edit2, AlertCircle } from "lucide-react";
