@@ -1,8 +1,9 @@
 "use client"
 import { useState, useEffect } from "react";
-import { Building2, Palette, Save, Bell, Shield, Globe, ChevronRight, Loader2, Check, AlertCircle, ClipboardList } from "lucide-react";
+import { Building2, Palette, Save, Bell, Shield, Globe, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import AuditLog from "@/components/AuditLog";
+import BackupPanel from "@/components/BackupPanel";
 
 const TABS = [
   { id: "company", label: "Şirket Bilgileri", icon: Building2 },
@@ -10,6 +11,7 @@ const TABS = [
   { id: "notifications", label: "Bildirimler", icon: Bell },
   { id: "security", label: "Güvenlik", icon: Shield },
   { id: "audit", label: "Sistem Log", icon: ClipboardList },
+  { id: "backup", label: "Veri Yedekleme", icon: Database },
 ];
 
 const COLORS = [
@@ -406,8 +408,14 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
           <AuditLog />
         )}
 
+        {/* Backup Tab */}
+        {activeTab === "backup" && (
+          <BackupPanel />
+        )}
+
         {/* Save Button */}
-        <div className="flex justify-end pt-2">
+        {activeTab !== "audit" && activeTab !== "backup" && (
+          <div className="flex justify-end pt-2">
           <button
             onClick={handleSave}
             disabled={saving}
