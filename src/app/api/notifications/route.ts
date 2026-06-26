@@ -17,16 +17,31 @@ export async function GET() {
   return NextResponse.json(notifications);
 }
 
-export async function PATCH() {
+export async function PATCH(request: Request) {
   const supabase = await createSupabaseServerClient();
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  const all = searchParams.get('all');
   
-  const { error } = await supabase
-    .from('activity_log')
-    .update({ is_read: true })
-    .eq('is_read', false);
-    
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (id) {
+    const { error } = await supabase
+      .from('activity_log')
+      .update({ is_read: true })
+      .eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  } else if (all === 'true') {
+    const { error } = await supabase
+      .from('activity_log')
+      .update({ is_read: true })
+      .eq('is_read', false);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  } else {
+    // Default fallback to update all (for backward compatibility if needed)
+    const { error } = await supabase
+      .from('activity_log')
+      .update({ is_read: true })
+      .eq('is_read', false);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   }
   
   return NextResponse.json({ success: true });

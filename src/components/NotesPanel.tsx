@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { MessageSquare, Send, Loader2, User, Clock, AlertTriangle } from "lucide-react";
 
 type Note = {
@@ -21,6 +21,7 @@ export default function NotesPanel({ applicationId, initialNotes }: { applicatio
     setSaving(true);
     setErrorMsg("");
 
+    const supabase = createSupabaseBrowserClient();
     const { data: { user } } = await supabase.auth.getUser();
     let authorName = "Danışman";
     if (user?.id) {

@@ -260,11 +260,21 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
       </div>
 
       <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg shadow-black/20">
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-[#1f2937] flex justify-between items-center bg-slate-50 dark:bg-[#0a101a]">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Müşteri Listesi</h2>
+        <div className="px-4 md:px-6 py-4 border-b border-slate-200 dark:border-[#1f2937] flex justify-between items-center bg-slate-50 dark:bg-[#0a101a]">
+          <div className="flex items-center gap-3">
+            <input 
+              type="checkbox" 
+              checked={selected.length === filtered.length && filtered.length > 0}
+              onChange={toggleSelectAll}
+              className="md:hidden w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Müşteri Listesi</h2>
+          </div>
           <span className="text-xs font-medium text-slate-500">{filtered.length} kayıt</span>
         </div>
-        <div className="overflow-x-auto">
+        
+        {/* DESKTOP TABLE */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="border-b border-slate-200 dark:border-[#1f2937]">
               <tr>
@@ -362,6 +372,77 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* MOBILE CARDS */}
+        <div className="block md:hidden divide-y divide-slate-100 dark:divide-[#1f2937]">
+          {filtered.map(customer => {
+            const cfg = STATUS_CONFIG[customer.status || "profil_analizi"] || STATUS_CONFIG.profil_analizi;
+            const Icon = cfg.icon;
+            const isSelected = selected.includes(customer.id);
+
+            return (
+              <div key={customer.id} className={`p-4 transition-colors relative ${isSelected ? 'bg-blue-50/50 dark:bg-blue-500/5' : 'bg-white dark:bg-[#0d1420]'}`}>
+                <div className="flex items-start gap-3">
+                  <div className="mt-1">
+                    <input 
+                      type="checkbox" 
+                      checked={isSelected}
+                      onChange={() => toggleSelect(customer.id)}
+                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <Link href={`/customers/${customer.id}`} className="font-semibold text-slate-900 dark:text-slate-200 text-sm truncate">
+                        {customer.first_name} {customer.last_name}
+                      </Link>
+                      <CustomerActionMenu customerId={customer.id} isAdmin={isAdmin} currentStaffId={(customer as any).assigned_staff_id} />
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 mb-2 text-[11px]">
+                      {customer.country ? (
+                        <span className="font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-[#1a2232] px-2 py-0.5 rounded-md">
+                          {customer.country}
+                        </span>
+                      ) : (
+                        <span className="text-slate-500 bg-slate-100 dark:bg-[#1a2232] px-2 py-0.5 rounded-md">
+                          Ülke Seçilmedi
+                        </span>
+                      )}
+                      <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-medium ${cfg.color}`}>
+                        <Icon className="w-3 h-3" />
+                        {cfg.label}
+                      </div>
+                    </div>
+
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                      <p className="flex items-center gap-1.5"><Search className="w-3 h-3" /> {customer.phone || 'Tel yok'}</p>
+                      <p className="flex items-center gap-1.5"><FileText className="w-3 h-3" /> {customer.email || 'E-posta yok'}</p>
+                    </div>
+
+                    {customer.profile_score != null && (
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-[#1a2232]">
+                        <span className="text-[10px] text-slate-500">Skor:</span>
+                        <div className="w-16 h-1.5 bg-slate-200 dark:bg-[#1f2937] rounded-full overflow-hidden flex-1 max-w-[100px]">
+                          <div
+                            className={`h-full rounded-full ${customer.profile_score >= 70 ? 'bg-emerald-500' : customer.profile_score >= 40 ? 'bg-amber-500' : 'bg-red-500'}`}
+                            style={{ width: `${customer.profile_score}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{customer.profile_score}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="p-8 text-center text-slate-500 text-sm">
+              {search || statusFilter !== "all" ? "Arama kriterlerine uygun müşteri bulunamadı." : "Henüz hiç müşteri yok."}
+            </div>
+          )}
         </div>
       </div>
     </>

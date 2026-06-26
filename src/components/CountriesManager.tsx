@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Plus, Save, Trash2, Settings, Globe, Loader2, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
@@ -103,6 +103,7 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
   const handleSaveCountry = async () => {
     if (!selectedCountry) return;
     setSavingCountry(true);
+    const supabase = createSupabaseBrowserClient();
     const { error } = await supabase
       .from("countries")
       .update({
@@ -142,6 +143,7 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
     };
 
     let error;
+    const supabase = createSupabaseBrowserClient();
     if (activeReq.id) {
       // Update
       const res = await supabase.from("country_visa_requirements").update(payload).eq("id", activeReq.id).select().single();

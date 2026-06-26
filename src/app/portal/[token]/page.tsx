@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import { Check, Clock, AlertCircle, Calendar, FileText, CreditCard, MapPin, Phone, MessageCircle, CheckCircle2, Globe, Mail } from "lucide-react";
 import PrintButton from "@/components/Portal/PrintButton";
@@ -17,7 +17,7 @@ const STATUS_STEPS = [
 export default async function PortalPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   
-  // GÜVENLİK: Sadece id, first_name ve last_name çekiyoruz (diğer hiçbir hassas bilgi cliente inmiyor)
+  const supabase = await createSupabaseServerClient();
   const { data: customer } = await supabase
     .from('customers')
     .select('id, first_name, last_name')

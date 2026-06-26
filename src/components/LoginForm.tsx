@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { loginAction } from "@/app/actions/auth"
 import { Globe, Mail, Lock, ArrowRight, Shield, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false)
@@ -29,6 +29,7 @@ export default function LoginForm() {
     setLoading(true)
     setResetMessage(null)
     
+    const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
       redirectTo: `${window.location.origin}/reset-password`,
     })

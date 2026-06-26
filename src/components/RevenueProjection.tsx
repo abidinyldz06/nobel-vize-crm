@@ -91,7 +91,7 @@ export default function RevenueProjection({
             <TrendingUp className="w-4 h-4 text-emerald-500" /> Bu Ay / Geçen Ay Karşılaştırması
           </p>
           
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div>
               <p className="text-xs text-slate-500 mb-1">Müşteri</p>
               <div className="flex items-end gap-2">
@@ -140,20 +140,20 @@ export default function RevenueProjection({
           </div>
         </div>
         
-        <div className="flex gap-8 text-center divide-x divide-slate-200 dark:divide-[#1f2937]">
-          <div className="pl-8 first:pl-0">
+        <div className="flex flex-wrap sm:flex-nowrap gap-4 sm:gap-8 text-center divide-x divide-slate-200 dark:divide-[#1f2937] overflow-x-auto w-full md:w-auto">
+          <div className="pl-4 sm:pl-8 first:pl-0">
             <p className="text-xl font-bold text-slate-900 dark:text-white">{yearly.customers}</p>
             <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Toplam Müşteri</p>
           </div>
-          <div className="pl-8">
+          <div className="pl-4 sm:pl-8">
             <p className="text-xl font-bold text-slate-900 dark:text-white">{yearly.apps}</p>
             <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Toplam Başvuru</p>
           </div>
-          <div className="pl-8">
+          <div className="pl-4 sm:pl-8">
             <p className="text-xl font-bold text-emerald-500">₺{yearly.revenue.toLocaleString('tr-TR')}</p>
             <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Toplam Tahsilat</p>
           </div>
-          <div className="pl-8">
+          <div className="pl-4 sm:pl-8">
             <p className="text-xl font-bold text-blue-500">{Math.round(yearly.apps / Math.max(1, yearly.monthsCount))}</p>
             <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Aylık Ort. Başvuru</p>
           </div>

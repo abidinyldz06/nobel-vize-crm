@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Phone, MessageCircle, Mail, MessageSquare, Users, Send, Loader2, Clock, AlertTriangle, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 
 type Communication = {
@@ -41,6 +41,8 @@ export default function CommunicationPanel({ customerId, applicationId, initialC
     subject: "",
     content: ""
   });
+  
+  const supabase = createSupabaseBrowserClient();
 
   const handleAdd = async () => {
     if (!form.content.trim()) return;

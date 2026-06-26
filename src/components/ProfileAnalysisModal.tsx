@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { BrainCircuit, X, Save, Loader2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -8,6 +8,7 @@ export default function ProfileAnalysisModal({ customerId, currentScore, onClose
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const supabase = createSupabaseBrowserClient();
   
   const [form, setForm] = useState({
     age: "",

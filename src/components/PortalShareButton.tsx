@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Share2, Copy, RefreshCw, X, MessageCircle, Check, AlertCircle } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { toast } from "sonner";
 
 interface PortalShareButtonProps {
@@ -45,6 +45,7 @@ export default function PortalShareButton({ customer }: PortalShareButtonProps) 
     
     setIsRefreshing(true);
     try {
+      const supabase = createSupabaseBrowserClient();
       const newToken = crypto.randomUUID();
       const { error } = await supabase
         .from('customers')

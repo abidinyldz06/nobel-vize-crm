@@ -55,8 +55,17 @@ export default function NotificationCenter() {
 
   const handleMarkAllRead = async () => {
     try {
-      await fetch('/api/notifications', { method: 'PATCH' });
+      await fetch('/api/notifications?all=true', { method: 'PATCH' });
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await fetch(`/api/notifications?id=${id}`, { method: 'PATCH' });
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
     } catch (err) {
       console.error(err);
     }
@@ -145,7 +154,10 @@ export default function NotificationCenter() {
                   <Link
                     key={n.id}
                     href={n.customer_id ? `/customers/${n.customer_id}` : "#"}
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                      setIsOpen(false);
+                      if (!n.is_read) handleMarkAsRead(n.id);
+                    }}
                     className={`block px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors ${!n.is_read ? 'bg-blue-50/30 dark:bg-blue-500/5' : ''}`}
                   >
                     <div className="flex gap-3">

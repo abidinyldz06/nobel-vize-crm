@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Loader2, X, AlertCircle } from "lucide-react";
 
@@ -70,6 +70,7 @@ export default function StatusUpdater({
       updateData.rejection_reason = reasonKey; // storing the key for aggregate reports
     }
 
+    const supabase = createSupabaseBrowserClient();
     const { error } = await supabase
       .from("applications")
       .update(updateData)

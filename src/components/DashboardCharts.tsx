@@ -58,7 +58,7 @@ export default function DashboardCharts({ monthlyData, countryData, statusData, 
       {/* 1. Monthly Application Trend */}
       <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg">
         <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Aylık Başvuru Trendi</h3>
-        <div className="h-[220px] w-full">
+        <div className="h-[150px] md:h-[220px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
@@ -74,7 +74,7 @@ export default function DashboardCharts({ monthlyData, countryData, statusData, 
       {/* 2. Country Distribution */}
       <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg">
         <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Ülke Dağılımı</h3>
-        <div className="h-[220px] w-full flex items-center justify-center">
+        <div className="h-[150px] md:h-[220px] w-full flex items-center justify-center">
           {countryData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -104,7 +104,7 @@ export default function DashboardCharts({ monthlyData, countryData, statusData, 
       {/* 3. Status Distribution */}
       <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg">
         <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Başvuru Durumları</h3>
-        <div className="h-[220px] w-full">
+        <div className="h-[150px] md:h-[220px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={statusData} layout="vertical" margin={{ top: 0, right: 10, left: 30, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" horizontal={false} />
@@ -124,7 +124,7 @@ export default function DashboardCharts({ monthlyData, countryData, statusData, 
       {/* 4. Monthly Revenue Trend */}
       <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-5 rounded-2xl shadow-lg">
         <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Aylık Tahsilat (Son 6 Ay)</h3>
-        <div className="h-[220px] w-full">
+        <div className="h-[150px] md:h-[220px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <defs>

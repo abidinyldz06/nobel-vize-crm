@@ -1,13 +1,15 @@
 "use client"
 import { useState, useEffect } from "react";
-import { Building2, Palette, Save, Bell, Shield, Globe, ChevronRight, Loader2, Check, AlertCircle } from "lucide-react";
+import { Building2, Palette, Save, Bell, Shield, Globe, ChevronRight, Loader2, Check, AlertCircle, ClipboardList } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import AuditLog from "@/components/AuditLog";
 
 const TABS = [
   { id: "company", label: "Şirket Bilgileri", icon: Building2 },
   { id: "appearance", label: "Görünüm & Tema", icon: Palette },
   { id: "notifications", label: "Bildirimler", icon: Bell },
   { id: "security", label: "Güvenlik", icon: Shield },
+  { id: "audit", label: "Sistem Log", icon: ClipboardList },
 ];
 
 const COLORS = [
@@ -397,6 +399,11 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Audit Log Tab */}
+        {activeTab === "audit" && (
+          <AuditLog />
         )}
 
         {/* Save Button */}
