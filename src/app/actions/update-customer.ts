@@ -120,7 +120,6 @@ export async function checkAppointmentDensity(dateStr: string, location: string)
   
   const supabase = await createSupabaseServerClient();
   
-  // Format date boundaries
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return [];
   
@@ -130,7 +129,6 @@ export async function checkAppointmentDensity(dateStr: string, location: string)
   const endOfDay = new Date(date);
   endOfDay.setHours(23, 59, 59, 999);
 
-  // Exact location match (case insensitive if possible, using ilike)
   const { data, error } = await supabase
     .from('applications')
     .select('id, appointment_date, customers!inner(first_name, last_name)')
