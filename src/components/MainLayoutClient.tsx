@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import NotificationCenter from "@/components/NotificationCenter";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -115,6 +116,8 @@ export default function MainLayoutClient({ children }: { children: React.ReactNo
             )}
           </div>
           <div className="flex items-center gap-3 ml-auto">
+            <NotificationCenter />
+            
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="relative p-2 rounded-xl bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#1a2232] transition-all"
