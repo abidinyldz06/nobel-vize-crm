@@ -3,6 +3,8 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import ReportFilters from "@/components/ReportFilters";
 import StaffPerformance from "@/components/StaffPerformance";
 import RejectionAnalysis from "@/components/RejectionAnalysis";
+import VisaSuccessMatrix from "@/components/VisaSuccessMatrix";
+import RevenueProjection from "@/components/RevenueProjection";
 
 export const revalidate = 0;
 
@@ -30,8 +32,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   const totalCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true });
   const monthlyCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true }).gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString());
-  const allAppsQuery = supabase.from('applications').select('id, customer_id, country, status, total_fee, created_at, customers!inner(id)').gte('created_at', trendStartDate.toISOString());
-  const allCustomersQuery = supabase.from('customers').select('id, assigned_staff_id');
+  const allAppsQuery = supabase.from('applications').select('id, customer_id, country, visa_type, status, total_fee, created_at, updated_at, customers!inner(id, assigned_staff_id)').gte('created_at', trendStartDate.toISOString());
+  const allCustomersQuery = supabase.from('customers').select('id, assigned_staff_id, created_at');
 
   if (!isAdmin && staffId) {
     totalCustomersQuery.eq('assigned_staff_id', staffId);
@@ -179,6 +181,71 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   });
 
   const trendStats = Object.values(monthsData);
+
+  // --- REVENUE PROJECTION & GOALS ---
+  const lastMonthStart = new Date(startDate);
+  lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
+  const lastMonthEnd = new Date(startDate);
+
+  const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
+
+  const activeApps = allApplications?.filter((a: any) => !['onaylandi', 'reddedildi', 'kapandi'].includes(a.status)) || [];
+  const activeAppsCount = activeApps.length;
+  const expectedRevenue = activeApps.reduce((s: number, a: any) => s + Number(a.total_fee || 0), 0);
+
+  // This month
+  const thisMonthApps = allApplications?.filter((a: any) => new Date(a.created_at) >= startDate && new Date(a.created_at) < endDate) || [];
+  const thisMonthPayments = allPayments?.filter((p: any) => new Date(p.created_at) >= startDate && new Date(p.created_at) < endDate && p.status === 'alindi') || [];
+  const thisMonthCustomers = allCustomers?.filter((c: any) => new Date(c.created_at) >= startDate && new Date(c.created_at) < endDate) || [];
+
+  const thisMonth = {
+    customers: thisMonthCustomers.length,
+    apps: thisMonthApps.length,
+    revenue: thisMonthPayments.reduce((s: number, p: any) => s + Number(p.amount || 0), 0),
+    approved: thisMonthApps.filter((a: any) => a.status === 'onaylandi').length
+  };
+
+  // Last month
+  const lastMonthApps = allApplications?.filter((a: any) => new Date(a.created_at) >= lastMonthStart && new Date(a.created_at) < lastMonthEnd) || [];
+  const lastMonthPayments = allPayments?.filter((p: any) => new Date(p.created_at) >= lastMonthStart && new Date(p.created_at) < lastMonthEnd && p.status === 'alindi') || [];
+  const lastMonthCustomers = allCustomers?.filter((c: any) => new Date(c.created_at) >= lastMonthStart && new Date(c.created_at) < lastMonthEnd) || [];
+
+  const lastMonth = {
+    customers: lastMonthCustomers.length,
+    apps: lastMonthApps.length,
+    revenue: lastMonthPayments.reduce((s: number, p: any) => s + Number(p.amount || 0), 0),
+    approved: lastMonthApps.filter((a: any) => a.status === 'onaylandi').length
+  };
+
+  // Yearly
+  const yearlyApps = allApplications?.filter((a: any) => new Date(a.created_at) >= yearStart) || [];
+  const yearlyPayments = allPayments?.filter((p: any) => new Date(p.created_at) >= yearStart && p.status === 'alindi') || [];
+  const yearlyCustomers = allCustomers?.filter((c: any) => new Date(c.created_at) >= yearStart) || [];
+
+  const currentMonthNum = new Date().getMonth() + 1;
+  const isCurrentYear = new Date().getFullYear().toString() === currentYear;
+  const monthsCount = isCurrentYear ? currentMonthNum : 12;
+
+  const yearly = {
+    customers: yearlyCustomers.length,
+    apps: yearlyApps.length,
+    revenue: yearlyPayments.reduce((s: number, p: any) => s + Number(p.amount || 0), 0),
+    monthsCount
+  };
+
+  // Avg Process Days
+  let totalProcessMs = 0;
+  let closedCount = 0;
+  allApplications?.forEach((a: any) => {
+    if (['onaylandi', 'reddedildi'].includes(a.status) && a.created_at && a.updated_at) {
+      const ms = new Date(a.updated_at).getTime() - new Date(a.created_at).getTime();
+      if (ms > 0) {
+        totalProcessMs += ms;
+        closedCount++;
+      }
+    }
+  });
+  const avgProcessDays = closedCount > 0 ? Math.round(totalProcessMs / closedCount / (1000 * 60 * 60 * 24)) : 30;
 
   // E. STAFF PERFORMANCE FULL DATA (All time)
   let staffPerfData: any[] = [];
@@ -361,6 +428,19 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           </div>
         </div>
       </div>
+
+      {/* MATRIX */}
+      <VisaSuccessMatrix data={allApplications || []} staffList={allStaff || []} />
+
+      {/* REVENUE PROJECTION */}
+      <RevenueProjection 
+        activeAppsCount={activeAppsCount}
+        expectedRevenue={expectedRevenue}
+        avgProcessDays={avgProcessDays}
+        thisMonth={thisMonth}
+        lastMonth={lastMonth}
+        yearly={yearly}
+      />
 
       {/* GELİR ÖZETİ SECTION */}
       <div className="mt-10">
