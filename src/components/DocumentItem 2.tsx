@@ -38,7 +38,7 @@ export default function DocumentItem({ doc }: { doc: any }) {
 
         if (allDocs) {
           const total = allDocs.length;
-          const completed = allDocs.filter((d: any) => d.id === doc.id ? newStatus === 'tamamlandi' : d.status === 'tamamlandi').length;
+          const completed = allDocs.filter(d => d.id === doc.id ? newStatus === 'tamamlandi' : d.status === 'tamamlandi').length;
           const docProgress = total > 0 ? Math.round((completed / total) * 40) : 0; // evraklar max 40 puan
 
           // customer_id al

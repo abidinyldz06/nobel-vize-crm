@@ -59,7 +59,7 @@ export default function AuditLog() {
     if (!error && data) {
       // Type asserting because Supabase's generated types might map relations as arrays or single objects
       // in this case customers is a single row relationship or array if misconfigured, but we'll handle it carefully.
-      const formattedData = data.map(d => ({
+      const formattedData = (data as any[]).map((d: any) => ({
         ...d,
         customers: Array.isArray(d.customers) ? d.customers[0] : d.customers
       })) as any[];
