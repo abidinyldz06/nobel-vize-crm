@@ -16,6 +16,7 @@ export async function createCustomerWithApplication(formData: FormData) {
   const serviceFeeStr = formData.get('serviceFee') as string
   const assignedStaffId = formData.get('assignedStaffId') as string
   const consultantNote = formData.get('consultantNote') as string
+  const matchedRuleId = formData.get('matchedRuleId') as string
   
   // Passport Data
   const passportNo = formData.get('passportNo') as string
@@ -71,16 +72,17 @@ export async function createCustomerWithApplication(formData: FormData) {
       resolvedCountryName = country.name
       baseFee = country.base_fee_service || 0 // Default to service fee
       
-      // Fetch specific visa requirements
-      const { data: requirement } = await supabase
-        .from('country_visa_requirements')
-        .select('documents')
-        .eq('country_id', countryId)
-        .eq('visa_type', visaType)
-        .single()
-        
-      if (requirement && requirement.documents) {
-        checklist = requirement.documents
+      // Fetch specific visa rules if matchedRuleId is provided
+      if (matchedRuleId) {
+        const { data: rule } = await supabase
+          .from('country_visa_rules')
+          .select('documents')
+          .eq('id', matchedRuleId)
+          .single()
+          
+        if (rule && rule.documents) {
+          checklist = rule.documents
+        }
       }
     }
   }

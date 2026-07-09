@@ -2,7 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createCustomerWithApplication } from "@/app/actions/customer";
 import { UserPlus, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import CountryVisaSelect from "@/components/CountryVisaSelect";
+import SmartDocumentSelector from "@/components/SmartDocumentSelector";
 
 export const revalidate = 0;
 
@@ -27,7 +27,7 @@ export default async function NewCustomerPage() {
   const supabase = await createSupabaseServerClient();
   // countries tablosundan kayıtlı ülkeleri çek
   const { data: dbCountries } = await supabase.from('countries').select('id, name').order('name');
-  const { data: allRequirements } = await supabase.from('country_visa_requirements').select('country_id, visa_type');
+  const { data: allRules } = await supabase.from('country_visa_rules').select('*');
   // staff tablosundan danışmanları çek
   const { data: staffList } = await supabase.from('staff').select('id, full_name, role').eq('is_active', true).order('full_name');
 
@@ -118,8 +118,7 @@ export default async function NewCustomerPage() {
             </div>
             <div className="px-6 py-5 space-y-4">
 
-              {/* Ülke ve Vize Seçimi (Client Component) */}
-              <CountryVisaSelect dbCountries={dbCountries || []} allRequirements={allRequirements || []} />
+              <SmartDocumentSelector dbCountries={dbCountries || []} allRules={allRules || []} />
 
               {/* Danışman Ataması */}
               <div className="space-y-1.5">
