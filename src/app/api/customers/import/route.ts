@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireStaff } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
+import { runCustomerApplicationWorkflow } from "@/lib/customer-workflow";
 
 interface ImportRow {
   first_name: string;
@@ -11,17 +12,10 @@ interface ImportRow {
   country?: string;
 }
 
-interface CountryRow {
+interface ExistingCustomer {
   id: string;
-  name: string;
-  base_fee_service?: number | null;
-}
-
-interface DocumentRule {
-  name: string;
-  category?: string;
-  required?: boolean;
-  description?: string;
+  phone: string | null;
+  email: string | null;
 }
 
 export async function POST(req: Request) {
@@ -43,12 +37,20 @@ export async function POST(req: Request) {
   }
   const { rows, resolutionMode } = body;
   
-  if (!rows || !Array.isArray(rows)) {
+  if (!rows || !Array.isArray(rows) || rows.length === 0 || rows.length > 1000) {
     return NextResponse.json({ error: "Geçersiz veri" }, { status: 400 });
   }
 
   const importRows = rows as ImportRow[];
-  if (!importRows.every(row => row && typeof row.first_name === "string" && typeof row.last_name === "string")) {
+  if (!importRows.every(row => row
+    && typeof row.first_name === "string"
+    && typeof row.last_name === "string"
+    && row.first_name.trim().length > 0
+    && row.last_name.trim().length > 0
+    && row.first_name.length <= 100
+    && row.last_name.length <= 100
+    && (!row.email || row.email.length <= 254)
+    && (!row.phone || row.phone.length <= 30))) {
     return NextResponse.json({ error: "Her satırda ad ve soyad bulunmalıdır." }, { status: 400 });
   }
 
@@ -56,12 +58,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Geçersiz mükerrer kayıt çözüm modu." }, { status: 400 });
   }
 
-  // Fetch reference data
-  const { data: countries } = await supabase.from('countries').select('*');
-  const { data: reqs } = await supabase.from('country_visa_requirements').select('*').eq('visa_type', 'turist');
-
   // Fetch existing customers to handle duplicates
-  const { data: existingCustomers } = await supabase.from('customers').select('id, phone, email');
+  const { data: existingCustomers, error: existingCustomersError } = await supabase
+    .from('customers')
+    .select('id, phone, email');
+  if (existingCustomersError) {
+    return NextResponse.json({ error: "Mevcut müşteri listesi alınamadı." }, { status: 500 });
+  }
+  const knownCustomers = (existingCustomers ?? []) as ExistingCustomer[];
   
   const results = {
     success: 0,
@@ -71,14 +75,16 @@ export async function POST(req: Request) {
     errors: [] as string[]
   };
 
-  for (const row of importRows) {
+  for (const [rowIndex, row] of importRows.entries()) {
     try {
       // Find duplicate (phone can have different formats, but for basic import we match exact or after trimming)
       const cleanPhone = row.phone ? row.phone.replace(/[^0-9]/g, '') : null;
       
-      const duplicate = existingCustomers?.find(c => {
+      const normalizedEmail = row.email?.trim().toLowerCase() || null;
+      const duplicate = knownCustomers.find(c => {
         const cPhone = c.phone ? c.phone.replace(/[^0-9]/g, '') : null;
-        return (cleanPhone && cPhone === cleanPhone) || (row.email && c.email === row.email);
+        return (cleanPhone && cPhone === cleanPhone)
+          || (normalizedEmail && c.email?.toLowerCase() === normalizedEmail);
       });
 
       if (duplicate) {
@@ -88,8 +94,8 @@ export async function POST(req: Request) {
         } else if (resolutionMode === 'update') {
           // Update profile only
           const { error: updateErr } = await supabase.from('customers').update({
-            first_name: row.first_name,
-            last_name: row.last_name,
+            first_name: row.first_name.trim(),
+            last_name: row.last_name.trim(),
             passport_no: row.passport_no || null,
           }).eq('id', duplicate.id);
           
@@ -98,77 +104,31 @@ export async function POST(req: Request) {
           continue; 
         }
       } else {
-        // Create new customer
-        const customerData = {
-          first_name: row.first_name,
-          last_name: row.last_name,
-          phone: row.phone || null,
-          email: row.email || null,
+        const result = await runCustomerApplicationWorkflow(supabase, {
+          first_name: row.first_name.trim(),
+          last_name: row.last_name.trim(),
+          phone: row.phone?.trim() || null,
+          email: normalizedEmail,
           profile_score: 30,
           passport_no: row.passport_no || null,
-        };
-        const { data: newCustomer, error: insertErr } = await supabase
-          .from('customers')
-          .insert({ ...customerData, assigned_staff_id: staffId })
-          .select()
-          .single();
+          country_name: row.country?.trim() || null,
+          visa_type: 'turistik',
+          assigned_staff_id: staffId,
+          consulate_fee: 0,
+          activity_action: 'CSV içe aktarma ile müşteri kaydı oluşturuldu',
+        });
 
-        if (insertErr) throw new Error(`Müşteri eklenemedi: ${row.first_name} ${row.last_name}`);
-        const customerId = newCustomer.id;
-
-        // If a country was provided, try to match it
-        let resolvedCountry: CountryRow | null = null;
-        let checklist: DocumentRule[] = [];
-        let baseFee = 0;
-
-        if (row.country) {
-          const rowCountryLower = String(row.country).toLowerCase().trim();
-          resolvedCountry = (countries as CountryRow[] | null)?.find(c => c.name.toLowerCase() === rowCountryLower) || null;
-          if (resolvedCountry) {
-            baseFee = resolvedCountry.base_fee_service || 0;
-            const resolvedCountryId = resolvedCountry.id;
-            const req = reqs?.find(r => r.country_id === resolvedCountryId);
-            if (req && req.documents) {
-              checklist = req.documents as DocumentRule[];
-            }
-          }
-        }
-
-        if (resolvedCountry) {
-          // Create Application
-          const appData = {
-            customer_id: customerId,
-            country: resolvedCountry.name,
-            consulate_fee: 0,
-            service_fee: baseFee,
-            total_fee: baseFee,
-            status: 'profil_analizi',
-            visa_type: 'turist',
-          };
-          const { data: application, error: appErr } = await supabase
-            .from('applications')
-            .insert([{ ...appData, assigned_staff_id: staffId }])
-            .select()
-            .single();
-
-          if (!appErr && checklist.length > 0) {
-            const docs = checklist.map(doc => ({
-              application_id: application.id,
-              document_type: doc.name,
-              category: doc.category || 'diger',
-              is_required: doc.required !== undefined ? doc.required : true,
-              description: doc.description || null,
-              status: 'bekleniyor'
-            }));
-            await supabase.from('documents').insert(docs);
-          }
-        }
-        
+        knownCustomers.push({
+          id: result.customer_id,
+          phone: row.phone?.trim() || null,
+          email: normalizedEmail,
+        });
         results.success++;
       }
     } catch (err: unknown) {
       results.failed++;
-      results.errors.push(err instanceof Error ? err.message : "Bilinmeyen içe aktarma hatası");
+      const message = err instanceof Error ? err.message : "Bilinmeyen içe aktarma hatası";
+      results.errors.push(`Satır ${rowIndex + 1}: ${message}`);
     }
   }
 

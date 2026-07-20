@@ -2,7 +2,25 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
-## [Unreleased] — Faz 0 Güvenlik Temeli
+## [Unreleased] — Faz 1 Veritabanı Standardizasyonu
+
+### Veri bütünlüğü
+
+- Boş veritabanından tekrar üretilebilen Supabase CLI migration zinciri eklendi.
+- Ülke/vize kuralları `country_visa_rules` modelinde birleştirildi.
+- Kritik foreign key, check constraint ve indeksler standardize edildi.
+- Müşteri/başvuru oluşturma ile durum güncelleme işlemleri atomik RPC'lere
+  taşındı.
+
+### Yedekleme ve operasyon
+
+- Sayfalı ve sürümlü v2 JSON yedeği ile transaction tabanlı atomik geri yükleme
+  eklendi.
+- Salt-okunur şema envanteri ve veri kalite ön kontrol betikleri eklendi.
+- Yerel pgTAP testleri, Faz 1 yayın rehberi ve tek kiracılı mimari karar kaydı
+  eklendi.
+
+## Faz 0 Güvenlik Temeli
 
 ### Güvenlik
 

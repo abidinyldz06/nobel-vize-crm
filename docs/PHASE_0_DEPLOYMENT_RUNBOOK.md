@@ -10,7 +10,7 @@ Staging ve production ortamlarında ayrı değerler kullanın:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `GOOGLE_FORM_WEBHOOK_SECRET`
-- `ENABLE_DANGEROUS_RESTORE=false`
+- `ENABLE_ATOMIC_RESTORE=false`
 
 Service-role ve webhook anahtarı yalnızca sunucuda bulunmalıdır.
 
@@ -80,7 +80,7 @@ Sonraki tüm kullanıcılar uygulamadaki admin personel daveti üzerinden ekleni
 - Evrak yüklenebilir; doğrudan public URL çalışmaz; uygulamadaki indirme düğmesi 60 saniyelik signed URL ile çalışır.
 - İmzasız, yanlış imzalı ve eski webhook istekleri reddedilir.
 - Doğru imzalı webhook bir kayıt oluşturur.
-- Backup indirilebilir; restore varsayılan olarak devre dışıdır.
+- Backup indirilebilir; atomik restore varsayılan olarak devre dışıdır.
 
 ## 5. Geri dönüş
 

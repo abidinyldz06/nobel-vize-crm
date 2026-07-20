@@ -33,6 +33,7 @@ npm install
 # NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 # SUPABASE_SERVICE_ROLE_KEY=...       # yalnızca sunucu
 # GOOGLE_FORM_WEBHOOK_SECRET=...      # yalnızca sunucu
+# ENABLE_ATOMIC_RESTORE=false          # normal çalışma için kapalı
 
 # Geliştirme sunucusunu başlatın
 npm run dev
@@ -44,6 +45,21 @@ npm run dev
 - Müşteri evrakları private Supabase Storage bucket'ında tutulur ve uygulama kısa süreli imzalı bağlantı üretir.
 - Google Form webhook istekleri `x-webhook-timestamp`, benzersiz UUID biçiminde `x-webhook-id` ve `x-webhook-signature` başlıklarını göndermelidir. İmza, `${timestamp}.${eventId}.${hamJsonGövdesi}` metninin `GOOGLE_FORM_WEBHOOK_SECRET` ile HMAC-SHA256 özetidir.
 - Veritabanı migration'ları önce staging ortamında uygulanmalıdır. Ayrıntılar `supabase/migrations/README.md` dosyasındadır.
+
+## Yerel veritabanı doğrulaması
+
+Docker Desktop çalışırken migration zinciri ve PostgreSQL testleri şu
+komutlarla doğrulanabilir:
+
+```bash
+npm run db:start
+npm run db:reset
+npm run db:lint
+npm run db:test
+```
+
+Faz 1 staging/production adımları ve geri dönüş planı
+`docs/PHASE_1_DEPLOYMENT_RUNBOOK.md` dosyasındadır.
 
 ## Teknik yol haritası
 

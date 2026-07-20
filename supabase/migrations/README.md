@@ -14,3 +14,19 @@ Bu klasördeki dosyalar sıralı ve geri izlenebilir veritabanı değişiklikler
 ## Faz 0 ortam gereksinimi
 
 Portal sunucu tarafında sınırlı sorgu çalıştırdığı için Vercel/Sunucu ortamında `SUPABASE_SERVICE_ROLE_KEY` bulunmalıdır. Bu değer hiçbir zaman `NEXT_PUBLIC_` önekiyle tanımlanmamalı veya tarayıcıya gönderilmemelidir.
+
+## Faz 1 yerel doğrulama
+
+Migration zinciri artık boş bir yerel Supabase veritabanından yeniden
+üretilebilir. Docker Desktop çalışırken:
+
+```bash
+npm run db:start
+npm run db:reset
+npm run db:lint
+npm run db:test
+```
+
+Canlı veya staging uygulama, envanter, yedekleme, veri kalite kontrolü ve geri
+dönüş adımları için `docs/PHASE_1_DEPLOYMENT_RUNBOOK.md` izlenmelidir. CLI ile
+bağlı uzak projeye migration gönderme bu yerel komutların parçası değildir.

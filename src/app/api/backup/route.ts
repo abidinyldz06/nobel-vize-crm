@@ -1,60 +1,123 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
+import { requireAdmin } from "@/lib/authz";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
-// Kaydedilecek ve geri yüklenecek tabloların doğru sırası (Parent -> Child)
 const TABLES_ORDER = [
+  "tenants",
+  "staff",
   "countries",
-  "country_visa_requirements",
+  "country_visa_rules",
   "customers",
   "applications",
   "documents",
-  "payments",
   "notes",
+  "payments",
+  "activity_log",
   "communications",
   "visa_history",
   "family_members",
-  "activity_log"
-];
+  "webhook_events",
+] as const;
 
-// Silme işlemi için ters sıra (Child -> Parent)
-const TABLES_REVERSE_ORDER = [...TABLES_ORDER].reverse();
+type BackupTable = typeof TABLES_ORDER[number];
+
+const TABLE_ORDER_COLUMNS: Record<BackupTable, string> = {
+  tenants: "id",
+  staff: "id",
+  countries: "id",
+  country_visa_rules: "id",
+  customers: "id",
+  applications: "id",
+  documents: "id",
+  notes: "id",
+  payments: "id",
+  activity_log: "id",
+  communications: "id",
+  visa_history: "id",
+  family_members: "id",
+  webhook_events: "event_id",
+};
+
+const MAX_BACKUP_BYTES = 25 * 1024 * 1024;
+const PAGE_SIZE = 1000;
+
+interface BackupV2 {
+  format: "nobel-vize-crm-backup";
+  version: "2.0";
+  exported_at: string;
+  schema: "phase1";
+  storage: {
+    included: false;
+    note: string;
+  };
+  tables: Record<BackupTable, unknown[]>;
+}
+
+function isBackupV2(value: unknown): value is BackupV2 {
+  if (!value || typeof value !== "object") return false;
+  const backup = value as Record<string, unknown>;
+  if (backup.format !== "nobel-vize-crm-backup" || backup.version !== "2.0") return false;
+  if (!backup.tables || typeof backup.tables !== "object" || Array.isArray(backup.tables)) return false;
+  const tables = backup.tables as Record<string, unknown>;
+  return TABLES_ORDER.every(table => Array.isArray(tables[table]));
+}
+
+async function exportTable(table: BackupTable): Promise<unknown[]> {
+  const supabase = createSupabaseAdminClient();
+  const records: unknown[] = [];
+
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from(table)
+      .select("*")
+      .order(TABLE_ORDER_COLUMNS[table], { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (error) throw new Error(`Failed to export ${table}: ${error.message}`);
+    const page = data ?? [];
+    records.push(...page);
+    if (page.length < PAGE_SIZE) break;
+  }
+
+  return records;
+}
 
 export async function GET() {
-  let supabase;
   try {
-    ({ supabase } = await requireAdmin());
+    await requireAdmin();
   } catch (error) {
     return authorizationErrorResponse(error);
   }
 
-  const exportData: Record<string, any> = {
-    exportDate: new Date().toISOString(),
-    version: "1.0",
-    tables: {}
-  };
-
   try {
-    for (const table of TABLES_ORDER) {
-      const { data, error } = await supabase.from(table).select('*');
-      if (error) {
-        console.error(`Error exporting table ${table}:`, error);
-        throw new Error(`Failed to export ${table}: ${error.message}`);
-      }
-      exportData.tables[table] = data || [];
-    }
+    const tableEntries = await Promise.all(
+      TABLES_ORDER.map(async table => [table, await exportTable(table)] as const),
+    );
 
-    // Response header'larını ayarlayarak dosya indirmesini sağla
-    return new NextResponse(JSON.stringify(exportData, null, 2), {
+    const backup: BackupV2 = {
+      format: "nobel-vize-crm-backup",
+      version: "2.0",
+      exported_at: new Date().toISOString(),
+      schema: "phase1",
+      storage: {
+        included: false,
+        note: "Belge metadata kayitlari dahildir; storage dosya binary'leri ayri yedeklenmelidir.",
+      },
+      tables: Object.fromEntries(tableEntries) as Record<BackupTable, unknown[]>,
+    };
+
+    return new NextResponse(JSON.stringify(backup, null, 2), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="nobel-vize-backup-${new Date().toISOString().split('T')[0]}.json"`,
+        "Content-Type": "application/json",
+        "Content-Disposition": `attachment; filename="nobel-vize-backup-v2-${new Date().toISOString().split("T")[0]}.json"`,
+        "Cache-Control": "no-store",
       },
     });
-
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("Backup export failed:", error);
+    return NextResponse.json({ error: "Yedek oluşturulamadı." }, { status: 500 });
   }
 }
 
@@ -66,53 +129,60 @@ export async function POST(req: Request) {
     return authorizationErrorResponse(error);
   }
 
-  // Mevcut restore akışı transaction kullanmadığı için varsayılan olarak kapalıdır.
-  // Faz 1'de atomik veritabanı fonksiyonuna taşınana kadar yalnızca kontrollü
-  // bakım penceresinde iki ayrı onayla açılabilir.
-  if (process.env.ENABLE_DANGEROUS_RESTORE !== "true") {
+  if (process.env.ENABLE_ATOMIC_RESTORE !== "true") {
     return NextResponse.json(
-      { error: "Geri yükleme güvenlik nedeniyle devre dışı. Atomik restore Faz 1 kapsamında tamamlanacak." },
+      { error: "Atomik geri yükleme bu ortamda devre dışı." },
       { status: 503 },
     );
   }
 
-  if (req.headers.get("x-confirm-restore") !== "RESTORE_ALL_DATA") {
+  if (req.headers.get("x-confirm-restore") !== "RESTORE_BACKUP_V2") {
     return NextResponse.json({ error: "Geri yükleme onay başlığı eksik." }, { status: 400 });
   }
 
+  const contentLength = Number(req.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_BACKUP_BYTES) {
+    return NextResponse.json({ error: "Yedek dosyası 25 MB sınırını aşıyor." }, { status: 413 });
+  }
+
+  let rawBackup: string;
   try {
-    const backupData = await req.json();
+    rawBackup = await req.text();
+  } catch {
+    return NextResponse.json({ error: "Yedek dosyası okunamadı." }, { status: 400 });
+  }
 
-    if (!backupData || !backupData.tables) {
-      return NextResponse.json({ error: "Invalid backup file format." }, { status: 400 });
-    }
+  if (new TextEncoder().encode(rawBackup).byteLength > MAX_BACKUP_BYTES) {
+    return NextResponse.json({ error: "Yedek dosyası 25 MB sınırını aşıyor." }, { status: 413 });
+  }
 
-    // 1. Önce Foreign Key hatalarını engellemek için Child'dan Parent'a doğru tüm verileri sil.
-    for (const table of TABLES_REVERSE_ORDER) {
-      // not('id', 'is', null) tüm kayıtları eşleştirip siler
-      const { error } = await supabase.from(table).delete().not('id', 'is', null);
-      if (error) {
-        console.error(`Error deleting table ${table}:`, error);
-        throw new Error(`Failed to clear table ${table}: ${error.message}`);
-      }
-    }
+  let backupData: unknown;
+  try {
+    backupData = JSON.parse(rawBackup);
+  } catch {
+    return NextResponse.json({ error: "Geçersiz JSON yedek dosyası." }, { status: 400 });
+  }
 
-    // 2. Parent'dan Child'a doğru verileri insert et.
-    for (const table of TABLES_ORDER) {
-      const records = backupData.tables[table];
-      if (records && records.length > 0) {
-        // Toplu insert işlemi (Eğer kayıt sayısı çok fazlaysa batch halinde yapılmalıdır, ama şimdilik doğrudan insert ediyoruz)
-        const { error } = await supabase.from(table).insert(records);
-        if (error) {
-          console.error(`Error restoring table ${table}:`, error);
-          throw new Error(`Failed to restore table ${table}: ${error.message}`);
-        }
-      }
-    }
+  if (!isBackupV2(backupData)) {
+    return NextResponse.json({ error: "Yalnızca doğrulanmış v2 yedekleri geri yüklenebilir." }, { status: 400 });
+  }
 
-    return NextResponse.json({ success: true, message: "Backup successfully restored." });
+  try {
+    const { data, error } = await supabase.rpc("restore_backup_v2", {
+      p_backup: backupData,
+    });
+    if (error) throw error;
 
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      message: "Yedek tek transaction içinde başarıyla geri yüklendi.",
+      result: data,
+    });
+  } catch (error: unknown) {
+    console.error("Atomic restore failed:", error);
+    return NextResponse.json(
+      { error: "Geri yükleme başarısız oldu; transaction tamamen geri alındı." },
+      { status: 500 },
+    );
   }
 }

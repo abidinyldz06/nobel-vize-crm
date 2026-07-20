@@ -68,13 +68,16 @@ Uygulama müşteri, vize başvurusu, evrak, randevu, ödeme, personel, iletişim
 
 ### Faz 1 — Veritabanı standardizasyonu
 
-- [ ] Canlı şema envanteri ve yedek
-- [ ] Supabase CLI migration zinciri
-- [ ] Tek ülke/vize kuralı modeli
-- [ ] Foreign key, enum/check ve indekslerin standardizasyonu
-- [ ] Kritik iş akışları için transaction/RPC
-- [ ] Sürümlü ve atomik backup/restore
-- [ ] SaaS hedefleniyorsa tüm iş tablolarında `tenant_id` izolasyonu
+- [ ] Canlı şema envanteri ve yedek (betikler hazır ve yerelde doğrulandı; uzak uygulama bekliyor)
+- [x] Supabase CLI migration zinciri
+- [x] Tek ülke/vize kuralı modeli
+- [x] Foreign key, check ve indekslerin standardizasyonu
+- [x] Kritik iş akışları için transaction/RPC
+- [x] Sürümlü ve atomik backup/restore
+- [x] Tek kiracılı mimari karar kaydı; SaaS `tenant_id` izolasyonu Faz 3 ürün kararına bağlandı
+
+Faz 1 uygulama ve test kanıtları `docs/PHASE_1_IMPLEMENTATION_REPORT.md`, staging
+ve production adımları `docs/PHASE_1_DEPLOYMENT_RUNBOOK.md` içindedir.
 
 ### Faz 2 — Stabilizasyon ve kalite
 
