@@ -8,7 +8,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint src",
-    "test:security": "node --test tests/*.test.ts"
+    "test:security": "node --test tests/*.test.ts",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:lint": "supabase db lint --schema public --level warning",
+    "db:test": "supabase test db"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -35,6 +40,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "supabase": "^2.109.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

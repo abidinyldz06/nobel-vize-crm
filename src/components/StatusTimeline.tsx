@@ -51,21 +51,14 @@ export default function StatusTimeline({
     setLoading(true);
     
     const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase
-      .from("applications")
-      .update({ status: newStatus })
-      .eq("id", applicationId);
+    const { error } = await supabase.rpc("update_application_status_v1", {
+      p_application_id: applicationId,
+      p_status: newStatus,
+      p_rejection_reason: null,
+      p_action: `Durum güncellendi: ${STATUS_CONFIG[newStatus]?.label || newStatus}`,
+    });
 
     if (!error) {
-      // Get logged in user
-      const { data: { user } } = await supabase.auth.getUser();
-
-      // Log activity
-      await supabase.from("activity_log").insert([{
-        application_id: applicationId,
-        action: `Durum güncellendi: ${STATUS_CONFIG[newStatus]?.label || newStatus}`,
-        performed_by: user?.email || "Danışman",
-      }]);
       router.refresh();
     } else {
       alert("Durum güncellenirken hata: " + error.message);

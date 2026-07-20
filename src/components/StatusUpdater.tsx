@@ -65,34 +65,24 @@ export default function StatusUpdater({
       reasonText = rejectionNote ? `${label} - ${rejectionNote}` : label;
     }
 
-    const updateData: any = { status: newStatus };
-    if (newStatus === "reddedildi") {
-      updateData.rejection_reason = reasonKey; // storing the key for aggregate reports
+    const supabase = createSupabaseBrowserClient();
+    const oldStatusLabel = STATUS_OPTIONS.find(o => o.key === status)?.label || status;
+    const newStatusLabel = STATUS_OPTIONS.find(o => o.key === newStatus)?.label || newStatus;
+    let actionLog = `Durum "${oldStatusLabel}" aşamasından "${newStatusLabel}" aşamasına değiştirildi`;
+    if (reasonText) {
+      actionLog += ` (Ret Sebebi: ${reasonText})`;
     }
 
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase
-      .from("applications")
-      .update(updateData)
-      .eq("id", applicationId);
+    const { error } = await supabase.rpc("update_application_status_v1", {
+      p_application_id: applicationId,
+      p_status: newStatus,
+      p_rejection_reason: reasonKey,
+      p_action: actionLog,
+    });
 
     if (!error) {
-      const { data: { user } } = await supabase.auth.getUser();
-      const oldStatusLabel = STATUS_OPTIONS.find(o => o.key === status)?.label || status;
-      const newStatusLabel = STATUS_OPTIONS.find(o => o.key === newStatus)?.label || newStatus;
-      
-      let actionLog = `Durum "${oldStatusLabel}" aşamasından "${newStatusLabel}" aşamasına değiştirildi`;
-      if (reasonText) {
-        actionLog += ` (Ret Sebebi: ${reasonText})`;
-      }
-
-      await supabase.from("activity_log").insert([{
-        application_id: applicationId,
-        action: actionLog,
-        performed_by: user?.email || "Danışman"
-      }]);
-
       setStatus(newStatus);
+      setRejectionNote("");
       router.refresh();
     } else {
       alert("Durum güncellenirken hata oluştu: " + error.message);

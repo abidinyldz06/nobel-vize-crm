@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Download, UploadCloud, AlertTriangle, Loader2, Database, FileJson, FileSpreadsheet, Check } from "lucide-react";
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 
 export default function BackupPanel() {
@@ -16,7 +15,13 @@ export default function BackupPanel() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!confirm("DİKKAT: Bu işlem mevcut tüm verileri SİLER ve yüklediğiniz dosyadaki verilerle değiştirir. Bu işlem GERİ ALINAMAZ. Onaylıyor musunuz?")) {
+    if (file.size > 25 * 1024 * 1024) {
+      setErrorMsg("Yedek dosyası 25 MB sınırını aşıyor.");
+      e.target.value = '';
+      return;
+    }
+
+    if (!confirm("DİKKAT: Bu işlem mevcut verileri v2 yedekteki kayıtlarla atomik olarak değiştirir. Başarısız olursa tüm işlem geri alınır. Devam edilsin mi?")) {
       e.target.value = '';
       return;
     }
@@ -32,12 +37,16 @@ export default function BackupPanel() {
 
     try {
       const text = await file.text();
-      const backupData = JSON.parse(text);
+      const backupData = JSON.parse(text) as Record<string, unknown>;
+      if (backupData.format !== "nobel-vize-crm-backup" || backupData.version !== "2.0") {
+        throw new Error("Yalnızca Nobel Vize CRM v2 yedekleri geri yüklenebilir.");
+      }
 
       const response = await fetch('/api/backup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-confirm-restore': 'RESTORE_BACKUP_V2',
         },
         body: JSON.stringify(backupData),
       });
@@ -53,8 +62,8 @@ export default function BackupPanel() {
         router.refresh();
       }, 2000);
       
-    } catch (err: any) {
-      setErrorMsg(err.message || "Dosya işlenirken bir hata oluştu.");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Dosya işlenirken bir hata oluştu.");
     } finally {
       setRestoring(false);
       e.target.value = '';
@@ -70,18 +79,22 @@ export default function BackupPanel() {
       if (!response.ok) {
         throw new Error("Veri çekilemedi.");
       }
-      const data = await response.json();
+      const data = await response.json() as { tables?: Record<string, unknown> };
       
       if (!data.tables) throw new Error("Geçersiz veri formatı.");
 
       // Her tablo için CSV oluştur ve indir
       for (const [tableName, records] of Object.entries(data.tables)) {
         if (!Array.isArray(records) || records.length === 0) continue;
+        const typedRecords = records.filter(
+          (record): record is Record<string, unknown> => Boolean(record) && typeof record === 'object' && !Array.isArray(record),
+        );
+        if (typedRecords.length === 0) continue;
 
-        const headers = Object.keys(records[0]);
+        const headers = Object.keys(typedRecords[0]);
         const csvRows = [
           headers.join(","),
-          ...records.map(row => 
+          ...typedRecords.map(row =>
             headers.map(header => {
               let cell = row[header] === null ? '' : String(row[header]);
               cell = cell.replace(/"/g, '""');
@@ -101,6 +114,7 @@ export default function BackupPanel() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
         
         // Tarayıcı indirmelerini yormamak için çok kısa bir bekleme
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -108,8 +122,8 @@ export default function BackupPanel() {
       
       setSuccessMsg("Tüm CSV dosyaları indirildi!");
       setTimeout(() => setSuccessMsg(""), 3000);
-    } catch (err: any) {
-      setErrorMsg(err.message || "CSV dışa aktarılırken hata oluştu.");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "CSV dışa aktarılırken hata oluştu.");
     } finally {
       setExportingCsv(false);
     }
@@ -172,7 +186,7 @@ export default function BackupPanel() {
                   <h4 className="font-semibold text-slate-900 dark:text-white text-sm">CSV Formatında Dışa Aktar</h4>
                 </div>
                 <p className="text-xs text-slate-500 mb-4">
-                  Her bir tabloyu (Müşteriler, Başvurular vb.) ayrı ayrı CSV dosyaları olarak indirir. Excel'de incelemek için idealdir.
+                  Her bir tabloyu (Müşteriler, Başvurular vb.) ayrı ayrı CSV dosyaları olarak indirir. Excel&apos;de incelemek için idealdir.
                 </p>
               </div>
               <button 
