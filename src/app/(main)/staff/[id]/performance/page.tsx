@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { ArrowLeft, Users, FileCheck, Banknote, Calendar } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Tables } from "@/types/database";
 
 export const revalidate = 0;
 
@@ -25,7 +26,7 @@ export default async function StaffPerformanceDetail({ params }: { params: Promi
     .order('created_at', { ascending: false });
 
   // Fetch apps for those customers
-  let applications: any[] = [];
+  let applications: Pick<Tables<'applications'>, 'id' | 'customer_id' | 'status' | 'total_fee' | 'created_at' | 'updated_at'>[] = [];
   if (customers && customers.length > 0) {
     const customerIds = customers.map(c => c.id);
     const { data: apps } = await supabase

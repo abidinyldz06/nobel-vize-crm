@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, Clock, UserPlus, FileText, CreditCard, Calendar, Activity, X } from "lucide-react";
+import { Bell, Check, Clock, UserPlus, FileText, CreditCard, Calendar, Activity } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 interface Notification {
   id: string;
@@ -20,7 +19,6 @@ export default function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
   const fetchNotifications = async () => {
     try {

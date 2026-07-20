@@ -3,17 +3,9 @@ import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { CheckCircle, XCircle, FileText, Plus, Loader2, AlertTriangle, Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { Tables } from "@/types/database";
 
-type VisaHistory = {
-  id: string;
-  country: string;
-  visa_type: string;
-  result: string; // 'onay', 'ret'
-  application_date: string;
-  expiry_date?: string;
-  notes?: string;
-  created_at: string;
-};
+type VisaHistory = Tables<'visa_history'>;
 
 export default function VisaHistoryPanel({ customerId, initialHistory }: { customerId: string; initialHistory: VisaHistory[] }) {
   const [history, setHistory] = useState<VisaHistory[]>(initialHistory || []);
@@ -180,7 +172,7 @@ export default function VisaHistoryPanel({ customerId, initialHistory }: { custo
                 <span className="text-[10px] text-slate-500 px-1.5 py-0.5 bg-slate-200 dark:bg-[#1f2937] rounded-md">{item.visa_type}</span>
               </div>
               <div className="text-[10px] text-slate-500 mb-1">
-                Tarih: {new Date(item.application_date).toLocaleDateString('tr-TR')} 
+                Tarih: {item.application_date ? new Date(item.application_date).toLocaleDateString('tr-TR') : 'Belirtilmedi'}
                 {item.expiry_date && ` - Bitiş: ${new Date(item.expiry_date).toLocaleDateString('tr-TR')}`}
               </div>
               {item.notes && (

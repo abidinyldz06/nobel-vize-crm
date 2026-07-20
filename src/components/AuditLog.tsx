@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { Download, Search, Filter, Clock, User, Activity, FileText, Calendar, CreditCard, ExternalLink } from "lucide-react";
+import { Download, Clock, User, Activity, FileText, Calendar, CreditCard, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 interface LogEntry {
@@ -29,7 +29,7 @@ export default function AuditLog() {
   
   const [limit, setLimit] = useState(50);
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true);
     let query = supabase
       .from('activity_log')
@@ -57,20 +57,15 @@ export default function AuditLog() {
 
     const { data, error } = await query;
     if (!error && data) {
-      // Type asserting because Supabase's generated types might map relations as arrays or single objects
-      // in this case customers is a single row relationship or array if misconfigured, but we'll handle it carefully.
-      const formattedData = (data as any[]).map((d: any) => ({
-        ...d,
-        customers: Array.isArray(d.customers) ? d.customers[0] : d.customers
-      })) as any[];
-      setLogs(formattedData);
+      setLogs(data);
     }
     setLoading(false);
-  };
+  }, [dateFilter, limit, supabase, typeFilter]);
 
   useEffect(() => {
-    fetchLogs();
-  }, [dateFilter, typeFilter, limit]);
+    const timer = window.setTimeout(() => void fetchLogs(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchLogs]);
 
   const exportToCSV = () => {
     const headers = ["Tarih", "Kullanıcı", "Aksiyon", "Tip", "Müşteri"];

@@ -83,7 +83,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
 
   // Document calculations
   const totalDocs = documents?.length || 0;
-  const completedDocs = documents?.filter(d => d.status === 'tamamlandi').length || 0;
+  const completedDocs = documents?.filter(d => d.status === 'onaylandi').length || 0;
   const docProgress = totalDocs > 0 ? (completedDocs / totalDocs) * 100 : 0;
 
   // Payment calculations
@@ -230,18 +230,18 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                 <div className="space-y-3 print:space-y-2">
                   {documents.map(doc => (
                     <div key={doc.id} className={`flex items-start justify-between p-4 rounded-2xl border transition-all ${
-                      doc.status === 'tamamlandi' 
+                      doc.status === 'onaylandi'
                         ? 'bg-white dark:bg-[#0d1420] border-slate-100 dark:border-[#1f2937] opacity-75 print:opacity-100' 
                         : 'bg-amber-50/50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20'
                     } print:rounded-lg print:p-3`}>
                       <div className="flex-1 pr-4">
-                        <p className={`font-bold text-sm ${doc.status === 'tamamlandi' ? 'text-slate-700 dark:text-slate-300' : 'text-amber-900 dark:text-amber-400'}`}>
+                        <p className={`font-bold text-sm ${doc.status === 'onaylandi' ? 'text-slate-700 dark:text-slate-300' : 'text-amber-900 dark:text-amber-400'}`}>
                           {doc.document_type}
                         </p>
-                        {doc.description && <p className={`text-xs mt-1 font-medium ${doc.status === 'tamamlandi' ? 'text-slate-400' : 'text-amber-700/70 dark:text-amber-400/70'}`}>{doc.description}</p>}
+                        {doc.description && <p className={`text-xs mt-1 font-medium ${doc.status === 'onaylandi' ? 'text-slate-400' : 'text-amber-700/70 dark:text-amber-400/70'}`}>{doc.description}</p>}
                       </div>
                       <div className="shrink-0 mt-0.5">
-                        {doc.status === 'tamamlandi' ? (
+                        {doc.status === 'onaylandi' ? (
                           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 print:bg-transparent print:w-auto">
                             <CheckCircle2 className="w-5 h-5" />
                           </div>

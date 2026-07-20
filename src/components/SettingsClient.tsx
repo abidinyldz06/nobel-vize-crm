@@ -4,6 +4,7 @@ import { Building2, Palette, Save, Bell, Shield, Globe, ChevronRight, Loader2, C
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import AuditLog from "@/components/AuditLog";
 import BackupPanel from "@/components/BackupPanel";
+import type { Tables, TablesUpdate } from "@/types/database";
 
 const TABS = [
   { id: "company", label: "Şirket Bilgileri", icon: Building2 },
@@ -25,7 +26,7 @@ const COLORS = [
   { hex: "#6366f1", name: "Indigo" },
 ];
 
-export default function SettingsClient({ tenant }: { tenant: any }) {
+export default function SettingsClient({ tenant }: { tenant: Tables<'tenants'> | null }) {
   const supabase = createSupabaseBrowserClient();
   const [activeTab, setActiveTab] = useState("company");
   const [saving, setSaving] = useState(false);
@@ -64,9 +65,7 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
     document.documentElement.style.setProperty('--color-primary', hex);
   };
 
-  const saveTenantData = async (payload: any) => {
-    payload.updated_at = new Date().toISOString();
-    
+  const saveTenantData = async (payload: TablesUpdate<'tenants'>) => {
     let error;
     if (tenant?.id) {
       const result = await supabase.from('tenants').update(payload).eq('id', tenant.id);
@@ -153,8 +152,8 @@ export default function SettingsClient({ tenant }: { tenant: any }) {
       
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Kaydetme işlemi başarısız oldu.");
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : "Kaydetme işlemi başarısız oldu.");
     } finally {
       setSaving(false);
     }

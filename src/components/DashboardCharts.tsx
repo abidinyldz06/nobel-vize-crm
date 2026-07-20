@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -26,12 +26,25 @@ const STATUS_COLORS: Record<string, string> = {
   'Kapandı': '#475569'
 };
 
-const CustomTooltip = ({ active, payload, label, prefix = "", suffix = "" }: any) => {
+type ChartTooltipEntry = {
+  name?: string;
+  value?: string | number;
+  color?: string;
+  fill?: string;
+};
+
+const CustomTooltip = ({ active, payload, label, prefix = "", suffix = "" }: {
+  active?: boolean;
+  payload?: ChartTooltipEntry[];
+  label?: ReactNode;
+  prefix?: string;
+  suffix?: string;
+}) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-slate-900 border border-slate-700 text-white p-3 rounded-xl shadow-xl text-xs font-medium">
         <p className="mb-1 opacity-70">{label}</p>
-        {payload.map((p: any, i: number) => (
+        {payload.map((p, i) => (
           <p key={i} style={{ color: p.color || p.fill }}>
             {p.name === 'value' ? '' : `${p.name}: `}
             {prefix}{Number(p.value).toLocaleString('tr-TR')}{suffix}
@@ -44,14 +57,6 @@ const CustomTooltip = ({ active, payload, label, prefix = "", suffix = "" }: any
 };
 
 export default function DashboardCharts({ monthlyData, countryData, statusData, revenueData }: ChartProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return <div className="h-48 w-full animate-pulse bg-slate-100 dark:bg-[#1a2232] rounded-2xl"></div>;
-
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6">
       

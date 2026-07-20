@@ -3,6 +3,12 @@ import { AlertCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import BulkWhatsAppReminder from "./BulkWhatsAppReminder";
 
+type ReminderCustomer = {
+  customer: { id: string; first_name: string; last_name: string; phone: string | null };
+  country: string;
+  docs: string[];
+};
+
 export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: boolean, staffId?: string }) {
   const supabase = await createSupabaseServerClient();
   // eslint-disable-next-line react-hooks/purity
@@ -28,8 +34,8 @@ export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: 
   if (!overdueDocs || overdueDocs.length === 0) return null;
 
   // Grup listesi oluştur (WhatsApp toplu hatırlatma için)
-  const customersMap = new Map();
-  overdueDocs.forEach((doc: any) => {
+  const customersMap = new Map<string, ReminderCustomer>();
+  overdueDocs.forEach((doc) => {
     const customer = doc.applications?.customers;
     const country = doc.applications?.country;
     if (!customer?.id) return;
@@ -41,7 +47,7 @@ export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: 
         docs: []
       });
     }
-    customersMap.get(customer.id).docs.push(doc.document_type);
+    customersMap.get(customer.id)?.docs.push(doc.document_type);
   });
   
   const customersList = Array.from(customersMap.values());
@@ -55,7 +61,7 @@ export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: 
         <BulkWhatsAppReminder customersList={customersList} />
       </div>
       <div className="divide-y divide-slate-100 dark:divide-[#1f2937]">
-        {overdueDocs.map((doc: any) => {
+        {overdueDocs.map((doc) => {
           // eslint-disable-next-line react-hooks/purity
           const daysOverdue = Math.floor((Date.now() - new Date(doc.requested_at).getTime()) / (1000 * 60 * 60 * 24));
           const isCritical = daysOverdue >= 7;

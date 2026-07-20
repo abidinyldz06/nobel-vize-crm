@@ -58,6 +58,21 @@ npm run db:lint
 npm run db:test
 ```
 
+Uygulama kalite ve tarayıcı kontrolleri:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+
+# Yerel Supabase çalışırken; ilk kullanımda `npx playwright install chromium`
+npm run test:e2e:local
+```
+
+Pull request ve `main` push'larında GitHub Actions; uygulama, veritabanı ve
+Chromium smoke testlerini ayrı kalite kapıları olarak çalıştırır.
+
 Faz 1 staging/production adımları ve geri dönüş planı
 `docs/PHASE_1_DEPLOYMENT_RUNBOOK.md` dosyasındadır.
 

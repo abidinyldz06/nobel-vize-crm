@@ -22,14 +22,14 @@ export default async function CountriesPage() {
     .select("country");
 
   const countMap: Record<string, number> = {};
-  appStats?.forEach((a: any) => {
-    countMap[a.country] = (countMap[a.country] || 0) + 1;
+  appStats?.forEach((application) => {
+    countMap[application.country] = (countMap[application.country] || 0) + 1;
   });
 
-  const enriched = (countries ?? []).map((c: any) => ({
-    ...c,
-    appCount: countMap[c.name] || 0,
-    rules: rules?.filter(r => r.country_id === c.id) || []
+  const enriched = (countries ?? []).map((country) => ({
+    ...country,
+    appCount: countMap[country.name] || 0,
+    rules: rules?.filter(rule => rule.country_id === country.id) || []
   }));
 
   return (

@@ -81,13 +81,16 @@ ve production adımları `docs/PHASE_1_DEPLOYMENT_RUNBOOK.md` içindedir.
 
 ### Faz 2 — Stabilizasyon ve kalite
 
-- [ ] Dashboard ve rapor hesaplarının düzeltilmesi
-- [ ] Supabase üretimli TypeScript tipleri
-- [ ] ESLint borcunun temizlenmesi
-- [ ] Unit ve entegrasyon testleri
-- [ ] Playwright ile temel kullanıcı akışları
-- [ ] GitHub Actions build/lint/test/audit kapıları
-- [ ] Güvensiz XLSX bağımlılığının değiştirilmesi
+- [x] Dashboard ve rapor hesaplarının düzeltilmesi
+- [x] Supabase üretimli TypeScript tipleri
+- [x] ESLint borcunun temizlenmesi
+- [x] Unit ve entegrasyon testleri
+- [x] Playwright ile temel kullanıcı akışları
+- [x] GitHub Actions build/lint/test/audit kapıları
+- [x] Güvensiz XLSX bağımlılığının değiştirilmesi
+
+Faz 2 kapsamı, doğrulama matrisi ve kalan riskler
+`docs/PHASE_2_IMPLEMENTATION_REPORT.md` içindedir.
 
 ### Faz 3 — Ürünleştirme
 

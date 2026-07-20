@@ -21,9 +21,10 @@ export default function AppointmentFormClient({
   const [location, setLocation] = useState("");
   const [existingApps, setExistingApps] = useState<DensityApp[]>([]);
   const [isChecking, setIsChecking] = useState(false);
+  const canCheckDensity = Boolean(date && location.length > 2);
 
   useEffect(() => {
-    if (date && location && location.length > 2) {
+    if (canCheckDensity) {
       const timer = setTimeout(async () => {
         setIsChecking(true);
         try {
@@ -37,12 +38,11 @@ export default function AppointmentFormClient({
       }, 500); // debounce
 
       return () => clearTimeout(timer);
-    } else {
-      setExistingApps([]);
     }
-  }, [date, location]);
+  }, [date, location, canCheckDensity]);
 
-  const densityCount = existingApps.length;
+  const visibleExistingApps = canCheckDensity ? existingApps : [];
+  const densityCount = visibleExistingApps.length;
   const isBusy = densityCount >= 3 && densityCount < 5;
   const isVeryBusy = densityCount >= 5;
 
@@ -68,7 +68,7 @@ export default function AppointmentFormClient({
             </p>
             <div className={`text-xs rounded-lg p-2.5 space-y-1.5 ${isVeryBusy ? 'bg-red-100/50 dark:bg-red-900/20' : 'bg-orange-100/50 dark:bg-orange-900/20'}`}>
               <div className="font-semibold opacity-70 mb-1 flex items-center gap-1.5"><Clock className="w-3 h-3"/> Mevcut Randevular:</div>
-              {existingApps.map(app => (
+              {visibleExistingApps.map(app => (
                 <div key={app.id} className="flex items-center gap-2">
                   <span className="font-mono bg-white/50 dark:bg-black/20 px-1 rounded">{app.time}</span>
                   <span className="truncate">{app.customerName}</span>

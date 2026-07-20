@@ -1,7 +1,6 @@
 "use client"
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, isToday, format } from "date-fns";
-import { tr } from "date-fns/locale";
-import { Clock } from "lucide-react";
+import type { CalendarAppointment } from "@/types/calendar";
 
 export default function MonthGrid({ 
   currentMonth, 
@@ -10,7 +9,7 @@ export default function MonthGrid({
   onSelectDate 
 }: { 
   currentMonth: Date, 
-  appointments: any[], 
+  appointments: CalendarAppointment[],
   selectedDate: Date | null,
   onSelectDate: (date: Date) => void 
 }) {
@@ -37,7 +36,7 @@ export default function MonthGrid({
 
       {/* Grid */}
       <div className="flex-1 grid grid-cols-7 auto-rows-fr bg-slate-200 dark:bg-[#1f2937] gap-px">
-        {days.map((day, idx) => {
+        {days.map((day) => {
           const isCurrentMonth = isSameMonth(day, monthStart);
           const isSelected = selectedDate && isSameDay(day, selectedDate);
           const isDayToday = isToday(day);

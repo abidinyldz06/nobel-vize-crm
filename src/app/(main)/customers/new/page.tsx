@@ -6,23 +6,6 @@ import SmartDocumentSelector from "@/components/SmartDocumentSelector";
 
 export const revalidate = 0;
 
-// Schengen ülkeleri ve diğer popüler hedefler
-const COUNTRY_LIST = [
-  // Schengen Ülkeleri
-  { group: "Schengen Ülkeleri", countries: [
-    "Almanya", "Avusturya", "Belçika", "Çekya", "Danimarka", "Estonya",
-    "Finlandiya", "Fransa", "Hollanda", "Hırvatistan", "İspanya", "İsveç",
-    "İsviçre", "İtalya", "İzlanda", "Letonya", "Litvanya", "Lüksemburg",
-    "Macaristan", "Malta", "Norveç", "Polonya", "Portekiz", "Romanya",
-    "Slovenya", "Slovakya", "Yunanistan"
-  ]},
-  // Diğer popüler ülkeler
-  { group: "Diğer Ülkeler", countries: [
-    "ABD (Amerika)", "İngiltere (UK)", "Kanada", "Avustralya", "Japonya", "Güney Kore",
-    "Brezilya", "Meksika", "Dubai (BAE)", "Rusya", "Çin"
-  ]},
-];
-
 export default async function NewCustomerPage() {
   const supabase = await createSupabaseServerClient();
   // countries tablosundan kayıtlı ülkeleri çek

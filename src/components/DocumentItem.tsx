@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
-import { Check, MoreHorizontal, UploadCloud, File, Trash2, Loader2 } from "lucide-react";
+import { Check, UploadCloud, File, Trash2, Loader2 } from "lucide-react";
+import type { Tables } from "@/types/database";
 
-export default function DocumentItem({ doc }: { doc: any }) {
+export default function DocumentItem({ doc }: { doc: Tables<'documents'> }) {
   const [status, setStatus] = useState(doc.status);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -13,7 +14,7 @@ export default function DocumentItem({ doc }: { doc: any }) {
 
   const toggleStatus = async () => {
     setLoading(true);
-    const newStatus = status === 'tamamlandi' ? 'bekleniyor' : 'tamamlandi';
+    const newStatus = status === 'onaylandi' ? 'bekleniyor' : 'onaylandi';
     const { error } = await supabase
       .from('documents')
       .update({ status: newStatus })
@@ -25,7 +26,7 @@ export default function DocumentItem({ doc }: { doc: any }) {
       const { data: { user } } = await supabase.auth.getUser();
       await supabase.from("activity_log").insert([{
         application_id: doc.application_id,
-        action: `Evrak güncellendi: "${doc.document_type}" -> ${newStatus === 'tamamlandi' ? 'Tamamlandı' : 'Bekliyor'}`,
+        action: `Evrak güncellendi: "${doc.document_type}" -> ${newStatus === 'onaylandi' ? 'Tamamlandı' : 'Bekliyor'}`,
         performed_by: user?.email || "Danışman"
       }]);
 
@@ -38,7 +39,7 @@ export default function DocumentItem({ doc }: { doc: any }) {
 
         if (allDocs) {
           const total = allDocs.length;
-          const completed = allDocs.filter((d: any) => d.id === doc.id ? newStatus === 'tamamlandi' : d.status === 'tamamlandi').length;
+          const completed = allDocs.filter((document) => document.id === doc.id ? newStatus === 'onaylandi' : document.status === 'onaylandi').length;
           const docProgress = total > 0 ? Math.round((completed / total) * 40) : 0; // evraklar max 40 puan
 
           // customer_id al
@@ -79,7 +80,7 @@ export default function DocumentItem({ doc }: { doc: any }) {
     setLoading(false);
   };
 
-  const isCompleted = status === 'tamamlandi';
+  const isCompleted = status === 'onaylandi';
 
   let overdueStatus = null;
   let overdueDays = 0;

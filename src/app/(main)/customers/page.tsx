@@ -3,6 +3,7 @@ import { Plus, Users } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import CustomerTable from "@/components/CustomerTable";
 import ExportButton from "@/components/ExportButton";
+import type { Tables } from "@/types/database";
 
 export const revalidate = 0;
 
@@ -11,15 +12,15 @@ export default async function CustomersPage() {
   
   // Get current user and staff record
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
+  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id ?? '').single();
   const isAdmin = staffRecord?.role === 'admin';
   const staffId = staffRecord?.id;
 
   const query = supabase
     .from('customers')
     .select(`
-      id, first_name, last_name, phone, email, created_at, profile_score,
-      applications (country, status, created_at)
+      id, first_name, last_name, phone, email, created_at, profile_score, assigned_staff_id,
+      applications (id, country, status, created_at)
     `)
     .order('created_at', { ascending: false });
 
@@ -32,13 +33,13 @@ export default async function CustomersPage() {
   if (error) console.error("Supabase Error:", error);
 
   // Flatten: add latest application's country/status to customer object
-  const flat = (customers ?? []).map((c: any) => {
-    const sorted = (c.applications ?? []).sort(
-      (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  const flat = (customers ?? []).map((customer) => {
+    const sorted = [...(customer.applications ?? [])].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
     const latest = sorted[0];
     return {
-      ...c,
+      ...customer,
       latest_application_id: latest?.id ?? null,
       country: latest?.country ?? null,
       status: latest?.status ?? null,
@@ -46,9 +47,9 @@ export default async function CustomersPage() {
   });
 
   // Fetch staff list for bulk assign (only if admin)
-  let staffList: any[] = [];
+  let staffList: Pick<Tables<'staff'>, 'id' | 'full_name' | 'role'>[] = [];
   if (isAdmin) {
-    const { data: staff } = await supabase.from('staff').select('id, first_name, last_name, role');
+    const { data: staff } = await supabase.from('staff').select('id, full_name, role');
     staffList = staff || [];
   }
 

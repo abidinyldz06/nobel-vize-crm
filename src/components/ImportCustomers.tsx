@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, ArrowRight, RefreshCw, Download } from "lucide-react";
+import { UploadCloud, CheckCircle2, AlertCircle, RefreshCw, Download } from "lucide-react";
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import { readSheet } from "read-excel-file/browser";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,15 +15,16 @@ interface ParsedRow {
   email: string;
   country: string;
   passport_no: string;
-  _original?: any;
+  _original?: RawRow;
 }
+
+type RawRow = Record<string, unknown>;
 
 export default function ImportCustomers() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedRow[]>([]);
   const [resolutionMode, setResolutionMode] = useState<'skip' | 'update'>('update');
   
@@ -33,16 +34,16 @@ export default function ImportCustomers() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
-    setFile(selectedFile);
-    parseFile(selectedFile);
+    void parseFile(selectedFile);
   };
 
-  const parseFile = (file: File) => {
-    const isCSV = file.name.endsWith('.csv');
-    const isExcel = file.name.match(/\.(xlsx|xls)$/);
+  const parseFile = async (file: File) => {
+    const extension = file.name.toLowerCase();
+    const isCSV = extension.endsWith('.csv');
+    const isExcel = extension.endsWith('.xlsx');
 
     if (isCSV) {
-      Papa.parse(file, {
+      Papa.parse<RawRow>(file, {
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
@@ -50,28 +51,32 @@ export default function ImportCustomers() {
         },
         error: (err) => toast.error(`CSV Okuma Hatası: ${err.message}`)
       });
-    } else if (isExcel) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const json = XLSX.utils.sheet_to_json(worksheet);
-        mapData(json);
-      };
-      reader.readAsBinaryString(file);
-    } else {
-      toast.error("Lütfen .csv, .xls veya .xlsx formatında bir dosya yükleyin.");
+      return;
     }
+
+    if (isExcel) {
+      try {
+        const [headerRow = [], ...dataRows] = await readSheet(file);
+        const headers = headerRow.map((cell) => String(cell ?? "").trim());
+        const rows = dataRows.map((row) => Object.fromEntries(
+          headers.map((header, index) => [header, row[index] ?? ""]),
+        ));
+        mapData(rows);
+      } catch (error) {
+        toast.error(`Excel Okuma Hatası: ${error instanceof Error ? error.message : "Dosya okunamadı."}`);
+      }
+      return;
+    }
+
+    toast.error("Lütfen .csv veya .xlsx formatında bir dosya yükleyin.");
   };
 
-  const mapData = (rawRows: any[]) => {
+  const mapData = (rawRows: RawRow[]) => {
     const mapped: ParsedRow[] = rawRows.map((row) => {
       // Çok temel bir otomatik eşleştirme (Kolon adlarını tahmin etme)
       const getVal = (keys: string[]) => {
         const key = Object.keys(row).find(k => keys.some(searchKey => k.toLowerCase().includes(searchKey.toLowerCase())));
-        return key ? String(row[key]).trim() : "";
+        return key ? String(row[key] ?? "").trim() : "";
       };
 
       return {
@@ -87,7 +92,6 @@ export default function ImportCustomers() {
 
     if (mapped.length === 0) {
       toast.error("Dosyadan veri okunamadı veya kolon adları anlaşılamadı. Lütfen şablona uygun yükleyin.");
-      setFile(null);
       return;
     }
 
@@ -111,10 +115,9 @@ export default function ImportCustomers() {
       setStep(3);
       toast.success("İçe aktarma işlemi tamamlandı!");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "İçe aktarma başarısız oldu.");
     } finally {
-      setIsProcessing(false);
       setIsImporting(false);
     }
   };
@@ -131,8 +134,6 @@ export default function ImportCustomers() {
     link.click();
     document.body.removeChild(link);
   };
-
-  const [isProcessing, setIsProcessing] = useState(false);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -172,7 +173,7 @@ export default function ImportCustomers() {
 
           <input
             type="file"
-            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             className="hidden"
             ref={fileInputRef}
             onChange={handleFileUpload}

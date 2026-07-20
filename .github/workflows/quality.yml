@@ -1,0 +1,68 @@
+name: Quality Gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: local-ci-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: local-ci-placeholder
+      GOOGLE_FORM_WEBHOOK_SECRET: phase-2-ci-secret-at-least-32-bytes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run build
+
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run db:start
+      - run: npm run db:reset
+      - name: Verify generated database types
+        run: |
+          npx supabase gen types typescript --local > /tmp/database.ts
+          diff -u src/types/database.ts /tmp/database.ts
+      - run: npm run db:lint
+      - run: npm run db:test
+      - if: always()
+        run: npm run db:stop
+
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run db:start
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:local
+      - if: always()
+        run: npm run db:stop

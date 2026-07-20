@@ -145,7 +145,7 @@ export default function BulkWhatsAppReminder({ customersList }: { customersList:
                 <MessageCircle className="w-4 h-4" /> Tümüne Sırayla Gönder
               </button>
               <p className="text-[10px] text-center text-slate-500 mt-2">
-                "Tümüne Gönder" butonuna bastığınızda sekmeler sırayla açılacaktır. Tarayıcınızın pop-up engelleyicisine takılmaması için izin vermeniz gerekebilir.
+                &quot;Tümüne Gönder&quot; butonuna bastığınızda sekmeler sırayla açılacaktır. Tarayıcınızın pop-up engelleyicisine takılmaması için izin vermeniz gerekebilir.
               </p>
             </div>
 

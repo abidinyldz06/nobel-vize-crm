@@ -54,7 +54,7 @@ export default function StatusTimeline({
     const { error } = await supabase.rpc("update_application_status_v1", {
       p_application_id: applicationId,
       p_status: newStatus,
-      p_rejection_reason: null,
+      p_rejection_reason: undefined,
       p_action: `Durum güncellendi: ${STATUS_CONFIG[newStatus]?.label || newStatus}`,
     });
 

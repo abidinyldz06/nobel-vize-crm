@@ -2,13 +2,9 @@
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { MessageSquare, Send, Loader2, User, Clock, AlertTriangle } from "lucide-react";
+import type { Tables } from "@/types/database";
 
-type Note = {
-  id: string;
-  content: string;
-  created_at: string;
-  author?: string;
-};
+type Note = Tables<'notes'>;
 
 export default function NotesPanel({ applicationId, initialNotes }: { applicationId: string; initialNotes: Note[] }) {
   const [notes, setNotes] = useState<Note[]>(initialNotes);
