@@ -92,14 +92,21 @@ ve production adımları `docs/PHASE_1_DEPLOYMENT_RUNBOOK.md` içindedir.
 Faz 2 kapsamı, doğrulama matrisi ve kalan riskler
 `docs/PHASE_2_IMPLEMENTATION_REPORT.md` içindedir.
 
-### Faz 3 — Ürünleştirme
+### Faz 3 — İç CRM ürünleştirme ve operasyon
 
-- [ ] Nobel Vize iç CRM / çok kiracılı SaaS ürün kararının kesinleştirilmesi
-- [ ] Marka, alan adı ve müşteri portalı stratejisi
-- [ ] Onboarding, plan, kota ve faturalandırma
-- [ ] Tenant bazlı white-label ve subdomain
-- [ ] KVKK süreçleri: aydınlatma, açık rıza, saklama ve silme politikaları
-- [ ] İzleme, hata raporlama, yedekleme tatbikatı ve olay müdahale planı
+- [x] Ürün kararı: Nobel Vize için tek şirketli iç CRM; SaaS ertelendi
+- [ ] Faz 3.1 — Staging/production hazırlığı ve yayın engelleri (devam ediyor)
+- [ ] Faz 3.2 — Tek şirket arayüz temizliği
+- [ ] Faz 3.3 — Görev ve gerçek bildirim sistemi
+- [ ] Faz 3.4 — Başvuru süreç panosu
+- [ ] Faz 3.5 — Müşteri iletişimi ve portal
+- [ ] Faz 3.6 — KVKK ve veri yaşam döngüsü
+- [ ] Faz 3.7 — İzleme ve iş sürekliliği
+- [ ] Faz 3.8 — Son kalite ve kullanıcı kabulü
+
+Faz 3 ayrıntılı kapsamı ve aşama durumları `docs/PHASE_3_PLAN.md` içindedir.
+Tenant, abonelik, plan, kota, white-label ve subdomain geliştirmeleri bu fazın
+kapsamı dışındadır.
 
 ## Yayın kontrol listesi
 

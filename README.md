@@ -80,5 +80,29 @@ Faz 1 staging/production adımları ve geri dönüş planı
 
 Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADMAP.md` dosyasına bakın.
 
+### Faz durumu
+
+| Faz | Durum | Rapor |
+|---|---|---|
+| Faz 0 — Güvenlik ve veri koruma | Kod tamamlandı; uzak ortam uygulaması bekliyor | `docs/PHASE_0_DEPLOYMENT_RUNBOOK.md` |
+| Faz 1 — Veritabanı standardizasyonu | Kod tamamlandı; uzak ortam uygulaması bekliyor | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
+| Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
+| Faz 3 — İç CRM ürünleştirme | Devam ediyor | `docs/PHASE_3_PLAN.md` |
+
+Faz 3 alt aşama takibi:
+
+- **Faz 3.1 — Devam ediyor:** staging/production hazırlığı ve yayın engelleri
+- **Faz 3.2 — Bekliyor:** tek şirket arayüz temizliği
+- **Faz 3.3 — Bekliyor:** görev ve gerçek bildirim sistemi
+- **Faz 3.4 — Bekliyor:** başvuru süreç panosu
+- **Faz 3.5 — Bekliyor:** müşteri iletişimi ve portal
+- **Faz 3.6 — Bekliyor:** KVKK ve veri yaşam döngüsü
+- **Faz 3.7 — Bekliyor:** izleme ve iş sürekliliği
+- **Faz 3.8 — Bekliyor:** son kalite ve kullanıcı kabulü
+
+Ayrıntılı kapsam ve kabul ölçütleri `docs/PHASE_3_PLAN.md`, Faz 3.1'in güncel
+kanıtları ise `docs/PHASE_3_1_IMPLEMENTATION_REPORT.md` içindedir. Bir aşama
+staging/production kanıtı tamamlanmadan `Tamamlandı` olarak işaretlenmez.
+
 ## Sürüm Notları (Changelog)
 Geliştirme geçmişi ve sürüm notları için `CHANGELOG.md` dosyasına bakabilirsiniz.

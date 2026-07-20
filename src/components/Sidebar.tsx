@@ -3,41 +3,23 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Users, Calendar, Settings, LogOut, Globe, BarChart3, UserCog } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { useState, useEffect } from "react";
+import type { CurrentStaffProfile } from "@/types/staff-profile";
 
-export default function Sidebar({ isMobileOpen = false, onClose }: { isMobileOpen?: boolean, onClose?: () => void }) {
+export default function Sidebar({
+  profile,
+  isMobileOpen = false,
+  onClose,
+}: {
+  profile: CurrentStaffProfile;
+  isMobileOpen?: boolean;
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
-  
-  const [userName, setUserName] = useState("Yükleniyor...");
-  const [userRole, setUserRole] = useState("Yönetici");
-  const [userInitial, setUserInitial] = useState("N");
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: staffRecord } = await supabase
-        .from('staff')
-        .select('full_name, role')
-        .eq('user_id', user.id)
-        .single();
-
-      if (staffRecord) {
-        setUserName(staffRecord.full_name);
-        setUserRole(staffRecord.role === 'admin' ? 'Yönetici' : 'Danışman');
-        setUserInitial(staffRecord.full_name.charAt(0).toUpperCase());
-      } else {
-        const email = user.email || "Nobel Vize";
-        setUserName(email);
-        setUserRole("Yönetici");
-        setUserInitial(email.charAt(0).toUpperCase());
-      }
-    };
-    fetchUser();
-  }, []);
+  const userName = profile.fullName;
+  const userRole = profile.role === "admin" ? "Yönetici" : "Danışman";
+  const userInitial = profile.fullName.trim().charAt(0).toLocaleUpperCase("tr-TR") || "N";
 
   const baseLinks = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
