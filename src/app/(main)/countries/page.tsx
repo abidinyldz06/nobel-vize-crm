@@ -1,25 +1,11 @@
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { requireAdminPage } from "@/lib/page-auth";
 import { Globe } from "lucide-react";
 import CountriesManager from "@/components/CountriesManager";
 
 export const revalidate = 0;
 
 export default async function CountriesPage() {
-  const supabase = await createSupabaseServerClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    const { redirect } = await import("next/navigation");
-    redirect("/");
-  }
-  
-  const { data: staffRecord } = await supabase.from('staff').select('role').eq('user_id', user?.id).single();
-  const isAdmin = !staffRecord || staffRecord.role === 'admin';
-  
-  if (!isAdmin) {
-    const { redirect } = await import("next/navigation");
-    redirect("/dashboard");
-  }
+  const { supabase } = await requireAdminPage();
 
   const { data: countries } = await supabase
     .from("countries")

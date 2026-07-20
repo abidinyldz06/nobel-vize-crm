@@ -1,18 +1,27 @@
 -- =============================================
 -- NOBEL VİZE CRM — Supabase Düzeltme SQL
--- Bu SQL'i Supabase Dashboard → SQL Editor'de çalıştırın
+-- ESKİ VE GÜVENSİZ DOSYA: ÇALIŞTIRMAYIN.
+-- Bu dosya geçmiş bağlam için tutulmaktadır; RLS'yi kapattığı için uygulama
+-- veya migration amacıyla kullanılması yasaktır. Güncel değişiklikler
+-- supabase/migrations klasöründedir.
 -- =============================================
 
--- 1. TÜM TABLOLARDA RLS KAPAT (ofis içi CRM olduğu için güvenli)
-ALTER TABLE IF EXISTS customers DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS applications DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS documents DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS countries DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS notes DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS staff DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS payments DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS activity_log DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS appointments DISABLE ROW LEVEL SECURITY;
+DO $$
+BEGIN
+  RAISE EXCEPTION 'Güvenlik engeli: fix_rls_and_countries.sql eski ve çalıştırılamaz. supabase/migrations kullanın.';
+END
+$$;
+
+-- 1. Tarihsel içerikte dahi RLS açık tutulur.
+ALTER TABLE IF EXISTS customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS countries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS staff ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS activity_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS appointments ENABLE ROW LEVEL SECURITY;
 
 -- 2. EKSİK TABLOLARI OLUŞTUR (yoksa)
 
@@ -27,7 +36,7 @@ CREATE TABLE IF NOT EXISTS staff (
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-ALTER TABLE staff DISABLE ROW LEVEL SECURITY;
+ALTER TABLE staff ENABLE ROW LEVEL SECURITY;
 
 -- Payments tablosu
 CREATE TABLE IF NOT EXISTS payments (
@@ -42,7 +51,7 @@ CREATE TABLE IF NOT EXISTS payments (
   note TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-ALTER TABLE payments DISABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 
 -- Activity Log tablosu
 CREATE TABLE IF NOT EXISTS activity_log (
@@ -53,7 +62,7 @@ CREATE TABLE IF NOT EXISTS activity_log (
   performed_by TEXT DEFAULT 'Sistem',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-ALTER TABLE activity_log DISABLE ROW LEVEL SECURITY;
+ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 
 -- Notes tablosu (yoksa)
 CREATE TABLE IF NOT EXISTS notes (
@@ -63,7 +72,7 @@ CREATE TABLE IF NOT EXISTS notes (
   author TEXT DEFAULT 'Danışman',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-ALTER TABLE notes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
 
 -- 3. CUSTOMERS TABLOSUNA EKSİK ALANLAR
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS assigned_staff_id UUID;
@@ -105,4 +114,4 @@ VALUES
   ('Kanada', 'Canada', 'VFS', 14000, '["Pasaport", "Biyometrik Fotoğraf", "Vize Başvuru Formu", "Biyometri Randevusu", "Banka Hesap Özeti (Son 6 Ay)", "Maaş Bordrosu (Son 6 Ay)", "İşveren Yazısı", "Seyahat Planı", "Konaklama Kanıtı"]')
 ON CONFLICT DO NOTHING;
 
--- Bitti! Tüm tablolar hazır, RLS kapalı.
+-- Bu noktaya ulaşılmamalıdır. Dosyanın kalan kısmı yalnızca tarihsel kayıttır.

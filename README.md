@@ -15,7 +15,7 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 
 ## Teknoloji Yığını
 
-- **Frontend**: Next.js 14 (App Router), React, Tailwind CSS, Lucide Icons, Recharts
+- **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS, Lucide Icons, Recharts
 - **Backend & Database**: Supabase (PostgreSQL), Supabase Auth, Row Level Security (RLS)
 - **Deployment**: Vercel
 
@@ -28,12 +28,26 @@ Projeyi lokalde çalıştırmak için:
 npm install
 
 # .env.local dosyasını ayarlayın
+# .env.example dosyasını .env.local olarak kopyalayın ve değerleri doldurun.
 # NEXT_PUBLIC_SUPABASE_URL=...
 # NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+# SUPABASE_SERVICE_ROLE_KEY=...       # yalnızca sunucu
+# GOOGLE_FORM_WEBHOOK_SECRET=...      # yalnızca sunucu
 
 # Geliştirme sunucusunu başlatın
 npm run dev
 ```
+
+## Güvenlik notları
+
+- `SUPABASE_SERVICE_ROLE_KEY` ve `GOOGLE_FORM_WEBHOOK_SECRET` hiçbir zaman `NEXT_PUBLIC_` önekiyle tanımlanmamalıdır.
+- Müşteri evrakları private Supabase Storage bucket'ında tutulur ve uygulama kısa süreli imzalı bağlantı üretir.
+- Google Form webhook istekleri `x-webhook-timestamp`, benzersiz UUID biçiminde `x-webhook-id` ve `x-webhook-signature` başlıklarını göndermelidir. İmza, `${timestamp}.${eventId}.${hamJsonGövdesi}` metninin `GOOGLE_FORM_WEBHOOK_SECRET` ile HMAC-SHA256 özetidir.
+- Veritabanı migration'ları önce staging ortamında uygulanmalıdır. Ayrıntılar `supabase/migrations/README.md` dosyasındadır.
+
+## Teknik yol haritası
+
+Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADMAP.md` dosyasına bakın.
 
 ## Sürüm Notları (Changelog)
 Geliştirme geçmişi ve sürüm notları için `CHANGELOG.md` dosyasına bakabilirsiniz.

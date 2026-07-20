@@ -19,7 +19,7 @@ export default async function Dashboard() {
     .eq('user_id', user?.id)
     .single();
 
-  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  const isAdmin = staffRecord?.role === 'admin';
   const staffId = staffRecord?.id;
 
   // Build query filters based on role

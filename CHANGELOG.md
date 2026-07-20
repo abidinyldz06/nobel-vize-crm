@@ -2,6 +2,27 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 0 Güvenlik Temeli
+
+### Güvenlik
+
+- Merkezi, kapalı-varsayımlı personel ve admin yetkilendirmesi eklendi.
+- API route'ları aktif personel/admin kontrolüyle korundu.
+- Google Form webhook'una HMAC-SHA256 imzası, zaman damgası ve tekrar olay engeli eklendi.
+- Ortak personel şifresi kaldırıldı; Supabase güvenli davet akışına geçildi.
+- İlk Auth kullanıcısını otomatik admin yapan davranış kaldırıldı.
+- Müşteri portalı anonim tablo politikaları yerine sınırlı sunucu sorgularına taşındı.
+- Evrak bucket'ı private erişime ve kısa süreli signed URL indirmeye taşındı.
+- Admin/danışman ayrımını koruyan recursion-safe RLS migration'ı hazırlandı.
+- Atomik olmayan restore işlemi varsayılan olarak devre dışı bırakıldı.
+
+### Kalite ve dokümantasyon
+
+- Teknik inceleme, faz yol haritası ve staging/canlı yayın rehberi eklendi.
+- Webhook imzası ve kritik güvenlik regresyonları için otomatik testler eklendi.
+- Harici Google Fonts derleme bağımlılığı kaldırıldı.
+- Next.js 16 lint komutu düzeltildi ve temel HTTP güvenlik başlıkları eklendi.
+
 ## [v1.2.0] - Temmuz 2026
 
 ### ✨ Yeni Özellikler (Kosmosvize Modeli)

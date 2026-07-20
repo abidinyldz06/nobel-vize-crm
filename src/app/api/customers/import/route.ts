@@ -1,19 +1,59 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { requireStaff } from "@/lib/authz";
+import { authorizationErrorResponse } from "@/lib/api-auth";
+
+interface ImportRow {
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  email?: string;
+  passport_no?: string;
+  country?: string;
+}
+
+interface CountryRow {
+  id: string;
+  name: string;
+  base_fee_service?: number | null;
+}
+
+interface DocumentRule {
+  name: string;
+  category?: string;
+  required?: boolean;
+  description?: string;
+}
 
 export async function POST(req: Request) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let context;
+  try {
+    context = await requireStaff();
+  } catch (error) {
+    return authorizationErrorResponse(error);
+  }
 
-  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user.id).single();
-  const staffId = staffRecord?.id;
+  const { supabase, staff } = context;
+  const staffId = staff.id;
 
-  const body = await req.json();
+  let body: { rows?: unknown; resolutionMode?: unknown };
+  try {
+    body = await req.json() as { rows?: unknown; resolutionMode?: unknown };
+  } catch {
+    return NextResponse.json({ error: "Geçersiz JSON gövdesi" }, { status: 400 });
+  }
   const { rows, resolutionMode } = body;
   
   if (!rows || !Array.isArray(rows)) {
     return NextResponse.json({ error: "Geçersiz veri" }, { status: 400 });
+  }
+
+  const importRows = rows as ImportRow[];
+  if (!importRows.every(row => row && typeof row.first_name === "string" && typeof row.last_name === "string")) {
+    return NextResponse.json({ error: "Her satırda ad ve soyad bulunmalıdır." }, { status: 400 });
+  }
+
+  if (resolutionMode !== "skip" && resolutionMode !== "update") {
+    return NextResponse.json({ error: "Geçersiz mükerrer kayıt çözüm modu." }, { status: 400 });
   }
 
   // Fetch reference data
@@ -31,7 +71,7 @@ export async function POST(req: Request) {
     errors: [] as string[]
   };
 
-  for (const row of rows) {
+  for (const row of importRows) {
     try {
       // Find duplicate (phone can have different formats, but for basic import we match exact or after trimming)
       const cleanPhone = row.phone ? row.phone.replace(/[^0-9]/g, '') : null;
@@ -59,7 +99,7 @@ export async function POST(req: Request) {
         }
       } else {
         // Create new customer
-        const customerData: any = {
+        const customerData = {
           first_name: row.first_name,
           last_name: row.last_name,
           phone: row.phone || null,
@@ -67,11 +107,9 @@ export async function POST(req: Request) {
           profile_score: 30,
           passport_no: row.passport_no || null,
         };
-        if (staffId) customerData.assigned_staff_id = staffId;
-
         const { data: newCustomer, error: insertErr } = await supabase
           .from('customers')
-          .insert(customerData)
+          .insert({ ...customerData, assigned_staff_id: staffId })
           .select()
           .single();
 
@@ -79,25 +117,26 @@ export async function POST(req: Request) {
         const customerId = newCustomer.id;
 
         // If a country was provided, try to match it
-        let resolvedCountry: any = null;
-        let checklist: any[] = [];
+        let resolvedCountry: CountryRow | null = null;
+        let checklist: DocumentRule[] = [];
         let baseFee = 0;
 
         if (row.country) {
           const rowCountryLower = String(row.country).toLowerCase().trim();
-          resolvedCountry = countries?.find(c => c.name.toLowerCase() === rowCountryLower);
+          resolvedCountry = (countries as CountryRow[] | null)?.find(c => c.name.toLowerCase() === rowCountryLower) || null;
           if (resolvedCountry) {
             baseFee = resolvedCountry.base_fee_service || 0;
-            const req = reqs?.find(r => r.country_id === resolvedCountry.id);
+            const resolvedCountryId = resolvedCountry.id;
+            const req = reqs?.find(r => r.country_id === resolvedCountryId);
             if (req && req.documents) {
-              checklist = req.documents;
+              checklist = req.documents as DocumentRule[];
             }
           }
         }
 
         if (resolvedCountry) {
           // Create Application
-          const appData: any = {
+          const appData = {
             customer_id: customerId,
             country: resolvedCountry.name,
             consulate_fee: 0,
@@ -106,16 +145,14 @@ export async function POST(req: Request) {
             status: 'profil_analizi',
             visa_type: 'turist',
           };
-          if (staffId) appData.assigned_staff_id = staffId;
-
           const { data: application, error: appErr } = await supabase
             .from('applications')
-            .insert([appData])
+            .insert([{ ...appData, assigned_staff_id: staffId }])
             .select()
             .single();
 
           if (!appErr && checklist.length > 0) {
-            const docs = checklist.map((doc: any) => ({
+            const docs = checklist.map(doc => ({
               application_id: application.id,
               document_type: doc.name,
               category: doc.category || 'diger',
@@ -129,9 +166,9 @@ export async function POST(req: Request) {
         
         results.success++;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       results.failed++;
-      results.errors.push(err.message);
+      results.errors.push(err instanceof Error ? err.message : "Bilinmeyen içe aktarma hatası");
     }
   }
 

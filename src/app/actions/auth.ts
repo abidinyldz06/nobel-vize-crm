@@ -26,27 +26,11 @@ export async function loginAction(formData: FormData) {
   const { data: staffRecord } = await supabase.from('staff').select('*').eq('user_id', authData.user.id).limit(1).single()
 
   if (!staffRecord) {
-    // If staff record does not exist, check if table is empty
-    const { count } = await supabase.from('staff').select('*', { count: 'exact', head: true })
-    
-    if (count === 0) {
-      // First user ever -> bootstrap as admin
-      const { error: insertError } = await supabase.from('staff').insert({
-        user_id: authData.user.id,
-        full_name: email.split('@')[0], // Extract name from email
-        email: email,
-        role: 'admin',
-        is_active: true
-      })
-      if (insertError) {
-        await supabase.auth.signOut()
-        return { error: "Sistem başlatılırken hata oluştu: " + insertError.message }
-      }
-    } else {
-      // Not empty, but no staff record -> unauthorized
-      await supabase.auth.signOut()
-      return { error: "Hesabınız henüz onaylanmamış. Lütfen yöneticinizle iletişime geçin." }
-    }
+    // Güvenlik: Sistemdeki ilk Auth kullanıcısını otomatik admin yapmak hesap
+    // ele geçirme riski doğurur. İlk admin kontrollü kurulumda oluşturulur;
+    // sonraki personeller yalnızca admin davetiyle sisteme katılır.
+    await supabase.auth.signOut()
+    return { error: "Hesabınız personel kaydıyla eşleştirilmemiş. Lütfen yöneticinizle iletişime geçin." }
   } else if (!staffRecord.is_active) {
     await supabase.auth.signOut()
     return { error: "Hesabınız pasif duruma alınmış." }

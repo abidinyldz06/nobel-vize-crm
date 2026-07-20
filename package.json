@@ -2,11 +2,13 @@
   "name": "antigravity-crm",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint src"
+    "lint": "eslint src",
+    "test:security": "node --test tests/*.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

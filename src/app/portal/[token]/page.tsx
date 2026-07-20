@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import { Check, Clock, AlertCircle, Calendar, FileText, CreditCard, MapPin, Phone, MessageCircle, CheckCircle2, Globe, Mail } from "lucide-react";
 import PrintButton from "@/components/Portal/PrintButton";
@@ -14,10 +14,26 @@ const STATUS_STEPS = [
   { key: "basvuru_yapildi",    label: "Başvuru Yapıldı",      short: "Başvuru" },
 ];
 
+interface PortalDocument {
+  id: string;
+  document_type: string | null;
+  status: string | null;
+  description: string | null;
+}
+
+interface PortalPayment {
+  amount: number | string;
+  status: string | null;
+  method: string | null;
+  created_at: string;
+}
+
 export default async function PortalPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   
-  const supabase = await createSupabaseServerClient();
+  // Portal reads run only on the server. The public browser never receives a
+  // Supabase session or direct anonymous table access.
+  const supabase = createSupabaseAdminClient();
   const { data: customer } = await supabase
     .from('customers')
     .select('id, first_name, last_name')
@@ -45,18 +61,18 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
     
   const activeApp = applications?.[0];
 
-  let documents = null;
-  let payments = null;
+  let documents: PortalDocument[] | null = null;
+  let payments: PortalPayment[] | null = null;
 
   if (activeApp) {
     const [{ data: docs }, { data: pays }] = await Promise.all([
       // GÜVENLİK: Sadece evrak tipi, durumu ve notu
-      supabase.from('documents').select('id, document_type, status').eq('application_id', activeApp.id).order('created_at', { ascending: true }),
+      supabase.from('documents').select('id, document_type, status, description').eq('application_id', activeApp.id).order('created_at', { ascending: true }),
       // GÜVENLİK: Sadece miktar ve tarih. Başka hiçbir finansal kalem/konsolosluk harcı vs gösterilmez.
-      supabase.from('payments').select('amount, status, created_at').eq('application_id', activeApp.id).order('created_at', { ascending: false })
+      supabase.from('payments').select('amount, status, method, created_at').eq('application_id', activeApp.id).order('created_at', { ascending: false })
     ]);
-    documents = docs;
-    payments = pays;
+    documents = docs as PortalDocument[] | null;
+    payments = pays as PortalPayment[] | null;
   }
   
   // Timeline calculations
@@ -67,12 +83,12 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
 
   // Document calculations
   const totalDocs = documents?.length || 0;
-  const completedDocs = documents?.filter((d: any) => d.status === 'tamamlandi').length || 0;
+  const completedDocs = documents?.filter(d => d.status === 'tamamlandi').length || 0;
   const docProgress = totalDocs > 0 ? (completedDocs / totalDocs) * 100 : 0;
 
   // Payment calculations
   const totalFee = activeApp?.total_fee || 0;
-  const totalPaid = payments?.filter((p: any) => p.status === 'alindi').reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
+  const totalPaid = payments?.filter(p => p.status === 'alindi').reduce((sum, p) => sum + Number(p.amount), 0) || 0;
   const remainingFee = Math.max(0, totalFee - totalPaid);
   const payProgress = totalFee > 0 ? (totalPaid / totalFee) * 100 : 0;
 
@@ -212,7 +228,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                 </div>
               ) : (
                 <div className="space-y-3 print:space-y-2">
-                  {documents.map((doc: any) => (
+                  {documents.map(doc => (
                     <div key={doc.id} className={`flex items-start justify-between p-4 rounded-2xl border transition-all ${
                       doc.status === 'tamamlandi' 
                         ? 'bg-white dark:bg-[#0d1420] border-slate-100 dark:border-[#1f2937] opacity-75 print:opacity-100' 
@@ -222,7 +238,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                         <p className={`font-bold text-sm ${doc.status === 'tamamlandi' ? 'text-slate-700 dark:text-slate-300' : 'text-amber-900 dark:text-amber-400'}`}>
                           {doc.document_type}
                         </p>
-                        {doc.notes && <p className={`text-xs mt-1 font-medium ${doc.status === 'tamamlandi' ? 'text-slate-400' : 'text-amber-700/70 dark:text-amber-400/70'}`}>{doc.notes}</p>}
+                        {doc.description && <p className={`text-xs mt-1 font-medium ${doc.status === 'tamamlandi' ? 'text-slate-400' : 'text-amber-700/70 dark:text-amber-400/70'}`}>{doc.description}</p>}
                       </div>
                       <div className="shrink-0 mt-0.5">
                         {doc.status === 'tamamlandi' ? (
@@ -306,14 +322,14 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                       <div className="mt-auto">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Son İşlemler</p>
                         <div className="space-y-2.5">
-                          {payments.filter((p: any) => p.status === 'alindi').slice(0, 3).map((p: any, i: number) => (
+                          {payments.filter(p => p.status === 'alindi').slice(0, 3).map((p, i) => (
                             <div key={i} className="flex justify-between items-center py-2.5 px-3 bg-slate-50 dark:bg-[#1a2232] rounded-xl border border-slate-100 dark:border-[#2d3f55] print:border-none print:p-0 print:bg-transparent print:border-b print:rounded-none">
                               <div className="flex items-center gap-3">
                                 <div className="w-7 h-7 rounded-full bg-white dark:bg-[#0d1420] flex items-center justify-center shadow-sm print:hidden">
                                   <Check className="w-3.5 h-3.5 text-emerald-500" />
                                 </div>
                                 <div>
-                                  <p className="text-xs font-bold text-slate-900 dark:text-white">{p.payment_method || 'Nakit/Transfer'}</p>
+                                  <p className="text-xs font-bold text-slate-900 dark:text-white">{p.method || 'Nakit/Transfer'}</p>
                                   <p className="text-[10px] font-medium text-slate-500">{new Date(p.created_at).toLocaleDateString('tr-TR')}</p>
                                 </div>
                               </div>

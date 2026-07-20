@@ -1,3 +1,12 @@
+-- ESKİ TAM ŞEMA DOSYASI: MEVCUT VERİTABANINDA ÇALIŞTIRMAYIN.
+-- DROP TABLE ... CASCADE içerir. Sürüm zinciri Faz 1'de birleştirilene kadar
+-- yalnızca supabase/migrations altındaki dosyalar kullanılmalıdır.
+DO $$
+BEGIN
+  RAISE EXCEPTION 'Güvenlik engeli: schema_full.sql veri siler ve doğrudan çalıştırılamaz.';
+END
+$$;
+
 -- 0. Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -335,7 +344,8 @@ CREATE POLICY "Family Members All" ON family_members FOR ALL TO authenticated US
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS file_url TEXT;
 
 -- Create storage bucket for documents
-INSERT INTO storage.buckets (id, name, public) VALUES ('documents', 'documents', true) ON CONFLICT DO NOTHING;
+INSERT INTO storage.buckets (id, name, public) VALUES ('documents', 'documents', false)
+ON CONFLICT (id) DO UPDATE SET public = false;
 
 -- Storage RLS Policies
 CREATE POLICY "Authenticated Upload" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'documents');

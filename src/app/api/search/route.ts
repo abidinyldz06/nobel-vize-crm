@@ -1,7 +1,15 @@
-import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { NextResponse } from "next/server";
+import { requireStaff } from "@/lib/authz";
+import { authorizationErrorResponse } from "@/lib/api-auth";
 
 export async function GET(request: Request) {
+  let supabase;
+  try {
+    ({ supabase } = await requireStaff());
+  } catch (error) {
+    return authorizationErrorResponse(error);
+  }
+
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q');
 
@@ -9,45 +17,48 @@ export async function GET(request: Request) {
     return NextResponse.json({ customers: [], countries: [], applications: [] });
   }
 
-  const supabase = await createSupabaseServerClient();
-  const searchPattern = `%${q}%`;
+  const normalizedQuery = q.trim().slice(0, 100);
+  const searchPattern = `%${normalizedQuery.replaceAll('%', '\\%').replaceAll('_', '\\_')}%`;
 
   // 1. Search Customers
-  const { data: customers } = await supabase
-    .from('customers')
-    .select('id, first_name, last_name, phone, email, passport_no')
-    .or(`first_name.ilike.${searchPattern},last_name.ilike.${searchPattern},phone.ilike.${searchPattern},email.ilike.${searchPattern},passport_no.ilike.${searchPattern}`)
-    .limit(5);
+  const customerFields = ['first_name', 'last_name', 'phone', 'email', 'passport_no'] as const;
+  const customerResults = await Promise.all(
+    customerFields.map(field => supabase
+      .from('customers')
+      .select('id, first_name, last_name, phone, email, passport_no')
+      .ilike(field, searchPattern)
+      .limit(5)),
+  );
+  const customers = Array.from(
+    new Map(customerResults.flatMap(result => result.data || []).map(customer => [customer.id, customer])).values(),
+  ).slice(0, 5);
 
   // 2. Search Countries
   const { data: countries } = await supabase
-    .from('visa_requirements')
-    .select('country, visa_type')
-    .ilike('country', searchPattern)
+    .from('countries')
+    .select('id, name, visa_system')
+    .ilike('name', searchPattern)
     .limit(5);
-
-  // Unique countries (since visa_requirements has multiple types per country)
-  const uniqueCountries = [];
-  const countryNames = new Set();
-  if (countries) {
-    for (const c of countries) {
-      if (!countryNames.has(c.country)) {
-        countryNames.add(c.country);
-        uniqueCountries.push(c);
-      }
-    }
-  }
 
   // 3. Search Applications (by country or status, and join customer name)
-  const { data: applications } = await supabase
-    .from('applications')
-    .select('id, country, status, customer_id, customers!inner(first_name, last_name)')
-    .or(`country.ilike.${searchPattern},status.ilike.${searchPattern}`)
-    .limit(5);
+  const applicationResults = await Promise.all(
+    ['country', 'status'].map(field => supabase
+      .from('applications')
+      .select('id, country, status, customer_id, customers!inner(first_name, last_name)')
+      .ilike(field, searchPattern)
+      .limit(5)),
+  );
+  const applications = Array.from(
+    new Map(applicationResults.flatMap(result => result.data || []).map(application => [application.id, application])).values(),
+  ).slice(0, 5);
 
   return NextResponse.json({
-    customers: customers || [],
-    countries: uniqueCountries.slice(0, 5),
-    applications: applications || []
+    customers,
+    countries: (countries || []).map(country => ({
+      id: country.id,
+      country: country.name,
+      visa_type: country.visa_system,
+    })),
+    applications,
   });
 }

@@ -1,10 +1,10 @@
 "use server"
-import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { requireStaff } from "@/lib/authz"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 export async function updateCustomer(formData: FormData) {
-  const supabase = await createSupabaseServerClient()
+  const { supabase, user, staff } = await requireStaff()
   const id = formData.get('id') as string
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
@@ -32,9 +32,7 @@ export async function updateCustomer(formData: FormData) {
   // Max 100
   profileScore = Math.min(100, profileScore)
 
-  const { data: { user } } = await supabase.auth.getUser()
-  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single()
-  const isAdmin = !staffRecord || staffRecord.role === 'admin'
+  const isAdmin = staff.role === 'admin'
 
   const updateData: any = {
     first_name: firstName,
@@ -77,7 +75,7 @@ export async function updateCustomer(formData: FormData) {
 }
 
 export async function addAppointment(formData: FormData) {
-  const supabase = await createSupabaseServerClient()
+  const { supabase, user } = await requireStaff()
   const customerId = formData.get('customerId') as string
   const applicationId = formData.get('applicationId') as string
   const date = formData.get('date') as string
@@ -103,7 +101,6 @@ export async function addAppointment(formData: FormData) {
   }
 
   // Log activity
-  const { data: { user } } = await supabase.auth.getUser()
   await supabase.from('activity_log').insert([{
     application_id: applicationId,
     customer_id: customerId,
@@ -118,7 +115,7 @@ export async function addAppointment(formData: FormData) {
 export async function checkAppointmentDensity(dateStr: string, location: string) {
   if (!dateStr || !location) return [];
   
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await requireStaff();
   
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return [];

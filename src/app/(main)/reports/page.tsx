@@ -27,7 +27,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   // Get current user and staff record
   const { data: { user } } = await supabase.auth.getUser();
   const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
-  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  const isAdmin = staffRecord?.role === 'admin';
   const staffId = staffRecord?.id;
 
   const totalCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true });

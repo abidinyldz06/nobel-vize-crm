@@ -1,10 +1,46 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createSupabaseAdminClient } from '@/lib/supabase-admin';
+import { verifySignedWebhook } from '@/lib/webhook-security';
+
+interface GoogleFormWebhookPayload {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  email?: string;
+  country?: string;
+  passportNo?: string;
+  passportExpiry?: string;
+  passportIssuingCountry?: string;
+  visaType?: string;
+  assignedStaffId?: string;
+  consulateFee?: number | string;
+  serviceFee?: number | string;
+  consultantNote?: string;
+}
+
+interface StaffLoadRow {
+  id: string;
+  customers?: Array<{ count?: number }>;
+}
 
 // POST /api/webhook/google-form
 export async function POST(request: Request) {
+  let webhookEventId: string | null = null;
   try {
-    const data = await request.json();
+    const verification = await verifySignedWebhook(request);
+    if (!verification.ok) {
+      return NextResponse.json(
+        { success: false, message: verification.error },
+        { status: verification.status },
+      );
+    }
+
+    let data: GoogleFormWebhookPayload;
+    try {
+      data = JSON.parse(verification.rawBody) as GoogleFormWebhookPayload;
+    } catch {
+      return NextResponse.json({ success: false, message: 'Geçersiz JSON gövdesi' }, { status: 400 });
+    }
     
     const { 
       firstName, 
@@ -22,28 +58,48 @@ export async function POST(request: Request) {
       consultantNote
     } = data;
 
-    if (!firstName || !lastName || !phone) {
+    if (typeof firstName !== 'string' || typeof lastName !== 'string' || typeof phone !== 'string' || !firstName.trim() || !lastName.trim() || !phone.trim()) {
       return NextResponse.json({ success: false, message: 'İsim, soyisim ve telefon zorunludur' }, { status: 400 });
     }
 
-    // Bypass RLS in webhook by using SERVICE_ROLE_KEY if available, else fallback to ANON_KEY
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: { persistSession: false, autoRefreshToken: false }
+    if (firstName.length > 100 || lastName.length > 100 || phone.length > 30 || (typeof email === 'string' && email.length > 254)) {
+      return NextResponse.json({ success: false, message: 'Gönderilen alanlardan biri izin verilen uzunluğu aşıyor' }, { status: 400 });
+    }
+
+    const supabase = createSupabaseAdminClient();
+    webhookEventId = verification.eventId;
+    const { error: eventInsertError } = await supabase.from('webhook_events').insert({
+      event_id: webhookEventId,
+      source: 'google-form',
+      status: 'processing',
     });
+
+    if (eventInsertError?.code === '23505') {
+      return NextResponse.json(
+        { success: false, message: 'Bu webhook olayı daha önce işlendi.' },
+        { status: 409 },
+      );
+    }
+    if (eventInsertError) throw eventInsertError;
 
     // 1. Duplicate Kontrolü
     let customerId = null;
     let isDuplicateCustomer = false;
 
     // Telefon veya email ile mevcut müşteriyi ara
-    let query = supabase.from('customers').select('id').eq('phone', phone);
-    if (email) {
-      query = supabase.from('customers').select('id').or(`phone.eq.${phone},email.eq.${email}`);
-    }
+    const normalizedPhone = phone.trim();
+    const normalizedEmail = typeof email === 'string' && email.trim() ? email.trim().toLowerCase() : null;
+    let { data: existingCustomers, error: searchError } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('phone', normalizedPhone)
+      .limit(1);
 
-    const { data: existingCustomers, error: searchError } = await query.limit(1);
+    if (!searchError && (!existingCustomers || existingCustomers.length === 0) && normalizedEmail) {
+      const emailResult = await supabase.from('customers').select('id').eq('email', normalizedEmail).limit(1);
+      existingCustomers = emailResult.data;
+      searchError = emailResult.error;
+    }
 
     if (searchError) throw searchError;
 
@@ -55,10 +111,10 @@ export async function POST(request: Request) {
       const { data: newCustomer, error: createError } = await supabase
         .from('customers')
         .insert([{ 
-          first_name: firstName, 
-          last_name: lastName, 
-          phone, 
-          email,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          phone: normalizedPhone,
+          email: normalizedEmail,
           passport_no: passportNo,
           passport_expiry: passportExpiry,
           passport_issuing_country: passportIssuingCountry
@@ -77,6 +133,7 @@ export async function POST(request: Request) {
       const { data: countryData } = await supabase.from('countries').select('*').ilike('name', country).single();
       
       if (!countryData) {
+        await supabase.from('webhook_events').update({ status: 'rejected' }).eq('event_id', webhookEventId);
         return NextResponse.json({ success: false, message: `Sistemde ${country} ülkesi bulunamadı.` }, { status: 400 });
       }
 
@@ -89,6 +146,7 @@ export async function POST(request: Request) {
           .ilike('country', country);
 
         if (existingApps && existingApps.length > 0) {
+          await supabase.from('webhook_events').update({ status: 'rejected' }).eq('event_id', webhookEventId);
           return NextResponse.json({ success: false, message: "Bu müşteri zaten bu ülkeye başvuru yapmış", customerId }, { status: 409 });
         }
       }
@@ -103,7 +161,7 @@ export async function POST(request: Request) {
           .eq('is_active', true);
 
         if (staffList && staffList.length > 0) {
-          const sorted = staffList.sort((a: any, b: any) => {
+          const sorted = (staffList as StaffLoadRow[]).sort((a, b) => {
              const aCount = a.customers?.[0]?.count || 0;
              const bCount = b.customers?.[0]?.count || 0;
              return aCount - bCount;
@@ -117,8 +175,8 @@ export async function POST(request: Request) {
 
       // 4. Ücret Hesaplama
       let finalFee = countryData.base_fee;
-      let cFee = consulateFee ? Number(consulateFee) : null;
-      let sFee = serviceFee ? Number(serviceFee) : null;
+      const cFee = consulateFee ? Number(consulateFee) : null;
+      const sFee = serviceFee ? Number(serviceFee) : null;
       
       if (cFee !== null || sFee !== null) {
         finalFee = (cFee || 0) + (sFee || 0);
@@ -171,13 +229,25 @@ export async function POST(request: Request) {
     }
 
     if (isDuplicateCustomer) {
+      await supabase.from('webhook_events').update({ status: 'processed', processed_at: new Date().toISOString() }).eq('event_id', webhookEventId);
       return NextResponse.json({ success: true, message: "Mevcut müşteriye yeni başvuru eklendi", customerId }, { status: 201 });
     }
 
+    await supabase.from('webhook_events').update({ status: 'processed', processed_at: new Date().toISOString() }).eq('event_id', webhookEventId);
     return NextResponse.json({ success: true, message: "Müşteri ve dosya başarıyla oluşturuldu", customerId }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Webhook Error:', error);
-    return NextResponse.json({ success: false, message: error.message || 'Sunucu hatası oluştu' }, { status: 500 });
+    if (webhookEventId) {
+      try {
+        await createSupabaseAdminClient()
+          .from('webhook_events')
+          .update({ status: 'failed' })
+          .eq('event_id', webhookEventId);
+      } catch (eventError) {
+        console.error('Webhook event status update failed:', eventError);
+      }
+    }
+    return NextResponse.json({ success: false, message: 'Sunucu hatası oluştu' }, { status: 500 });
   }
 }

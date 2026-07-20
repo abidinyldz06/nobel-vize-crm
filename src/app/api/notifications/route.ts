@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { requireStaff } from "@/lib/authz";
+import { authorizationErrorResponse } from "@/lib/api-auth";
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
+  let supabase;
+  try {
+    ({ supabase } = await requireStaff());
+  } catch (error) {
+    return authorizationErrorResponse(error);
+  }
   
   const { data: notifications, error } = await supabase
     .from('activity_log')
@@ -18,7 +24,12 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const supabase = await createSupabaseServerClient();
+  let supabase;
+  try {
+    ({ supabase } = await requireStaff());
+  } catch (error) {
+    return authorizationErrorResponse(error);
+  }
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   const all = searchParams.get('all');

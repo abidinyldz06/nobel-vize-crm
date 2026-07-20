@@ -1,18 +1,9 @@
 "use server"
-import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { requireAdmin } from "@/lib/authz"
 import { revalidatePath } from "next/cache"
 
 export async function assignStaff(customerId: string, staffId: string | null) {
-  const supabase = await createSupabaseServerClient()
-
-  // Sadece Admin yetkisi olanlar atama yapabilir
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: "Yetkisiz işlem." }
-
-  const { data: currentStaff } = await supabase.from('staff').select('role').eq('user_id', user.id).single()
-  if (currentStaff?.role !== 'admin') {
-    return { error: "Sadece yöneticiler danışman ataması yapabilir." }
-  }
+  const { supabase, user } = await requireAdmin()
 
   const { error } = await supabase
     .from('customers')

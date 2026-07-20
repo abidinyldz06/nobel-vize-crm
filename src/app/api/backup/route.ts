@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { requireAdmin } from "@/lib/authz";
+import { authorizationErrorResponse } from "@/lib/api-auth";
 
 // Kaydedilecek ve geri yüklenecek tabloların doğru sırası (Parent -> Child)
 const TABLES_ORDER = [
@@ -19,25 +20,12 @@ const TABLES_ORDER = [
 // Silme işlemi için ters sıra (Child -> Parent)
 const TABLES_REVERSE_ORDER = [...TABLES_ORDER].reverse();
 
-async function checkAdmin(supabase: any) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  const { data: staff } = await supabase
-    .from('staff')
-    .select('role')
-    .eq('user_id', user.id)
-    .single();
-
-  return staff?.role === 'admin';
-}
-
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-  const isAdmin = await checkAdmin(supabase);
-
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized. Only admins can perform backups." }, { status: 403 });
+  let supabase;
+  try {
+    ({ supabase } = await requireAdmin());
+  } catch (error) {
+    return authorizationErrorResponse(error);
   }
 
   const exportData: Record<string, any> = {
@@ -71,11 +59,25 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const supabase = await createSupabaseServerClient();
-  const isAdmin = await checkAdmin(supabase);
+  let supabase;
+  try {
+    ({ supabase } = await requireAdmin());
+  } catch (error) {
+    return authorizationErrorResponse(error);
+  }
 
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized. Only admins can restore backups." }, { status: 403 });
+  // Mevcut restore akışı transaction kullanmadığı için varsayılan olarak kapalıdır.
+  // Faz 1'de atomik veritabanı fonksiyonuna taşınana kadar yalnızca kontrollü
+  // bakım penceresinde iki ayrı onayla açılabilir.
+  if (process.env.ENABLE_DANGEROUS_RESTORE !== "true") {
+    return NextResponse.json(
+      { error: "Geri yükleme güvenlik nedeniyle devre dışı. Atomik restore Faz 1 kapsamında tamamlanacak." },
+      { status: 503 },
+    );
+  }
+
+  if (req.headers.get("x-confirm-restore") !== "RESTORE_ALL_DATA") {
+    return NextResponse.json({ error: "Geri yükleme onay başlığı eksik." }, { status: 400 });
   }
 
   try {
