@@ -44,7 +44,7 @@ jobs:
       - run: npm run db:reset
       - name: Verify generated database types
         run: |
-          npx supabase gen types typescript --local > /tmp/database.ts
+          npx supabase gen types typescript --local | sed '${/^$/d;}' > /tmp/database.ts
           diff -u src/types/database.ts /tmp/database.ts
       - run: npm run db:lint
       - run: npm run db:test

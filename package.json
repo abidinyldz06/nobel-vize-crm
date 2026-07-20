@@ -9,9 +9,9 @@
     "start": "next start",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.ts",
-    "test:unit": "node --test tests/report-metrics.test.ts",
-    "test:security": "node --test tests/security-regressions.test.ts tests/webhook-signature.test.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "test:unit": "tsx --test tests/report-metrics.test.ts",
+    "test:security": "tsx --test tests/security-regressions.test.ts tests/webhook-signature.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:local": "sh scripts/run-e2e-local.sh",
     "db:start": "supabase start",
@@ -49,6 +49,7 @@
     "eslint-config-next": "16.2.9",
     "supabase": "^2.109.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5"
   }
 }

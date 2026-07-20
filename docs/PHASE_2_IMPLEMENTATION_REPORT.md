@@ -61,8 +61,8 @@ npx supabase gen types typescript --local > src/types/database.ts
 
 ### Test ve CI
 
-- Node test runner ile hesaplama sınırları, aktif başvuru, ödeme, evrak ve süreç
-  süresi testleri eklendi.
+- Node test runner ve Node 20 uyumlu `tsx` yükleyicisiyle hesaplama sınırları,
+  aktif başvuru, ödeme, evrak ve süreç süresi testleri eklendi.
 - Playwright Chromium smoke kapsamı:
   - giriş formu,
   - anonim kullanıcının korumalı sayfadan yönlendirilmesi,
