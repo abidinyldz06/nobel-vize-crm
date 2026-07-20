@@ -1,23 +1,61 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { requireStaff } from "@/lib/authz";
+import { authorizationErrorResponse } from "@/lib/api-auth";
+
+const ALLOWED_STATUSES = new Set([
+  "profil_analizi",
+  "evrak_bekleniyor",
+  "randevu_bekleniyor",
+  "randevu_alindi",
+  "evrak_hazirlaniyor",
+  "basvuru_yapildi",
+  "onaylandi",
+  "reddedildi",
+  "itiraz",
+  "kapandi",
+]);
 
 export async function POST(req: Request) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  let performed_by = "Sistem";
-  if (user) {
-    const { data: staff } = await supabase.from('staff').select('first_name, last_name').eq('user_id', user.id).single();
-    if (staff) performed_by = `${staff.first_name} ${staff.last_name}`;
+  let context;
+  try {
+    context = await requireStaff();
+  } catch (error) {
+    return authorizationErrorResponse(error);
   }
 
-  const { action, customerIds, applicationIds, value } = await req.json();
+  const { supabase, staff } = context;
+  const performed_by = staff.full_name;
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Geçersiz JSON gövdesi" }, { status: 400 });
+  }
+
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 });
+  }
+
+  const { action, customerIds, applicationIds, value } = body as {
+    action?: string;
+    customerIds?: unknown;
+    applicationIds?: unknown;
+    value?: unknown;
+  };
 
   if (!customerIds || !Array.isArray(customerIds) || customerIds.length === 0) {
     return NextResponse.json({ error: "Eksik parametreler" }, { status: 400 });
   }
 
+  if (!customerIds.every(id => typeof id === "string")) {
+    return NextResponse.json({ error: "Geçersiz müşteri kimliği" }, { status: 400 });
+  }
+
   if (action === "delete") {
+    if (staff.role !== "admin") {
+      return NextResponse.json({ error: "Toplu silme için yönetici yetkisi gerekiyor." }, { status: 403 });
+    }
     // Supabase cascade ayarlıysa application ve documentler silinir.
     const { error } = await supabase.from('customers').delete().in('id', customerIds);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -25,6 +63,9 @@ export async function POST(req: Request) {
   else if (action === "update_status") {
     if (!applicationIds || !Array.isArray(applicationIds) || applicationIds.length === 0) {
       return NextResponse.json({ error: "Müşterilerin aktif başvurusu bulunamadı" }, { status: 400 });
+    }
+    if (!applicationIds.every(id => typeof id === "string") || typeof value !== "string" || !ALLOWED_STATUSES.has(value)) {
+      return NextResponse.json({ error: "Geçersiz başvuru durumu" }, { status: 400 });
     }
     const { error } = await supabase.from('applications').update({ status: value }).in('id', applicationIds);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -39,6 +80,12 @@ export async function POST(req: Request) {
     await supabase.from('activity_log').insert(logs);
   }
   else if (action === "assign_staff") {
+    if (staff.role !== "admin") {
+      return NextResponse.json({ error: "Toplu danışman ataması için yönetici yetkisi gerekiyor." }, { status: 403 });
+    }
+    if (value !== null && value !== undefined && typeof value !== "string") {
+      return NextResponse.json({ error: "Geçersiz danışman kimliği" }, { status: 400 });
+    }
     const { error } = await supabase.from('customers').update({ assigned_staff_id: value || null }).in('id', customerIds);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     

@@ -1,3 +1,11 @@
+-- ESKİ RLS DOSYASI: staff tablosuna recursive politika gönderebilir.
+-- Güncel politika: migrations/202607200002_phase0_role_based_rls.sql
+DO $$
+BEGIN
+  RAISE EXCEPTION 'Güvenlik engeli: apply_rls_policies.sql eski; sürümlü migration kullanın.';
+END
+$$;
+
 -- ==========================================
 -- 1. DROP EXISTING POLICIES
 -- ==========================================

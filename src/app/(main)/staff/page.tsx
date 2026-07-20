@@ -1,59 +1,16 @@
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { requireAdminPage } from "@/lib/page-auth";
 import { Users, Plus, Shield, User, Phone, Mail, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 
 export const revalidate = 0;
 
 export default async function StaffPage() {
-  const supabase = await createSupabaseServerClient();
-  
-  // Role Check
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    const { redirect } = await import("next/navigation");
-    redirect("/");
-  }
-  
-  const { data: staffRecord } = await supabase.from('staff').select('role').eq('user_id', user?.id).single();
-  const isAdmin = !staffRecord || staffRecord.role === 'admin';
-  
-  if (!isAdmin) {
-    const { redirect } = await import("next/navigation");
-    redirect("/dashboard");
-  }
+  const { supabase } = await requireAdminPage();
 
   const { data: staff } = await supabase
     .from('staff')
     .select('*')
     .order('created_at', { ascending: false });
-
-  // --- AUTO CLEANUP DUPLICATES ---
-  if (staff && staff.length > 0) {
-    const emails = new Set();
-    const toDelete = [];
-    for (const member of staff) {
-      if (emails.has(member.email)) {
-        toDelete.push(member.id);
-      } else {
-        emails.add(member.email);
-      }
-    }
-    if (toDelete.length > 0) {
-      for (const id of toDelete) {
-        await supabase.from('staff').delete().eq('id', id);
-      }
-      // Re-fetch after cleaning
-      const { data: refreshedStaff } = await supabase
-        .from('staff')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (refreshedStaff) {
-        staff.length = 0;
-        staff.push(...refreshedStaff);
-      }
-    }
-  }
-  // -------------------------------
 
   // Get customer count per staff
   const { data: customerCounts } = await supabase

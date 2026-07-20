@@ -12,7 +12,7 @@ export default async function CustomersPage() {
   // Get current user and staff record
   const { data: { user } } = await supabase.auth.getUser();
   const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
-  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  const isAdmin = staffRecord?.role === 'admin';
   const staffId = staffRecord?.id;
 
   const query = supabase

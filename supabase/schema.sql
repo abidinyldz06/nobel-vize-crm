@@ -1,3 +1,11 @@
+-- ESKİ ŞEMA DOSYASI: GÜNCEL RLS MODELİNİ TEMSİL ETMEZ.
+-- Yalnızca supabase/migrations altındaki sürümlü dosyaları kullanın.
+DO $$
+BEGIN
+  RAISE EXCEPTION 'Güvenlik engeli: schema.sql eski politikalar içerir ve çalıştırılamaz.';
+END
+$$;
+
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 

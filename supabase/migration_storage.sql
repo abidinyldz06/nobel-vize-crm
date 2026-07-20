@@ -4,7 +4,8 @@
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS file_url TEXT;
 
 -- 2. Create Bucket
-INSERT INTO storage.buckets (id, name, public) VALUES ('documents', 'documents', true) ON CONFLICT DO NOTHING;
+INSERT INTO storage.buckets (id, name, public) VALUES ('documents', 'documents', false)
+ON CONFLICT (id) DO UPDATE SET public = false;
 
 -- 3. Storage Policies
 CREATE POLICY "Authenticated Upload" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'documents');

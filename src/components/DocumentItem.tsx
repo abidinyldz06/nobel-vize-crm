@@ -115,13 +115,9 @@ export default function DocumentItem({ doc }: { doc: any }) {
       return;
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('documents')
-      .getPublicUrl(filePath);
-
     await supabase
       .from('documents')
-      .update({ file_url: publicUrl })
+      .update({ file_url: filePath })
       .eq('id', doc.id);
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -140,10 +136,14 @@ export default function DocumentItem({ doc }: { doc: any }) {
     if (!confirm("Dosyayı silmek istediğinize emin misiniz?")) return;
 
     setUploading(true);
-    // Remove file_url from db
+    const storedPath = typeof doc.file_url === 'string' && !doc.file_url.startsWith('http')
+      ? doc.file_url
+      : null;
+    if (storedPath) {
+      await supabase.storage.from('documents').remove([storedPath]);
+    }
+
     await supabase.from('documents').update({ file_url: null }).eq('id', doc.id);
-    
-    // (Optional: delete from storage using url extraction)
     
     setUploading(false);
     router.refresh();
@@ -213,7 +213,7 @@ export default function DocumentItem({ doc }: { doc: any }) {
         <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
           {doc.file_url ? (
             <div className="flex items-center gap-1">
-              <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="p-1 text-blue-500 hover:text-blue-600 bg-blue-500/10 rounded-md" title="Dosyayı Görüntüle">
+              <a href={`/api/documents/${doc.id}/download`} target="_blank" rel="noopener noreferrer" className="p-1 text-blue-500 hover:text-blue-600 bg-blue-500/10 rounded-md" title="Dosyayı Görüntüle">
                 <File className="w-4 h-4" />
               </a>
               <button onClick={handleDeleteFile} disabled={uploading} className="p-1 text-red-500 hover:text-red-600 bg-red-500/10 rounded-md disabled:opacity-50" title="Dosyayı Sil">

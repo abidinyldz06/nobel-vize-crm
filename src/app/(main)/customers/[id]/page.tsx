@@ -24,7 +24,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
   const { data: { user } } = await supabase.auth.getUser();
   const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
-  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  const isAdmin = staffRecord?.role === 'admin';
   const staffId = staffRecord?.id;
 
   const { data: customer } = await supabase.from('customers').select('*').eq('id', id).single();

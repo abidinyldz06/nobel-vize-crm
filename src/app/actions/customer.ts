@@ -1,10 +1,10 @@
 "use server"
-import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { requireStaff } from "@/lib/authz"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 export async function createCustomerWithApplication(formData: FormData) {
-  const supabase = await createSupabaseServerClient()
+  const { supabase, user, staff } = await requireStaff()
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
   const phone = formData.get('phone') as string
@@ -23,14 +23,12 @@ export async function createCustomerWithApplication(formData: FormData) {
   const passportExpiry = formData.get('passportExpiry') as string
   const passportIssuingCountry = formData.get('passportIssuingCountry') as string || 'Türkiye'
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
-  const isAdmin = !staffRecord || staffRecord.role === 'admin';
+  const isAdmin = staff.role === 'admin';
 
   let finalAssignedStaffId = assignedStaffId;
   // Danışmansa, her halükarda sadece kendisine atayabilir
-  if (!isAdmin && staffRecord?.id) {
-    finalAssignedStaffId = staffRecord.id;
+  if (!isAdmin) {
+    finalAssignedStaffId = staff.id;
   }
 
   // 1. Create Customer
@@ -133,7 +131,6 @@ export async function createCustomerWithApplication(formData: FormData) {
     }
 
     // 5. Log activity
-    const { data: { user } } = await supabase.auth.getUser()
     await supabase.from('activity_log').insert([{
       application_id: application.id,
       customer_id: customer.id,

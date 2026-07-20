@@ -7,10 +7,14 @@ UPDATE customers SET portal_token = gen_random_uuid() WHERE portal_token IS NULL
 -- Token'ı benzersiz yap
 CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_portal_token ON customers(portal_token) WHERE portal_token IS NOT NULL;
 
--- Portal token'ı authenticated olmadan okunabilmesi için public read policy
-CREATE POLICY "Portal Public Read" ON customers FOR SELECT TO anon USING (true);
+-- Portal sorguları yalnızca Next.js sunucu katmanında service-role istemcisiyle,
+-- sınırlı kolonlar seçilerek yapılır. Anonim tablo erişimi kesinlikle verilmez.
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 
--- applications, documents, payments tabloları için de anon read policy ekle (portal için)
-CREATE POLICY "Portal Public Read Apps" ON applications FOR SELECT TO anon USING (true);
-CREATE POLICY "Portal Public Read Docs" ON documents FOR SELECT TO anon USING (true);
-CREATE POLICY "Portal Public Read Payments" ON payments FOR SELECT TO anon USING (true);
+DROP POLICY IF EXISTS "Portal Public Read" ON customers;
+DROP POLICY IF EXISTS "Portal Public Read Apps" ON applications;
+DROP POLICY IF EXISTS "Portal Public Read Docs" ON documents;
+DROP POLICY IF EXISTS "Portal Public Read Payments" ON payments;
