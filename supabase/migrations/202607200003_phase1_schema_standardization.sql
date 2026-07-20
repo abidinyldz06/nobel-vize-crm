@@ -340,6 +340,8 @@ END
 $$;
 
 UPDATE public.applications SET visa_type = 'turistik' WHERE visa_type = 'turist';
+UPDATE public.applications SET visa_type = 'ogrenci' WHERE visa_type IN ('Öğrenci', 'öğrenci');
+UPDATE public.documents SET status = 'onaylandi' WHERE status = 'tamamlandi';
 UPDATE public.country_visa_rules SET visa_category = 'turistik' WHERE visa_category = 'turist';
 UPDATE public.country_visa_rules SET documents = '[]'::JSONB WHERE documents IS NULL;
 

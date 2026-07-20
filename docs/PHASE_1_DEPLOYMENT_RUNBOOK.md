@@ -53,8 +53,11 @@ Staging veya production üzerinde migration çalıştırmadan önce:
    alın; dosyayı şifreli ve erişimi sınırlı konumda saklayın.
 3. SQL Editor'da `supabase/scripts/phase1_schema_inventory.sql` çalıştırıp
    çıktıyı tarih/proje adıyla saklayın. Betik satır verisi ve secret yazdırmaz.
-4. `supabase/scripts/phase1_data_preflight.sql` çalıştırın. Dönen bütün
-   `issue_count` değerleri sıfır olmadan constraint doğrulamasına geçmeyin.
+4. Migration öncesinde
+   `supabase/scripts/phase1_pre_migration_data_preflight.sql` çalıştırın.
+   Migration sonrasında `supabase/scripts/phase1_data_preflight.sql` ile
+   kontrolleri tekrarlayın. Dönen bütün `issue_count` değerleri sıfır olmadan
+   constraint doğrulamasına geçmeyin.
 
 Yedek geri yükleme tatbikatı production yerine izole bir staging projesinde
 yapılmalıdır. Storage içindeki dosya nesneleri JSON veritabanı yedeğine dahil
