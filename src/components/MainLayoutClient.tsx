@@ -5,8 +5,10 @@ import { useTheme } from "next-themes";
 import { useState, useEffect, useSyncExternalStore } from "react";
 import NotificationCenter from "@/components/NotificationCenter";
 import GlobalSearch from "@/components/GlobalSearch";
+import ProfileMenu from "@/components/ProfileMenu";
+import type { CurrentStaffProfile } from "@/types/staff-profile";
 
-export default function MainLayoutClient({ children }: { children: React.ReactNode }) {
+export default function MainLayoutClient({ children, profile }: { children: React.ReactNode; profile: CurrentStaffProfile }) {
   const { theme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(
     () => () => undefined,
@@ -31,7 +33,7 @@ export default function MainLayoutClient({ children }: { children: React.ReactNo
 
   return (
     <div className="flex min-h-screen bg-white dark:bg-[#060d1a]">
-      <Sidebar isMobileOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Sidebar profile={profile} isMobileOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <GlobalSearch open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
       
       <div className="flex-1 flex flex-col min-w-0">
@@ -70,9 +72,7 @@ export default function MainLayoutClient({ children }: { children: React.ReactNo
               {mounted ? (theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />) : <div className="w-4 h-4" />}
             </button>
 
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-purple-700 flex items-center justify-center text-white text-xs font-bold shadow-md ring-2 ring-white dark:ring-[#060d1a] ml-1">
-              N
-            </div>
+            <ProfileMenu profile={profile} />
           </div>
         </header>
 

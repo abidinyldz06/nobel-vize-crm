@@ -6,7 +6,18 @@ export default async function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireStaffPage();
+  const { staff, user } = await requireStaffPage();
 
-  return <MainLayoutClient>{children}</MainLayoutClient>;
+  return (
+    <MainLayoutClient
+      profile={{
+        staffId: staff.id,
+        fullName: staff.full_name,
+        email: user.email ?? staff.email,
+        role: staff.role,
+      }}
+    >
+      {children}
+    </MainLayoutClient>
+  );
 }
