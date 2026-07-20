@@ -39,9 +39,14 @@ Durum: **Devam ediyor**
 | Profil aç/kapat | Geçti |
 | Sistem Ayarları geçişi | Geçti |
 | Profil menüsünden çıkış | Geçti |
+| GitHub Actions — application | Geçti |
+| GitHub Actions — database | Geçti |
+| GitHub Actions — browser | Geçti |
+| Vercel Preview | Geçti |
 
-GitHub Actions kontrolü, Faz 3.1 taslak PR'ı açıldıktan sonra ayrıca
-izlenecektir.
+GitHub Actions'ın ilk browser turunda Node 20 WebSocket farkı yakalandı. `ws`
+transport düzeltmesi yerelde Node 20 ile doğrulandıktan sonra ikinci turdaki
+application, database ve browser işlerinin tamamı başarılı oldu.
 
 ## Dış ortam durumu
 
