@@ -1,4 +1,4 @@
-import { Edit, MoreHorizontal, AlertCircle } from "lucide-react";
+import { Edit, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import StatusTimeline from "@/components/StatusTimeline";
@@ -23,7 +23,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   const supabase = await createSupabaseServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
+  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id ?? '').single();
   const isAdmin = staffRecord?.role === 'admin';
   const staffId = staffRecord?.id;
 
@@ -85,7 +85,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     familyMembers = familyData;
   }
 
-  const completedDocs = documents?.filter(d => d.status === 'tamamlandi').length || 0;
+  const completedDocs = documents?.filter(d => d.status === 'onaylandi').length || 0;
   const totalDocs = documents?.length || 0;
   const fee = activeApp?.total_fee || 0;
 
@@ -231,7 +231,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                 <CustomerActionMenu 
                   customerId={customer.id} 
                   isAdmin={isAdmin} 
-                  currentStaffId={customer.assigned_staff_id} 
+                  currentStaffId={customer.assigned_staff_id ?? undefined}
                 />
               </div>
               <StatusTimeline applicationId={activeApp.id} currentStatus={activeApp.status || 'profil_analizi'} />
@@ -265,7 +265,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                 ) : (
                   <div className="space-y-4 p-3">
                     {Object.keys(DOCUMENT_CATEGORIES).map(catKey => {
-                      const catDocs = documents.filter((d: any) => (d.category || 'diger') === catKey);
+                      const catDocs = documents.filter((document) => (document.category || 'diger') === catKey);
                       if (catDocs.length === 0) return null;
                       return (
                         <div key={catKey} className="bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl overflow-hidden">
@@ -273,7 +273,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                             <h4 className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{DOCUMENT_CATEGORIES[catKey]}</h4>
                           </div>
                           <div className="divide-y divide-slate-100 dark:divide-[#1f2937]">
-                            {catDocs.map((doc: any) => (
+                            {catDocs.map((doc) => (
                               <DocumentItem key={doc.id} doc={doc} />
                             ))}
                           </div>
@@ -291,7 +291,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   {customer.email && (
                     <a
                       href={`mailto:${customer.email}?subject=${encodeURIComponent(`${activeApp?.country || ''} Vize Başvurusu — Evrak Listesi`)}&body=${encodeURIComponent(
-                        `Merhaba ${customer.first_name} Bey/Hanım,\n\n${activeApp?.country || ''} vize başvurunuz için gereken evraklar:\n\n${(documents || []).map((d: any, i: number) => `${i + 1}. ${d.document_type} - ${d.status === 'tamamlandi' ? 'Tamamlandı ✓' : 'Bekleniyor'}`).join('\n')}\n\nSaygılarımızla,\nNobel Vize`
+                        `Merhaba ${customer.first_name} Bey/Hanım,\n\n${activeApp?.country || ''} vize başvurunuz için gereken evraklar:\n\n${(documents || []).map((document, index) => `${index + 1}. ${document.document_type} - ${document.status === 'onaylandi' ? 'Tamamlandı ✓' : 'Bekleniyor'}`).join('\n')}\n\nSaygılarımızla,\nNobel Vize`
                       )}`}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-[11px] font-semibold rounded-lg transition-all"
                     >
@@ -321,7 +321,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Tüm Başvurular</h3>
               </div>
               <div className="divide-y divide-slate-200 dark:divide-[#1f2937]">
-                {applications.map((app: any) => (
+                {applications.map((app) => (
                   <div key={app.id} className={`flex items-center justify-between px-5 py-3 ${app.id === activeApp?.id ? 'bg-blue-600/5' : ''}`}>
                     <div>
                       <p className="text-sm font-medium text-slate-900 dark:text-slate-200">{app.country}</p>

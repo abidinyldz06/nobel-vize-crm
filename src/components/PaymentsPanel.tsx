@@ -3,17 +3,9 @@ import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { CreditCard, Plus, Check, Clock, Loader2, Banknote, X } from "lucide-react";
+import type { Tables } from "@/types/database";
 
-type Payment = {
-  id: string;
-  amount: number;
-  type: string;
-  method: string;
-  status: string;
-  paid_at: string | null;
-  note: string | null;
-  created_at: string;
-};
+type Payment = Tables<'payments'>;
 
 const TYPE_LABELS: Record<string, string> = {
   upfront:   "Peşinat",
@@ -71,7 +63,6 @@ export default function PaymentsPanel({
     setErrorMsg("");
     setSaving(true);
 
-    const now = new Date().toISOString();
     const { data, error } = await supabase
       .from("payments")
       .insert([{
@@ -81,7 +72,6 @@ export default function PaymentsPanel({
         type: form.type,
         method: form.method,
         status: "alindi",
-        paid_at: now,
         note: form.note || null,
       }])
       .select()
@@ -261,8 +251,8 @@ export default function PaymentsPanel({
                 }`}>{p.status === "alindi" ? "Alındı ✓" : "Bekliyor"}</span>
               </div>
               <p className="text-[10px] text-slate-500">
-                {TYPE_LABELS[p.type] || p.type} · {METHOD_LABELS[p.method] || p.method}
-                {p.paid_at && ` · ${new Date(p.paid_at).toLocaleDateString('tr-TR')}`}
+                {TYPE_LABELS[p.type] || p.type} · {METHOD_LABELS[p.method ?? ''] || p.method || 'Belirtilmedi'}
+                {` · ${new Date(p.created_at).toLocaleDateString('tr-TR')}`}
                 {p.note && ` · ${p.note}`}
               </p>
             </div>

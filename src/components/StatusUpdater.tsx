@@ -76,7 +76,7 @@ export default function StatusUpdater({
     const { error } = await supabase.rpc("update_application_status_v1", {
       p_application_id: applicationId,
       p_status: newStatus,
-      p_rejection_reason: reasonKey,
+      p_rejection_reason: reasonKey ?? undefined,
       p_action: actionLog,
     });
 

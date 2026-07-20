@@ -86,10 +86,11 @@ export default function LoginForm() {
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
+                <label htmlFor="reset-email" className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input
+                    id="reset-email"
                     type="email"
                     required
                     value={resetEmail}
@@ -132,10 +133,11 @@ export default function LoginForm() {
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
+              <label htmlFor="login-email" className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
+                  id="login-email"
                   name="email"
                   type="email"
                   required
@@ -148,12 +150,13 @@ export default function LoginForm() {
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Şifre</label>
+                <label htmlFor="login-password" className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Şifre</label>
                 <button type="button" onClick={() => setIsResetMode(true)} className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Şifremi Unuttum</button>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
+                  id="login-password"
                   name="password"
                   type="password"
                   required

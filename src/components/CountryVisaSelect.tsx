@@ -1,29 +1,21 @@
 "use client"
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import { AlertCircle } from "lucide-react";
+import type { Tables } from "@/types/database";
 
 export default function CountryVisaSelect({ 
   dbCountries, 
   allRequirements 
 }: { 
-  dbCountries: any[], 
-  allRequirements: any[] 
+  dbCountries: Pick<Tables<'countries'>, 'id' | 'name'>[],
+  allRequirements: Pick<Tables<'country_visa_requirements'>, 'country_id' | 'visa_type'>[]
 }) {
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [selectedVisaType, setSelectedVisaType] = useState<string>("turistik");
-  const [hasRequirements, setHasRequirements] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (selectedCountry && selectedVisaType) {
-      const found = allRequirements.some(
-        r => r.country_id === selectedCountry && r.visa_type === selectedVisaType
-      );
-      setHasRequirements(found);
-    } else {
-      setHasRequirements(true); // Don't show warning if nothing is selected yet
-    }
-  }, [selectedCountry, selectedVisaType, allRequirements]);
+  const hasRequirements = !selectedCountry || allRequirements.some(
+    requirement => requirement.country_id === selectedCountry && requirement.visa_type === selectedVisaType
+  );
 
   return (
     <>

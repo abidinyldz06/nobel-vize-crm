@@ -1,4 +1,4 @@
-import { Check, Zap, Building2, ShieldCheck } from "lucide-react";
+import { Check } from "lucide-react";
 import Link from "next/link";
 
 export default function PricingPage() {

@@ -1,8 +1,10 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
-import { Users, FileText, Calendar, AlertCircle, CheckCircle2, Plus, ArrowRight, Clock, TrendingUp, DollarSign } from "lucide-react";
+import { Users, FileText, Calendar, AlertCircle, CheckCircle2, Plus, ArrowRight, TrendingUp, DollarSign } from "lucide-react";
 import Link from "next/link";
 import OverdueDocuments from "@/components/OverdueDocuments";
 import DashboardCharts from "@/components/DashboardCharts";
+import { sumExpectedRevenue, sumPayments, summarizeDocuments } from "@/lib/report-metrics";
+import type { Tables } from "@/types/database";
 
 export const revalidate = 0;
 
@@ -16,7 +18,7 @@ export default async function Dashboard() {
   const { data: staffRecord } = await supabase
     .from('staff')
     .select('*')
-    .eq('user_id', user?.id)
+    .eq('user_id', user?.id ?? '')
     .single();
 
   const isAdmin = staffRecord?.role === 'admin';
@@ -24,7 +26,8 @@ export default async function Dashboard() {
 
   // Build query filters based on role
   const customerQuery = supabase.from('customers').select('*', { count: 'exact', head: true });
-  const appQuery = supabase.from('applications').select('status, country, total_fee, created_at, customer_id, customers!inner(id, first_name, last_name)');
+  const appQuery = supabase.from('applications').select('id, status, country, total_fee, created_at, customer_id, customers!inner(id, first_name, last_name)');
+  const activeAppsQuery = supabase.from('applications').select('id, customers!inner(id)', { count: 'exact', head: true }).not('status', 'in', '(onaylandi,reddedildi,kapandi)');
   const recentCustomerQuery = supabase.from('customers').select('id, first_name, last_name, created_at, assigned_staff_id');
   const todayAppsQuery = supabase.from('applications').select('id, country, status, customer_id, customers!inner(id)').gte('created_at', new Date().toISOString().split('T')[0]);
   const monthlyAppsQuery = supabase.from('applications').select('total_fee, customer_id, customers!inner(id)');
@@ -35,6 +38,7 @@ export default async function Dashboard() {
     customerQuery.eq('assigned_staff_id', staffId);
     recentCustomerQuery.eq('assigned_staff_id', staffId);
     appQuery.eq('customers.assigned_staff_id', staffId);
+    activeAppsQuery.eq('customers.assigned_staff_id', staffId);
     todayAppsQuery.eq('customers.assigned_staff_id', staffId);
     monthlyAppsQuery.eq('customers.assigned_staff_id', staffId);
     appointmentsQuery.eq('customers.assigned_staff_id', staffId);
@@ -43,11 +47,13 @@ export default async function Dashboard() {
   const [
     { count: totalCustomers },
     { data: allApps },
+    { count: activeApps },
     { data: recentCustomers },
     { data: todayApps },
   ] = await Promise.all([
     customerQuery,
     appQuery.order('created_at', { ascending: false }).limit(5),
+    activeAppsQuery,
     recentCustomerQuery.order('created_at', { ascending: false }).limit(6),
     todayAppsQuery,
   ]);
@@ -60,13 +66,13 @@ export default async function Dashboard() {
   monthlyAppsQuery.gte('created_at', startOfMonth.toISOString());
 
   const { data: monthlyApps } = await monthlyAppsQuery;
-  const expectedMonthlyRevenue = monthlyApps?.reduce((sum, app) => sum + Number(app.total_fee || 0), 0) || 0;
+  const expectedMonthlyRevenue = sumExpectedRevenue(monthlyApps ?? []);
 
   const { data: upcomingAppointments } = await appointmentsQuery;
 
   // Documents and payments
-  let allDocs: any[] | null = [];
-  let allPayments: any[] | null = [];
+  let allDocs: Pick<Tables<'documents'>, 'status'>[] = [];
+  let allPayments: Pick<Tables<'payments'>, 'amount' | 'status' | 'created_at'>[] = [];
   
   if (!isAdmin && staffId) {
     // Danışmanın müşterilerinin başvuru ID'lerini bulalım
@@ -77,29 +83,22 @@ export default async function Dashboard() {
         supabase.from('documents').select('status').in('application_id', appIds),
         supabase.from('payments').select('amount, status, created_at').in('application_id', appIds)
       ]);
-      allDocs = d;
-      allPayments = p;
+      allDocs = d ?? [];
+      allPayments = p ?? [];
     }
   } else {
     const [{ data: d }, { data: p }] = await Promise.all([
       supabase.from('documents').select('status'),
       supabase.from('payments').select('amount, status, created_at')
     ]);
-    allDocs = d;
-    allPayments = p;
+    allDocs = d ?? [];
+    allPayments = p ?? [];
   }
 
-  const pendingDocs = allDocs?.filter(d => d.status === 'bekleniyor').length || 0;
-  const completedDocs = allDocs?.filter(d => d.status === 'tamamlandi').length || 0;
-  const totalApps = allApps?.length || 0;
+  const { pending: pendingDocs, completed: completedDocs } = summarizeDocuments(allDocs);
 
   // Payment metrics
-  const totalCollected = allPayments?.filter(p => p.status === 'alindi').reduce((s, p) => s + Number(p.amount), 0) || 0;
-  const pendingPayments = allPayments?.filter(p => p.status === 'bekliyor').reduce((s, p) => s + Number(p.amount), 0) || 0;
-
-  // Active applications (not closed)
-  const closedStatuses = ['onaylandi', 'reddedildi', 'kapandi'];
-  const activeApps = allApps?.filter(a => !closedStatuses.includes(a.status || '')).length || 0;
+  const pendingPayments = sumPayments(allPayments, 'bekliyor');
 
   const today = new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -147,7 +146,7 @@ export default async function Dashboard() {
   const countryMap: Record<string, number> = {};
   const statusMap: Record<string, number> = {};
 
-  (chartsApps || []).forEach((app: any) => {
+  (chartsApps || []).forEach((app) => {
     const d = new Date(app.created_at);
     const key = `${d.getFullYear()}-${d.getMonth()}`;
     const mItem = monthlyData.find(m => m._key === key);
@@ -158,7 +157,7 @@ export default async function Dashboard() {
     statusMap[statusLabel] = (statusMap[statusLabel] || 0) + 1;
   });
 
-  (allPayments || []).forEach((p: any) => {
+  allPayments.forEach((p) => {
     if (p.status === 'alindi') {
       const d = new Date(p.created_at);
       const key = `${d.getFullYear()}-${d.getMonth()}`;
@@ -196,7 +195,7 @@ export default async function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         {[
           { label: "Toplam Müşteri",  value: totalCustomers ?? 0, icon: Users,         accent: "border-t-blue-500",    iconBg: "bg-blue-500/10",    iconColor: "text-blue-400",    href: "/customers" },
-          { label: "Aktif Başvuru",   value: activeApps,          icon: FileText,       accent: "border-t-purple-500",  iconBg: "bg-purple-500/10",  iconColor: "text-purple-400",  href: "/customers" },
+          { label: "Aktif Başvuru",   value: activeApps ?? 0,     icon: FileText,       accent: "border-t-purple-500",  iconBg: "bg-purple-500/10",  iconColor: "text-purple-400",  href: "/customers" },
           { label: "Evrak Bekliyor",  value: pendingDocs,         icon: AlertCircle,    accent: "border-t-amber-500",   iconBg: "bg-amber-500/10",   iconColor: "text-amber-400",   href: "/customers" },
           { label: "Evrak Tamam",     value: completedDocs,       icon: CheckCircle2,   accent: "border-t-emerald-500", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400", href: "/customers" },
           { label: "Aylık Beklenen",  value: `₺${(expectedMonthlyRevenue/1000).toFixed(0)}K`, icon: DollarSign, accent: "border-t-indigo-500", iconBg: "bg-indigo-500/10", iconColor: "text-indigo-400", href: "/reports" },
@@ -244,20 +243,20 @@ export default async function Dashboard() {
             </Link>
           </div>
           <div className="divide-y divide-slate-200 dark:divide-[#1f2937]">
-            {allApps && allApps.length > 0 ? allApps.map((app: any) => {
+            {allApps && allApps.length > 0 ? allApps.map((app) => {
               const cfg = STATUS_CONFIG[app.status] || { label: app.status, color: "text-slate-500 dark:text-slate-400", dot: "bg-slate-500" };
               return (
                 <Link
-                  key={app.id || Math.random()}
-                  href={`/customers/${(app.customers as any)?.id || ''}`}
+                  key={app.id}
+                  href={`/customers/${app.customers?.id || ''}`}
                   className="flex items-center gap-4 px-6 py-3.5 hover:bg-white/[0.02] transition-colors"
                 >
                   <div className="w-8 h-8 rounded-full bg-blue-900/40 flex items-center justify-center text-blue-300 font-bold text-xs uppercase shrink-0">
-                    {(app.customers as any)?.first_name?.[0]}{(app.customers as any)?.last_name?.[0]}
+                    {app.customers?.first_name?.[0]}{app.customers?.last_name?.[0]}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-slate-900 dark:text-slate-200 text-sm truncate">
-                      {(app.customers as any)?.first_name} {(app.customers as any)?.last_name}
+                      {app.customers?.first_name} {app.customers?.last_name}
                     </p>
                     <p className="text-xs text-slate-500">{app.country} Vizesi</p>
                   </div>
@@ -293,8 +292,8 @@ export default async function Dashboard() {
               </h2>
             </div>
             <div className="divide-y divide-slate-200 dark:divide-[#1f2937]">
-              {upcomingAppointments && upcomingAppointments.length > 0 ? upcomingAppointments.map((app: any) => (
-                <Link key={app.id} href={`/customers/${(app.customers as any)?.id}`}
+              {upcomingAppointments && upcomingAppointments.length > 0 ? upcomingAppointments.map((app) => (
+                <Link key={app.id} href={`/customers/${app.customers?.id}`}
                   className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors"
                 >
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex flex-col items-center justify-center shrink-0 border border-blue-500/20">
@@ -302,7 +301,7 @@ export default async function Dashboard() {
                     <span className="text-[9px] text-blue-300 uppercase mt-0.5">{new Date(app.appointment_date).toLocaleString('tr-TR', { month: 'short' })}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-200 truncate">{(app.customers as any)?.first_name} {(app.customers as any)?.last_name}</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-200 truncate">{app.customers?.first_name} {app.customers?.last_name}</p>
                     <p className="text-[10px] text-slate-500 mt-0.5 truncate">{app.appointment_location}</p>
                   </div>
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">
@@ -324,7 +323,7 @@ export default async function Dashboard() {
               </Link>
             </div>
             <div className="divide-y divide-slate-200 dark:divide-[#1f2937]">
-              {recentCustomers && recentCustomers.length > 0 ? recentCustomers.map((c: any) => (
+              {recentCustomers && recentCustomers.length > 0 ? recentCustomers.map((c) => (
                 <Link key={c.id} href={`/customers/${c.id}`}
                   className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors"
                 >

@@ -1,7 +1,19 @@
 "use client"
 import { Download } from "lucide-react";
 
-export default function ExportButton({ data }: { data: any[] }) {
+type ExportCustomer = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
+  email: string | null;
+  created_at: string;
+  country?: string | null;
+  status?: string | null;
+  profile_score: number | null;
+};
+
+export default function ExportButton({ data }: { data: ExportCustomer[] }) {
   const handleExport = () => {
     // CSV Header
     const headers = ["ID", "Ad", "Soyad", "Telefon", "E-posta", "Kayıt Tarihi", "Ülke", "Durum", "Profil Skoru"];

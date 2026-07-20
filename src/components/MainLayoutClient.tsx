@@ -1,33 +1,22 @@
 "use client"
 import Sidebar from "@/components/Sidebar";
 import { Search, Sun, Moon } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import NotificationCenter from "@/components/NotificationCenter";
 import GlobalSearch from "@/components/GlobalSearch";
 
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/customers": "Müşteriler",
-  "/appointments": "Randevu Takvimi",
-  "/countries": "Ülke & Evraklar",
-  "/reports": "Raporlar",
-  "/settings": "Ayarlar",
-};
-
 export default function MainLayoutClient({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    
     // Ctrl+K to open global search
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -39,8 +28,6 @@ export default function MainLayoutClient({ children }: { children: React.ReactNo
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  const title = Object.entries(PAGE_TITLES).find(([key]) => pathname.startsWith(key))?.[1] || "";
 
   return (
     <div className="flex min-h-screen bg-white dark:bg-[#060d1a]">

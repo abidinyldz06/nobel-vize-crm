@@ -9,17 +9,19 @@ interface AppData {
   visa_type: string;
   status: string;
   created_at: string;
-  customers: any;
+  customers: { assigned_staff_id: string | null } | null;
 }
 
-export default function VisaSuccessMatrix({ data, staffList }: { data: AppData[], staffList: any[] }) {
+type StaffOption = { id: string; full_name: string };
+
+export default function VisaSuccessMatrix({ data, staffList }: { data: AppData[], staffList: StaffOption[] }) {
   const [selectedStaff, setSelectedStaff] = useState<string>("all");
   const [timeRange, setTimeRange] = useState<string>("all"); // all, this_month, last_3_months
 
   // Filter data
   const filteredData = data.filter(a => {
     if (selectedStaff !== "all") {
-      const staffId = Array.isArray(a.customers) ? a.customers[0]?.assigned_staff_id : a.customers?.assigned_staff_id;
+      const staffId = a.customers?.assigned_staff_id;
       if (staffId !== selectedStaff) return false;
     }
     

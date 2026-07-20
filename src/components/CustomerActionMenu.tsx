@@ -5,12 +5,13 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 import { assignStaff } from "@/app/actions/assign-staff"
+import type { Tables } from "@/types/database"
 
 export default function CustomerActionMenu({ customerId, isAdmin, currentStaffId }: { customerId: string, isAdmin: boolean, currentStaffId?: string }) {
   const [isOpen, setIsOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showAssignModal, setShowAssignModal] = useState(false)
-  const [staffList, setStaffList] = useState<any[]>([])
+  const [staffList, setStaffList] = useState<Pick<Tables<'staff'>, 'id' | 'full_name' | 'role'>[]>([])
   const [selectedStaff, setSelectedStaff] = useState<string>(currentStaffId || "")
   const [isAssigning, setIsAssigning] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -36,7 +37,7 @@ export default function CustomerActionMenu({ customerId, isAdmin, currentStaffId
       }
       fetchStaff()
     }
-  }, [showAssignModal, isAdmin])
+  }, [showAssignModal, isAdmin, staffList.length])
 
   const handleDelete = async () => {
     setIsDeleting(true)

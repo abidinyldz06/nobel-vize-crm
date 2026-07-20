@@ -18,9 +18,9 @@ export default async function StaffPage() {
     .select('assigned_staff_id');
 
   const countMap: Record<string, number> = {};
-  customerCounts?.forEach((c: any) => {
-    if (c.assigned_staff_id) {
-      countMap[c.assigned_staff_id] = (countMap[c.assigned_staff_id] || 0) + 1;
+  customerCounts?.forEach((customer) => {
+    if (customer.assigned_staff_id) {
+      countMap[customer.assigned_staff_id] = (countMap[customer.assigned_staff_id] || 0) + 1;
     }
   });
 
@@ -91,7 +91,7 @@ export default async function StaffPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-[#1f2937]">
-                  {staff.map((member: any) => (
+                  {staff.map((member) => (
                     <tr key={member.id} className="hover:bg-white/[0.02] transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">

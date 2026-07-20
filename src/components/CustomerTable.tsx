@@ -2,7 +2,8 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, Filter, Clock, CheckCircle2, AlertCircle, FileText, Calendar, Loader, XCircle, Trash2, UserPlus, MessageCircle, RefreshCw, X } from "lucide-react";
+import { Search, Filter, Clock, CheckCircle2, AlertCircle, FileText, Calendar, Loader, XCircle, Trash2, MessageCircle, RefreshCw, X } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import CustomerActionMenu from "./CustomerActionMenu";
 import { toast } from "sonner";
 
@@ -17,9 +18,16 @@ type Customer = {
   country?: string | null;
   status?: string | null;
   latest_application_id?: string | null;
+  assigned_staff_id: string | null;
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
+type StaffOption = {
+  id: string;
+  full_name: string;
+  role: string;
+};
+
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   profil_analizi:     { label: "Profil Analizi",      color: "text-slate-500 dark:text-slate-400 bg-slate-800/50",    icon: Clock },
   evrak_bekleniyor:   { label: "Evrak Bekleniyor",    color: "text-amber-400 bg-amber-500/10",    icon: AlertCircle },
   randevu_bekleniyor: { label: "Randevu Bekleniyor",  color: "text-orange-400 bg-orange-500/10",  icon: Calendar },
@@ -32,7 +40,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
   kapandi:            { label: "Kapandı",             color: "text-slate-500 bg-slate-800/50",    icon: XCircle },
 };
 
-export default function CustomerTable({ customers, isAdmin, staffList = [] }: { customers: Customer[], isAdmin: boolean, staffList?: any[] }) {
+export default function CustomerTable({ customers, isAdmin, staffList = [] }: { customers: Customer[], isAdmin: boolean, staffList?: StaffOption[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -93,8 +101,8 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
       setSelected([]);
       setShowDeleteConfirm(false);
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Bir hata oluştu.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Bir hata oluştu.");
     } finally {
       setIsProcessing(false);
     }
@@ -169,7 +177,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
               >
                 <option value="">Danışman Ata</option>
                 {staffList.map(s => (
-                  <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
+                  <option key={s.id} value={s.id}>{s.full_name}</option>
                 ))}
               </select>
             )}
@@ -357,7 +365,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                       <CustomerActionMenu 
                         customerId={customer.id} 
                         isAdmin={isAdmin} 
-                        currentStaffId={(customer as any).assigned_staff_id} 
+                        currentStaffId={customer.assigned_staff_id ?? undefined}
                       />
                     </td>
                   </tr>
@@ -397,7 +405,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                       <Link href={`/customers/${customer.id}`} className="font-semibold text-slate-900 dark:text-slate-200 text-sm truncate">
                         {customer.first_name} {customer.last_name}
                       </Link>
-                      <CustomerActionMenu customerId={customer.id} isAdmin={isAdmin} currentStaffId={(customer as any).assigned_staff_id} />
+                      <CustomerActionMenu customerId={customer.id} isAdmin={isAdmin} currentStaffId={customer.assigned_staff_id ?? undefined} />
                     </div>
                     
                     <div className="flex flex-wrap gap-2 mb-2 text-[11px]">

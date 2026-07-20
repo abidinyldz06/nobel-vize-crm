@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { requireAdmin } from "@/lib/authz";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
+import type { Json } from "@/types/database";
 
 const TABLES_ORDER = [
   "tenants",
@@ -169,7 +170,7 @@ export async function POST(req: Request) {
 
   try {
     const { data, error } = await supabase.rpc("restore_backup_v2", {
-      p_backup: backupData,
+      p_backup: backupData as unknown as Json,
     });
     if (error) throw error;
 

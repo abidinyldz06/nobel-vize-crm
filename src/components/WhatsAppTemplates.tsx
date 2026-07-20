@@ -1,12 +1,13 @@
 "use client"
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, FileText, Calendar, CheckCircle2, XCircle, CreditCard, ChevronDown } from "lucide-react";
+import type { Tables } from "@/types/database";
 
 type Props = {
-  customer: any;
-  activeApp?: any;
-  documents?: any[];
-  payments?: any[];
+  customer: Pick<Tables<'customers'>, 'first_name' | 'phone'>;
+  activeApp?: Pick<Tables<'applications'>, 'country' | 'status' | 'total_fee' | 'appointment_date' | 'appointment_location'> | null;
+  documents?: Pick<Tables<'documents'>, 'document_type' | 'status'>[];
+  payments?: Pick<Tables<'payments'>, 'status' | 'amount'>[];
 };
 
 export default function WhatsAppTemplates({ customer, activeApp, documents, payments }: Props) {
@@ -33,7 +34,7 @@ export default function WhatsAppTemplates({ customer, activeApp, documents, paym
   const totalFee = activeApp?.total_fee || 0;
   const kalanTutar = Math.max(0, totalFee - totalPaid);
   
-  const docList = documents?.map((d: any, i: number) => `${i + 1}. ${d.document_type} ${d.status === 'tamamlandi' ? '✅' : '⏳'}`).join('\n') || '';
+  const docList = documents?.map((document, index) => `${index + 1}. ${document.document_type} ${document.status === 'onaylandi' ? '✅' : '⏳'}`).join('\n') || '';
 
   const sendWaMsg = (text: string) => {
     window.open(`https://wa.me/${phoneParam}?text=${encodeURIComponent(text)}`, '_blank');

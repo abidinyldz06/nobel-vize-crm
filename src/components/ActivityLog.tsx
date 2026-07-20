@@ -44,7 +44,7 @@ export default function ActivityLog({ logs }: { logs: LogEntry[] }) {
         <div className="absolute left-[30px] top-0 bottom-0 w-px bg-slate-200 dark:bg-[#1f2937]" />
 
         <div className="py-3 space-y-0">
-          {logs.length > 0 ? logs.map((log, i) => (
+          {logs.length > 0 ? logs.map((log) => (
             <div key={log.id} className="flex items-start gap-3 px-4 py-2.5 hover:bg-slate-100 dark:bg-[#1a2232] transition-colors">
               {/* Icon bubble */}
               <div className="relative z-10 w-7 h-7 rounded-full bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] flex items-center justify-center shrink-0 mt-0.5">

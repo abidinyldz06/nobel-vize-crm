@@ -2,6 +2,7 @@
 import { requireStaff } from "@/lib/authz"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import type { TablesUpdate } from "@/types/database"
 
 export async function updateCustomer(formData: FormData) {
   const { supabase, user, staff } = await requireStaff()
@@ -34,7 +35,7 @@ export async function updateCustomer(formData: FormData) {
 
   const isAdmin = staff.role === 'admin'
 
-  const updateData: any = {
+  const updateData: TablesUpdate<'customers'> = {
     first_name: firstName,
     last_name: lastName,
     phone,
@@ -82,8 +83,6 @@ export async function addAppointment(formData: FormData) {
   const time = formData.get('time') as string
   const location = formData.get('location') as string
   const system = formData.get('appointmentSystem') as string || 'VFS'
-  const note = formData.get('appointmentNote') as string
-
   const datetime = `${date}T${time}:00`
 
   const { error } = await supabase
@@ -136,9 +135,9 @@ export async function checkAppointmentDensity(dateStr: string, location: string)
 
   if (error || !data) return [];
   
-  return data.map((app: any) => ({
+  return data.map((app) => ({
     id: app.id,
     time: new Date(app.appointment_date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
     customerName: `${app.customers.first_name} ${app.customers.last_name}`
-  })).sort((a: any, b: any) => a.time.localeCompare(b.time));
+  })).sort((a, b) => a.time.localeCompare(b.time));
 }

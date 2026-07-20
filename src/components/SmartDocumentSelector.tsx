@@ -1,7 +1,8 @@
 "use client"
-import { useState, useEffect, useMemo } from "react";
-import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
+import { useState, useMemo } from "react";
+import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import { AlertCircle, FileText, CheckCircle2 } from "lucide-react";
+import type { Json, Tables } from "@/types/database";
 
 const TRAVEL_METHODS = { ucak: "Uçak", tur_paketi: "Tur Paketi", gemi: "Gemi", kendi_araci: "Kendi Aracı" };
 const ACCOMMODATIONS = { otel: "Otel", aile_arkadas: "Aile/Arkadaş Yanı", diger: "Diğer" };
@@ -9,12 +10,27 @@ const OCCUPATIONS = { calisan: "Çalışan", memur: "Memur", emekli: "Emekli", o
 const WITH_CHILDREN = { "true": "Evet", "false": "Hayır" };
 const NATIONALITIES = { tc: "TC Vatandaşı", diger: "Diğer" };
 
+type DocumentRule = { name: string; required: boolean; description?: string };
+type SmartRule = Tables<'country_visa_rules'> & { parsedDocuments: DocumentRule[] };
+
+function parseDocuments(value: Json): DocumentRule[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry) || typeof entry.name !== 'string') return [];
+    return [{
+      name: entry.name,
+      required: entry.required !== false,
+      description: typeof entry.description === 'string' ? entry.description : undefined,
+    }];
+  });
+}
+
 export default function SmartDocumentSelector({ 
   dbCountries, 
   allRules 
 }: { 
-  dbCountries: any[], 
-  allRules: any[] 
+  dbCountries: Pick<Tables<'countries'>, 'id' | 'name'>[],
+  allRules: Tables<'country_visa_rules'>[]
 }) {
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [selectedVisaType, setSelectedVisaType] = useState<string>("turistik");
@@ -28,23 +44,23 @@ export default function SmartDocumentSelector({
   const matchingRule = useMemo(() => {
     if (!selectedCountry || !selectedVisaType) return null;
 
-    const countryRules = allRules.filter(r => r.country_id === selectedCountry && r.visa_category === selectedVisaType);
+    const countryRules: SmartRule[] = allRules
+      .filter(rule => rule.country_id === selectedCountry && rule.visa_category === selectedVisaType)
+      .map(rule => ({ ...rule, parsedDocuments: parseDocuments(rule.documents) }));
     if (countryRules.length === 0) return null;
 
     // Scoring system to find the most specific rule
     // Exact match = 10 points
     // Null match = 1 point
     // Mismatch = -100 points
-    let bestRule = null;
+    let bestRule: SmartRule | null = null;
     let maxScore = -1;
 
     for (const rule of countryRules) {
       let score = 0;
-      let isMatch = true;
-
-      const checkField = (ruleVal: any, stateVal: string) => {
+      const checkField = (ruleVal: unknown, stateVal: string) => {
         if (ruleVal === null) return 1; // Generic matches anything, low points
-        if (stateVal && ruleVal.toString() === stateVal) return 10; // Exact match, high points
+        if (stateVal && String(ruleVal) === stateVal) return 10; // Exact match, high points
         return -100; // Mismatch
       };
 
@@ -160,13 +176,13 @@ export default function SmartDocumentSelector({
             <div className="p-4">
               <div className="mb-4 text-[10px] flex gap-2 flex-wrap text-slate-500">
                 <span className="bg-slate-200 dark:bg-[#1f2937] px-2 py-0.5 rounded">Eşleşen Kural ID: {matchingRule.id?.split('-')[0]}</span>
-                <span className="bg-slate-200 dark:bg-[#1f2937] px-2 py-0.5 rounded">{matchingRule.documents?.length || 0} Evrak Bulundu</span>
+                <span className="bg-slate-200 dark:bg-[#1f2937] px-2 py-0.5 rounded">{matchingRule.parsedDocuments.length} Evrak Bulundu</span>
               </div>
-              {(!matchingRule.documents || matchingRule.documents.length === 0) ? (
+              {matchingRule.parsedDocuments.length === 0 ? (
                 <p className="text-xs text-slate-500">Bu kurala henüz evrak eklenmemiş.</p>
               ) : (
                 <ul className="space-y-2">
-                  {matchingRule.documents.map((doc: any, i: number) => (
+                  {matchingRule.parsedDocuments.map((doc, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs">
                       <CheckCircle2 className={`w-4 h-4 shrink-0 ${doc.required ? 'text-emerald-500' : 'text-slate-400'}`} />
                       <div>

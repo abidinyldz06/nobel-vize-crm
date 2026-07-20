@@ -126,7 +126,7 @@ export default function RejectionAnalysis({ data }: { data: RejectedApp[] }) {
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
                   itemStyle={{ color: '#fff' }}
-                  formatter={(value: any) => [value + ' Başvuru', 'Sayı']}
+                  formatter={(value) => [`${String(value)} Başvuru`, 'Sayı']}
                 />
                 <Legend verticalAlign="bottom" height={36} />
               </PieChart>

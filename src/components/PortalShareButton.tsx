@@ -56,8 +56,8 @@ export default function PortalShareButton({ customer }: PortalShareButtonProps) 
       
       setToken(newToken);
       toast.success("Yeni portal linki başarıyla oluşturuldu.");
-    } catch (err: any) {
-      toast.error("Link yenilenirken hata oluştu: " + err.message);
+    } catch (error) {
+      toast.error("Link yenilenirken hata oluştu: " + (error instanceof Error ? error.message : "Bilinmeyen hata"));
     } finally {
       setIsRefreshing(false);
     }

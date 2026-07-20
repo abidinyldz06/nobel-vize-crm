@@ -3,7 +3,7 @@ import { format, isSameDay } from "date-fns";
 import { tr } from "date-fns/locale";
 import { X, Clock, MapPin, User, Globe, CalendarPlus, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import type { CalendarAppointment } from "@/types/calendar";
 
 export default function DaySidebar({ 
   selectedDate, 
@@ -11,16 +11,9 @@ export default function DaySidebar({
   onClose 
 }: { 
   selectedDate: Date | null, 
-  appointments: any[], 
+  appointments: CalendarAppointment[],
   onClose: () => void 
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    if (selectedDate) setIsOpen(true);
-    else setIsOpen(false);
-  }, [selectedDate]);
-
   if (!selectedDate) return null;
 
   const dayApps = appointments.filter(app => isSameDay(new Date(app.appointment_date), selectedDate));
@@ -31,7 +24,7 @@ export default function DaySidebar({
   return (
     <>
       {/* Mobile Backdrop */}
-      {isOpen && (
+      {selectedDate && (
         <div 
           className="fixed inset-0 bg-slate-900/50 dark:bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
           onClick={onClose}
@@ -43,7 +36,7 @@ export default function DaySidebar({
         fixed inset-y-0 right-0 z-50 w-full sm:w-80 bg-white dark:bg-[#0d1420] border-l border-slate-200 dark:border-[#1f2937] shadow-2xl
         transform transition-transform duration-300 ease-in-out flex flex-col
         lg:absolute lg:top-0 lg:bottom-0 lg:h-full lg:rounded-2xl lg:border
-        ${isOpen ? 'translate-x-0' : 'translate-x-full lg:hidden'}
+        translate-x-0
       `}>
         
         {/* Header */}

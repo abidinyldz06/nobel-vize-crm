@@ -4,6 +4,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Plus, Save, Trash2, Settings, Globe, Loader2, Info, FileText, Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
+import type { Json, Tables } from "@/types/database";
 
 // Dropdown options
 const TRAVEL_METHODS = { "null": "Tümü", ucak: "Uçak", tur_paketi: "Tur Paketi", gemi: "Gemi", kendi_araci: "Kendi Aracı" };
@@ -11,6 +12,13 @@ const ACCOMMODATIONS = { "null": "Tümü", otel: "Otel", aile_arkadas: "Aile/Ark
 const OCCUPATIONS = { "null": "Tümü", calisan: "Çalışan", memur: "Memur", emekli: "Emekli", ogrenci: "Öğrenci", issiz: "İşsiz", sirket_sahibi: "Şirket Sahibi" };
 const WITH_CHILDREN = { "null": "Farketmez", "true": "Evet", "false": "Hayır" };
 const NATIONALITIES = { "null": "Farketmez", tc: "TC Vatandaşı", diger: "Diğer" };
+
+type VisaDocumentRule = {
+  name: string;
+  required: boolean;
+  category: string;
+  description?: string;
+};
 
 type VisaRule = {
   id?: string;
@@ -21,13 +29,33 @@ type VisaRule = {
   occupation: string | null;
   with_children: boolean | null;
   nationality: string | null;
-  documents: any[];
-  processing_time: string;
-  validity: string;
-  max_stay: string;
+  documents: VisaDocumentRule[];
+  processing_time: string | null;
+  validity: string | null;
+  max_stay: string | null;
   multiple_entry: boolean;
-  notes: string;
+  notes: string | null;
 };
+
+function parseDocuments(value: Json): VisaDocumentRule[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+    const name = typeof entry.name === "string" ? entry.name : "";
+    if (!name) return [];
+    return [{
+      name,
+      required: entry.required !== false,
+      category: typeof entry.category === "string" ? entry.category : "diger",
+      description: typeof entry.description === "string" ? entry.description : "",
+    }];
+  });
+}
+
+function toVisaRule(rule: Tables<'country_visa_rules'>): VisaRule {
+  return { ...rule, documents: parseDocuments(rule.documents) };
+}
 
 type Country = {
   id: string;
@@ -42,9 +70,25 @@ type Country = {
   rules: VisaRule[];
 };
 
-export default function CountriesManager({ initialCountries }: { initialCountries: Country[] }) {
-  const [countries, setCountries] = useState<Country[]>(initialCountries);
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(initialCountries[0] ?? null);
+type InitialCountry = Tables<'countries'> & {
+  appCount: number;
+  rules: Tables<'country_visa_rules'>[];
+};
+
+function toCountry(country: InitialCountry): Country {
+  return {
+    ...country,
+    visa_system: country.visa_system ?? "",
+    appointment_system: country.appointment_system ?? "",
+    notes: country.notes ?? "",
+    rules: country.rules.map(toVisaRule),
+  };
+}
+
+export default function CountriesManager({ initialCountries }: { initialCountries: InitialCountry[] }) {
+  const normalizedInitialCountries = initialCountries.map(toCountry);
+  const [countries, setCountries] = useState<Country[]>(normalizedInitialCountries);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(normalizedInitialCountries[0] ?? null);
   const [mode, setMode] = useState<"genel" | "kurallar">("genel");
   const [savingCountry, setSavingCountry] = useState(false);
   const router = useRouter();
@@ -69,8 +113,8 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
         name: selectedCountry.name,
         visa_system: selectedCountry.visa_system,
         appointment_system: selectedCountry.appointment_system,
-        base_fee_visa: selectedCountry.base_fee_visa || null,
-        base_fee_service: selectedCountry.base_fee_service || null,
+        base_fee_visa: selectedCountry.base_fee_visa || 0,
+        base_fee_service: selectedCountry.base_fee_service || 0,
         active: selectedCountry.active,
         notes: selectedCountry.notes
       })
@@ -132,14 +176,14 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
       error = res.error;
       if (!error && res.data) {
         setEditingRule(null);
-        updateLocalRule(res.data);
+        updateLocalRule(toVisaRule(res.data));
       }
     } else {
       const res = await supabase.from("country_visa_rules").insert([payload]).select().single();
       error = res.error;
       if (!error && res.data) {
         setEditingRule(null);
-        updateLocalRule(res.data, true);
+        updateLocalRule(toVisaRule(res.data), true);
       }
     }
 
@@ -200,7 +244,7 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
     });
   };
 
-  const updateDoc = (index: number, field: string, value: any) => {
+  const updateDoc = <K extends keyof VisaDocumentRule>(index: number, field: K, value: VisaDocumentRule[K]) => {
     if (!editingRule) return;
     const newDocs = [...editingRule.documents];
     newDocs[index] = { ...newDocs[index], [field]: value };
@@ -220,7 +264,7 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push({ ...doc, originalIndex: index });
     return acc;
-  }, {} as Record<string, any[]>) || {};
+  }, {} as Record<string, Array<VisaDocumentRule & { originalIndex: number }>>) || {};
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -475,7 +519,7 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
                             <h5 className="text-xs font-bold text-slate-700 dark:text-slate-200">{DOCUMENT_CATEGORIES[catKey as keyof typeof DOCUMENT_CATEGORIES]}</h5>
                           </div>
                           <div className="divide-y divide-slate-100 dark:divide-[#1f2937]">
-                            {docsInCat.map((doc: any) => (
+                            {docsInCat.map((doc) => (
                               <div key={doc.originalIndex} className="p-3 grid grid-cols-12 gap-3 items-start group hover:bg-slate-50 dark:hover:bg-[#151b28] transition-colors">
                                 <div className="col-span-12 md:col-span-4 space-y-1">
                                   <label className="text-[9px] text-slate-400 font-semibold uppercase">Evrak Adı</label>

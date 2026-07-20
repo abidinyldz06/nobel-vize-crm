@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Search, X, User, Globe, FileText, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -10,13 +9,30 @@ interface GlobalSearchProps {
   onClose: () => void;
 }
 
+type SearchResults = {
+  customers: Array<{
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone: string | null;
+    passport_no: string | null;
+  }>;
+  countries: Array<{ id: string; country: string; visa_type: string | null }>;
+  applications: Array<{
+    id: string;
+    customer_id: string;
+    country: string;
+    status: string;
+    customers: { first_name: string; last_name: string } | null;
+  }>;
+};
+
+const EMPTY_RESULTS: SearchResults = { customers: [], countries: [], applications: [] };
+
 export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<{ customers: any[], countries: any[], applications: any[] }>({
-    customers: [], countries: [], applications: []
-  });
+  const [results, setResults] = useState<SearchResults>(EMPTY_RESULTS);
   const [isSearching, setIsSearching] = useState(false);
-  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus input when opened
@@ -25,8 +41,6 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
       setTimeout(() => inputRef.current?.focus(), 100);
       document.body.style.overflow = "hidden";
     } else {
-      setQuery("");
-      setResults({ customers: [], countries: [], applications: [] });
       document.body.style.overflow = "unset";
     }
     return () => { document.body.style.overflow = "unset"; };
@@ -34,7 +48,6 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
 
   useEffect(() => {
     if (query.length < 2) {
-      setResults({ customers: [], countries: [], applications: [] });
       return;
     }
     const timer = setTimeout(async () => {
@@ -55,14 +68,20 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
 
   if (!open) return null;
 
-  const hasResults = results.customers.length > 0 || results.countries.length > 0 || results.applications.length > 0;
+  const visibleResults = query.length >= 2 ? results : EMPTY_RESULTS;
+  const hasResults = visibleResults.customers.length > 0 || visibleResults.countries.length > 0 || visibleResults.applications.length > 0;
+  const handleClose = () => {
+    setQuery("");
+    setResults(EMPTY_RESULTS);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] px-4">
       {/* Overlay */}
       <div 
         className="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/60 backdrop-blur-sm transition-opacity" 
-        onClick={onClose}
+        onClick={handleClose}
       />
       
       {/* Modal */}
@@ -80,7 +99,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
             className="flex-1 bg-transparent border-none focus:outline-none text-slate-900 dark:text-white placeholder:text-slate-400 text-lg py-1"
           />
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1a2232] transition-colors"
           >
             <X className="w-5 h-5" />
@@ -94,15 +113,15 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
               <div className="p-2 space-y-4">
                 
                 {/* Customers */}
-                {results.customers.length > 0 && (
+                {visibleResults.customers.length > 0 && (
                   <div>
                     <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">Müşteriler</h3>
                     <div className="space-y-1">
-                      {results.customers.map((c) => (
+                      {visibleResults.customers.map((c) => (
                         <Link
                           key={`cust-${c.id}`}
                           href={`/customers/${c.id}`}
-                          onClick={onClose}
+                          onClick={handleClose}
                           className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1a2232] transition-colors group"
                         >
                           <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -124,15 +143,15 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                 )}
 
                 {/* Applications */}
-                {results.applications.length > 0 && (
+                {visibleResults.applications.length > 0 && (
                   <div>
                     <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">Başvurular</h3>
                     <div className="space-y-1">
-                      {results.applications.map((app) => (
+                      {visibleResults.applications.map((app) => (
                         <Link
                           key={`app-${app.id}`}
                           href={`/customers/${app.customer_id}`}
-                          onClick={onClose}
+                          onClick={handleClose}
                           className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1a2232] transition-colors group"
                         >
                           <div className="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
@@ -154,15 +173,15 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                 )}
 
                 {/* Countries */}
-                {results.countries.length > 0 && (
+                {visibleResults.countries.length > 0 && (
                   <div>
                     <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">Ülkeler (Gereksinimler)</h3>
                     <div className="space-y-1">
-                      {results.countries.map((country, idx) => (
+                      {visibleResults.countries.map((country, idx) => (
                         <Link
                           key={`country-${country.country}-${idx}`}
                           href={`/countries`}
-                          onClick={onClose}
+                          onClick={handleClose}
                           className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1a2232] transition-colors group"
                         >
                           <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
@@ -187,7 +206,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
             ) : (
               <div className="p-12 text-center text-slate-500">
                 <Search className="w-8 h-8 mx-auto mb-3 opacity-20" />
-                <p>"{query}" için sonuç bulunamadı.</p>
+                <p>&quot;{query}&quot; için sonuç bulunamadı.</p>
               </div>
             )
           ) : (

@@ -3,9 +3,10 @@ import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { Users, Plus, X, Loader2, Trash2 } from "lucide-react";
+import type { Tables } from "@/types/database";
 
-export default function FamilyMembersPanel({ customerId, initialMembers }: { customerId: string, initialMembers: any[] }) {
-  const [members, setMembers] = useState(initialMembers || []);
+export default function FamilyMembersPanel({ customerId, initialMembers }: { customerId: string, initialMembers: Tables<'family_members'>[] }) {
+  const [members, setMembers] = useState<Tables<'family_members'>[]>(initialMembers || []);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -52,7 +53,7 @@ export default function FamilyMembersPanel({ customerId, initialMembers }: { cus
   const handleDelete = async (id: string) => {
     if (!confirm("Bu kişiyi silmek istediğinize emin misiniz?")) return;
     
-    setMembers(members.filter((m: any) => m.id !== id));
+    setMembers(members.filter((member) => member.id !== id));
     await supabase.from('family_members').delete().eq('id', id);
     router.refresh();
   };
@@ -120,7 +121,7 @@ export default function FamilyMembersPanel({ customerId, initialMembers }: { cus
         {members.length === 0 ? (
           <p className="p-5 text-center text-xs text-slate-500">Kayıtlı kişi yok.</p>
         ) : (
-          members.map((m: any) => (
+          members.map((m) => (
             <div key={m.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-[#1a2232] transition-colors group">
               <div>
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-200">{m.full_name}</p>

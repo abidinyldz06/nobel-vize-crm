@@ -2,16 +2,9 @@
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Phone, MessageCircle, Mail, MessageSquare, Users, Send, Loader2, Clock, AlertTriangle, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import type { Tables } from "@/types/database";
 
-type Communication = {
-  id: string;
-  type: string;
-  direction: string;
-  subject: string;
-  content: string;
-  created_at: string;
-  performed_by?: string;
-};
+type Communication = Tables<'communications'>;
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   telefon: <Phone className="w-3.5 h-3.5" />,

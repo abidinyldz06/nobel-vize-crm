@@ -5,34 +5,53 @@ import StaffPerformance from "@/components/StaffPerformance";
 import RejectionAnalysis from "@/components/RejectionAnalysis";
 import VisaSuccessMatrix from "@/components/VisaSuccessMatrix";
 import RevenueProjection from "@/components/RevenueProjection";
+import {
+  averageProcessDays,
+  countActiveApplications,
+  filterByRange,
+  monthRangeUtc,
+  normalizeReportPeriod,
+  shiftMonthRange,
+  sumExpectedRevenue,
+  sumPayments,
+  summarizeApplications,
+  summarizeDocuments,
+} from "@/lib/report-metrics";
+import type { Tables } from "@/types/database";
 
 export const revalidate = 0;
+
+type StaffPerformanceMetric = {
+  id: string;
+  name: string;
+  totalCustomers: number;
+  activeApps: number;
+  approved: number;
+  rejected: number;
+  revenue: number;
+  totalProcessTimeMs: number;
+  completedCount: number;
+};
 
 export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ month?: string, year?: string }> }) {
   const supabase = await createSupabaseServerClient();
   const params = await searchParams;
   const today = new Date();
-  const currentMonth = params.month || String(today.getMonth() + 1).padStart(2, '0');
-  const currentYear = params.year || String(today.getFullYear());
-
-  // ISO string dates for gte / lt comparisons
-  const startDate = new Date(`${currentYear}-${currentMonth}-01T00:00:00.000Z`);
-  const endDate = new Date(startDate);
-  endDate.setMonth(endDate.getMonth() + 1);
-
-  // 6 months trend start date
-  const trendStartDate = new Date(startDate);
-  trendStartDate.setMonth(trendStartDate.getMonth() - 5);
+  const period = normalizeReportPeriod(params.month, params.year, today);
+  const selectedMonthRange = monthRangeUtc(period.year, period.month);
+  const { start: startDate, end: endDate } = selectedMonthRange;
 
   // Get current user and staff record
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id).single();
+  const { data: staffRecord } = await supabase.from('staff').select('id, role').eq('user_id', user?.id ?? '').single();
   const isAdmin = staffRecord?.role === 'admin';
   const staffId = staffRecord?.id;
 
   const totalCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true });
   const monthlyCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true }).gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString());
-  const allAppsQuery = supabase.from('applications').select('id, customer_id, country, visa_type, status, total_fee, created_at, updated_at, customers!inner(id, assigned_staff_id)').gte('created_at', trendStartDate.toISOString());
+  // These records feed all-time, active, yearly and selected-period metrics.
+  // Keeping the complete authorized set prevents the old six-month truncation bug.
+  const allAppsQuery = supabase.from('applications').select('id, customer_id, country, visa_type, status, total_fee, created_at, updated_at, customers!inner(id, assigned_staff_id)');
   const allCustomersQuery = supabase.from('customers').select('id, assigned_staff_id, created_at');
 
   if (!isAdmin && staffId) {
@@ -56,39 +75,40 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     allCustomersQuery,
   ]);
 
-  let allDocs: any[] | null = [];
-  let allPayments: any[] | null = [];
+  let allDocs: Pick<Tables<'documents'>, 'status'>[] = [];
+  let allPayments: Pick<Tables<'payments'>, 'application_id' | 'amount' | 'status' | 'created_at'>[] = [];
 
   if (!isAdmin && staffId) {
-    const appIds = allApplications?.map((a: any) => a.id) || [];
+    const appIds = allApplications?.map((application) => application.id) || [];
     if (appIds.length > 0) {
       const [{ data: docs }, { data: payments }] = await Promise.all([
         supabase.from('documents').select('status').gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString()).in('application_id', appIds),
-        supabase.from('payments').select('application_id, amount, status, created_at').gte('created_at', trendStartDate.toISOString()).in('application_id', appIds)
+        supabase.from('payments').select('application_id, amount, status, created_at').in('application_id', appIds)
       ]);
-      allDocs = docs;
-      allPayments = payments;
+      allDocs = docs ?? [];
+      allPayments = payments ?? [];
     }
   } else {
     const [{ data: docs }, { data: payments }] = await Promise.all([
       supabase.from('documents').select('status').gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString()),
-      supabase.from('payments').select('application_id, amount, status, created_at').gte('created_at', trendStartDate.toISOString())
+      supabase.from('payments').select('application_id, amount, status, created_at')
     ]);
-    allDocs = docs;
-    allPayments = payments;
+    allDocs = docs ?? [];
+    allPayments = payments ?? [];
   }
 
-  const monthlyApps = allApplications?.filter((a: any) => new Date(a.created_at) >= startDate && new Date(a.created_at) < endDate) || [];
+  const applications = allApplications ?? [];
+  const customers = allCustomers ?? [];
+  const staff = allStaff ?? [];
+  const monthlyApps = filterByRange(applications, selectedMonthRange);
 
-  const totalApps = monthlyApps.length;
-  const approved = monthlyApps.filter((a: any) => a.status === 'onaylandi').length;
-  const rejected = monthlyApps.filter(a => a.status === 'reddedildi').length;
-  const approvalRate = totalApps > 0 ? ((approved / totalApps) * 100).toFixed(1) : "—";
+  const monthlyApplicationSummary = summarizeApplications(monthlyApps);
+  const { total: totalApps, approved, rejected } = monthlyApplicationSummary;
+  const approvalRate = monthlyApplicationSummary.approvalRate?.toFixed(1) ?? "—";
 
-  const pendingDocs = allDocs?.filter(d => d.status === 'bekleniyor').length ?? 0;
-  const completedDocs = allDocs?.filter(d => d.status === 'tamamlandi').length ?? 0;
-  const totalDocs = allDocs?.length ?? 0;
-  const docCompletionRate = totalDocs > 0 ? ((completedDocs / totalDocs) * 100).toFixed(0) : "0";
+  const documentSummary = summarizeDocuments(allDocs);
+  const { pending: pendingDocs, completed: completedDocs, total: totalDocs } = documentSummary;
+  const docCompletionRate = documentSummary.completionRate.toFixed(0);
 
   // Country distribution
   const countryMap: Record<string, number> = {};
@@ -101,29 +121,29 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const maxCount = countryStats[0]?.[1] || 1;
 
   // A. AYLIK GELİR KARTLARI
-  const monthlyPayments = allPayments?.filter(p => new Date(p.created_at) >= startDate && new Date(p.created_at) < endDate) || [];
-  const tahsilEdilen = monthlyPayments.filter(p => p.status === 'alindi').reduce((sum, p) => sum + Number(p.amount), 0);
-  const bekleyen = monthlyPayments.filter(p => p.status === 'bekliyor').reduce((sum, p) => sum + Number(p.amount), 0);
-  const toplamBeklenen = monthlyApps.reduce((sum, a) => sum + Number(a.total_fee || 0), 0);
+  const monthlyPayments = filterByRange(allPayments, selectedMonthRange);
+  const tahsilEdilen = sumPayments(monthlyPayments, 'alindi');
+  const bekleyen = sumPayments(monthlyPayments, 'bekliyor');
+  const toplamBeklenen = sumExpectedRevenue(monthlyApps);
   const tahsilatOrani = toplamBeklenen > 0 ? ((tahsilEdilen / toplamBeklenen) * 100).toFixed(1) : "0";
 
   // B. DANIŞMAN BAZINDA GELİR
   const staffIncomeMap: Record<string, { name: string, customerCount: Set<string>, collected: number, pending: number }> = {};
-  allStaff?.forEach(s => {
+  staff.forEach(s => {
     staffIncomeMap[s.id] = { name: s.full_name, customerCount: new Set(), collected: 0, pending: 0 };
   });
 
   const customerStaffMap: Record<string, string> = {};
-  allCustomers?.forEach(c => {
+  customers.forEach(c => {
     if (c.assigned_staff_id) customerStaffMap[c.id] = c.assigned_staff_id;
   });
 
   const appCustomerMap: Record<string, string> = {};
-  allApplications?.forEach(a => {
+  applications.forEach(a => {
     if (a.customer_id) appCustomerMap[a.id] = a.customer_id;
   });
 
-  allPayments?.forEach(p => {
+  allPayments.forEach(p => {
     const custId = appCustomerMap[p.application_id];
     if (!custId) return;
     const staffId = customerStaffMap[custId];
@@ -140,7 +160,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   // C. ÜLKE BAZINDA GELİR
   const countryIncomeMap: Record<string, { apps: number, expected: number, collected: number }> = {};
-  allApplications?.forEach(a => {
+  applications.forEach(a => {
     if (!a.country) return;
     if (!countryIncomeMap[a.country]) {
       countryIncomeMap[a.country] = { apps: 0, expected: 0, collected: 0 };
@@ -148,8 +168,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     countryIncomeMap[a.country].apps += 1;
     countryIncomeMap[a.country].expected += Number(a.total_fee || 0);
   });
-  allPayments?.forEach(p => {
-    const app = allApplications?.find(a => a.id === p.application_id);
+  allPayments.forEach(p => {
+    const app = applications.find(a => a.id === p.application_id);
     if (app?.country && p.status === 'alindi') {
       if (!countryIncomeMap[app.country]) countryIncomeMap[app.country] = { apps: 0, expected: 0, collected: 0 };
       countryIncomeMap[app.country].collected += Number(p.amount);
@@ -162,18 +182,17 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   // D. SON 6 AY TREND
   const monthsData: Record<string, { label: string, collected: number, pending: number }> = {};
-  const formatter = new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' });
+  const formatter = new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
   
   for (let i = 5; i >= 0; i--) {
-    const d = new Date(startDate);
-    d.setMonth(d.getMonth() - i);
-    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    const d = new Date(Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth() - i, 1));
+    const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
     monthsData[key] = { label: formatter.format(d), collected: 0, pending: 0 };
   }
 
-  allPayments?.forEach(p => {
+  allPayments.forEach(p => {
     const d = new Date(p.created_at);
-    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
     if (monthsData[key]) {
       if (p.status === 'alindi') monthsData[key].collected += Number(p.amount);
       if (p.status === 'bekliyor') monthsData[key].pending += Number(p.amount);
@@ -183,73 +202,68 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const trendStats = Object.values(monthsData);
 
   // --- REVENUE PROJECTION & GOALS ---
-  const lastMonthStart = new Date(startDate);
-  lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
-  const lastMonthEnd = new Date(startDate);
+  const lastMonthRange = shiftMonthRange(selectedMonthRange, -1);
+  const yearRange = {
+    start: new Date(Date.UTC(period.year, 0, 1)),
+    end: new Date(Date.UTC(period.year + 1, 0, 1)),
+  };
 
-  const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-
-  const activeApps = allApplications?.filter((a: any) => !['onaylandi', 'reddedildi', 'kapandi'].includes(a.status)) || [];
-  const activeAppsCount = activeApps.length;
-  const expectedRevenue = activeApps.reduce((s: number, a: any) => s + Number(a.total_fee || 0), 0);
+  const activeApps = applications.filter((application) => !['onaylandi', 'reddedildi', 'kapandi'].includes(application.status));
+  const activeAppsCount = countActiveApplications(applications);
+  const expectedRevenue = sumExpectedRevenue(activeApps);
 
   // This month
-  const thisMonthApps = allApplications?.filter((a: any) => new Date(a.created_at) >= startDate && new Date(a.created_at) < endDate) || [];
-  const thisMonthPayments = allPayments?.filter((p: any) => new Date(p.created_at) >= startDate && new Date(p.created_at) < endDate && p.status === 'alindi') || [];
-  const thisMonthCustomers = allCustomers?.filter((c: any) => new Date(c.created_at) >= startDate && new Date(c.created_at) < endDate) || [];
+  const thisMonthApps = monthlyApps;
+  const thisMonthPayments = monthlyPayments;
+  const thisMonthCustomers = filterByRange(customers, selectedMonthRange);
 
   const thisMonth = {
     customers: thisMonthCustomers.length,
     apps: thisMonthApps.length,
-    revenue: thisMonthPayments.reduce((s: number, p: any) => s + Number(p.amount || 0), 0),
-    approved: thisMonthApps.filter((a: any) => a.status === 'onaylandi').length
+    revenue: sumPayments(thisMonthPayments, 'alindi'),
+    approved: thisMonthApps.filter((application) => application.status === 'onaylandi').length
   };
 
   // Last month
-  const lastMonthApps = allApplications?.filter((a: any) => new Date(a.created_at) >= lastMonthStart && new Date(a.created_at) < lastMonthEnd) || [];
-  const lastMonthPayments = allPayments?.filter((p: any) => new Date(p.created_at) >= lastMonthStart && new Date(p.created_at) < lastMonthEnd && p.status === 'alindi') || [];
-  const lastMonthCustomers = allCustomers?.filter((c: any) => new Date(c.created_at) >= lastMonthStart && new Date(c.created_at) < lastMonthEnd) || [];
+  const lastMonthApps = filterByRange(applications, lastMonthRange);
+  const lastMonthPayments = filterByRange(allPayments, lastMonthRange);
+  const lastMonthCustomers = filterByRange(customers, lastMonthRange);
 
   const lastMonth = {
     customers: lastMonthCustomers.length,
     apps: lastMonthApps.length,
-    revenue: lastMonthPayments.reduce((s: number, p: any) => s + Number(p.amount || 0), 0),
-    approved: lastMonthApps.filter((a: any) => a.status === 'onaylandi').length
+    revenue: sumPayments(lastMonthPayments, 'alindi'),
+    approved: lastMonthApps.filter((application) => application.status === 'onaylandi').length
   };
 
   // Yearly
-  const yearlyApps = allApplications?.filter((a: any) => new Date(a.created_at) >= yearStart) || [];
-  const yearlyPayments = allPayments?.filter((p: any) => new Date(p.created_at) >= yearStart && p.status === 'alindi') || [];
-  const yearlyCustomers = allCustomers?.filter((c: any) => new Date(c.created_at) >= yearStart) || [];
+  const yearlyApps = filterByRange(applications, yearRange);
+  const yearlyPayments = filterByRange(allPayments, yearRange);
+  const yearlyCustomers = filterByRange(customers, yearRange);
 
-  const currentMonthNum = new Date().getMonth() + 1;
-  const isCurrentYear = new Date().getFullYear().toString() === currentYear;
-  const monthsCount = isCurrentYear ? currentMonthNum : 12;
+  const currentUtcYear = today.getUTCFullYear();
+  const monthsCount = period.year < currentUtcYear
+    ? 12
+    : period.year === currentUtcYear
+      ? today.getUTCMonth() + 1
+      : 0;
 
   const yearly = {
     customers: yearlyCustomers.length,
     apps: yearlyApps.length,
-    revenue: yearlyPayments.reduce((s: number, p: any) => s + Number(p.amount || 0), 0),
+    revenue: sumPayments(yearlyPayments, 'alindi'),
     monthsCount
   };
 
   // Avg Process Days
-  let totalProcessMs = 0;
-  let closedCount = 0;
-  allApplications?.forEach((a: any) => {
-    if (['onaylandi', 'reddedildi'].includes(a.status) && a.created_at && a.updated_at) {
-      const ms = new Date(a.updated_at).getTime() - new Date(a.created_at).getTime();
-      if (ms > 0) {
-        totalProcessMs += ms;
-        closedCount++;
-      }
-    }
-  });
-  const avgProcessDays = closedCount > 0 ? Math.round(totalProcessMs / closedCount / (1000 * 60 * 60 * 24)) : 30;
+  const avgProcessDays = averageProcessDays(applications);
 
   // E. STAFF PERFORMANCE FULL DATA (All time)
-  let staffPerfData: any[] = [];
-  let rejectedAppsData: any[] = [];
+  let staffPerfData: Array<Omit<StaffPerformanceMetric, 'totalProcessTimeMs' | 'completedCount'> & {
+    approvalRate: number;
+    avgProcessTimeDays: number | null;
+  }> = [];
+  let rejectedAppsData: Array<{ rejection_reason: string; country: string; visa_type: string }> = [];
   if (isAdmin) {
     const { data: perfApps } = await supabase.from('applications').select('id, customer_id, status, created_at, updated_at, customers!inner(assigned_staff_id)');
     const { data: perfPayments } = await supabase.from('payments').select('amount, status, application_id');
@@ -259,31 +273,41 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       .eq('status', 'reddedildi')
       .not('rejection_reason', 'is', null);
     
-    if (rejectedApps) rejectedAppsData = rejectedApps;
+    if (rejectedApps) {
+      rejectedAppsData = rejectedApps.flatMap((application) =>
+        application.rejection_reason
+          ? [{
+              rejection_reason: application.rejection_reason,
+              country: application.country,
+              visa_type: application.visa_type,
+            }]
+          : [],
+      );
+    }
 
-    const perfStaffMap: Record<string, any> = {};
-    allStaff?.forEach((s: any) => {
+    const perfStaffMap: Record<string, StaffPerformanceMetric> = {};
+    staff.forEach((s) => {
       perfStaffMap[s.id] = { id: s.id, name: s.full_name, totalCustomers: 0, activeApps: 0, approved: 0, rejected: 0, revenue: 0, totalProcessTimeMs: 0, completedCount: 0 };
     });
 
-    allCustomers?.forEach((c: any) => {
+    customers.forEach((c) => {
       if (c.assigned_staff_id && perfStaffMap[c.assigned_staff_id]) {
         perfStaffMap[c.assigned_staff_id].totalCustomers++;
       }
     });
 
-    perfApps?.forEach((a: any) => {
-      const staffId = (a.customers as any).assigned_staff_id;
-      if (!staffId || !perfStaffMap[staffId]) return;
+    perfApps?.forEach((application) => {
+      const assignedStaffId = application.customers?.assigned_staff_id;
+      if (!assignedStaffId || !perfStaffMap[assignedStaffId]) return;
       
-      const s = perfStaffMap[staffId];
-      if (['onaylandi', 'reddedildi', 'kapandi'].includes(a.status)) {
-        if (a.status === 'onaylandi') s.approved++;
-        if (a.status === 'reddedildi') s.rejected++;
+      const s = perfStaffMap[assignedStaffId];
+      if (['onaylandi', 'reddedildi', 'kapandi'].includes(application.status)) {
+        if (application.status === 'onaylandi') s.approved++;
+        if (application.status === 'reddedildi') s.rejected++;
         
         // processing time
-        if (a.created_at && a.updated_at) {
-           const timeDiff = new Date(a.updated_at).getTime() - new Date(a.created_at).getTime();
+        if (application.created_at && application.updated_at) {
+           const timeDiff = new Date(application.updated_at).getTime() - new Date(application.created_at).getTime();
            if (timeDiff > 0) {
              s.totalProcessTimeMs += timeDiff;
              s.completedCount++;
@@ -294,19 +318,19 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       }
     });
 
-    perfPayments?.forEach((p: any) => {
+    perfPayments?.forEach((p) => {
       if (p.status === 'alindi') {
-        const app = perfApps?.find((a: any) => a.id === p.application_id);
+        const app = perfApps?.find((application) => application.id === p.application_id);
         if (app) {
-          const staffId = (app.customers as any).assigned_staff_id;
-          if (staffId && perfStaffMap[staffId]) {
-            perfStaffMap[staffId].revenue += Number(p.amount);
+          const assignedStaffId = app.customers?.assigned_staff_id;
+          if (assignedStaffId && perfStaffMap[assignedStaffId]) {
+            perfStaffMap[assignedStaffId].revenue += Number(p.amount);
           }
         }
       }
     });
 
-    staffPerfData = Object.values(perfStaffMap).map((s: any) => {
+    staffPerfData = Object.values(perfStaffMap).map((s) => {
       const totalDecided = s.approved + s.rejected;
       const approvalRate = totalDecided > 0 ? (s.approved / totalDecided) * 100 : 0;
       const avgProcessTimeDays = s.completedCount > 0 ? (s.totalProcessTimeMs / s.completedCount) / (1000 * 60 * 60 * 24) : null;
@@ -430,7 +454,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       </div>
 
       {/* MATRIX */}
-      <VisaSuccessMatrix data={allApplications || []} staffList={allStaff || []} />
+      <VisaSuccessMatrix data={applications} staffList={staff} />
 
       {/* REVENUE PROJECTION */}
       <RevenueProjection 

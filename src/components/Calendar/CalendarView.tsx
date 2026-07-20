@@ -1,14 +1,15 @@
 "use client"
 import { useState } from "react";
-import { format, addMonths, subMonths, isToday } from "date-fns";
+import { format, addMonths, subMonths } from "date-fns";
 import { tr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from "lucide-react";
 import MonthGrid from "./MonthGrid";
 import DaySidebar from "./DaySidebar";
+import type { CalendarAppointment } from "@/types/calendar";
 
 type ViewMode = "month" | "list";
 
-export default function CalendarView({ appointments }: { appointments: any[] }) {
+export default function CalendarView({ appointments }: { appointments: CalendarAppointment[] }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("month");
