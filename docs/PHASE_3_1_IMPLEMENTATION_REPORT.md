@@ -18,6 +18,8 @@ Durum: **Devam ediyor**
   kullanıcıyı admin varsayan istemci fallback'i kaldırıldı.
 - Yerel Supabase üzerinde gerçek test yöneticisi oluşturan oturumlu Playwright
   regresyon testi eklendi. Test kullanıcısı senaryo sonunda temizleniyor.
+- Supabase test istemcisine `ws` transport'u verilerek oturumlu test Node 20
+  kullanan GitHub Actions ortamıyla uyumlu hale getirildi.
 
 ## Doğrulama durumu
 
@@ -33,6 +35,7 @@ Durum: **Devam ediyor**
 | Veritabanı lint | Geçti, şema hatası yok |
 | pgTAP | Geçti, 25/25 |
 | Playwright | Geçti, 5/5 |
+| Playwright — Node 20.20.2 | Geçti, 5/5 |
 | Profil aç/kapat | Geçti |
 | Sistem Ayarları geçişi | Geçti |
 | Profil menüsünden çıkış | Geçti |

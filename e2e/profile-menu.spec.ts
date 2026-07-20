@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import type { WebSocketLikeConstructor } from '@supabase/realtime-js';
 import { expect, test } from '@playwright/test';
+import WebSocket from 'ws';
 import type { Database } from '../src/types/database';
 
 const testEmail = 'phase3-profile-menu@example.test';
@@ -16,6 +18,9 @@ const admin = createClient<Database>(supabaseUrl, serviceRoleKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
+  },
+  realtime: {
+    transport: WebSocket as unknown as WebSocketLikeConstructor,
   },
 });
 
