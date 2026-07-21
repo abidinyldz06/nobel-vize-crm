@@ -31,11 +31,16 @@ Durum: **Devam ediyor**
 - [x] Faz 3 dalının güncel `main` üzerinden açılması
 - [x] Sağ üst profil menüsü yayın engelinin giderilmesi
 - [x] Profil menüsü için oturumlu Playwright regresyon testi
-- [ ] Supabase CLI oturumu ve staging proje bağlantısı
+- [x] Supabase CLI oturumu ve doğru CRM production projesinin belirlenmesi
+- [x] Production şema envanteri ve migration öncesi veri kalite kontrolü
+- [x] Şifreli production veritabanı ve Storage mantıksal yedeği
+- [x] Canlı veri kopyasında Faz 0–1 migration provası
+- [ ] Ayrı staging projesi veya Supabase preview branch'i
 - [ ] Staging şema envanteri ve veri kalite ön kontrolü
 - [ ] Staging veritabanı ve Storage yedeği
 - [ ] Faz 0–1 migration zincirinin staging uygulaması
 - [ ] Rol, portal, Storage, webhook ve backup/restore regresyonu
+- [ ] Production platform yedeği veya PITR güvencesi
 - [ ] Production bakım penceresi ve kontrollü yayın
 
 ### Faz 3.2 — Tek şirket arayüz temizliği
