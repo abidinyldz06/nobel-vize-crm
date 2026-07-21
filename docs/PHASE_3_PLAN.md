@@ -25,7 +25,7 @@ subdomain geliştirmeleri bu fazın kapsamında değildir.
 
 ### Faz 3.1 — Staging ve production hazırlığı
 
-Durum: **Devam ediyor**
+Durum: **Tamamlandı — 21 Temmuz 2026**
 
 - [x] Faz 2'nin `main` dalına alınması
 - [x] Faz 3 dalının güncel `main` üzerinden açılması
@@ -35,13 +35,14 @@ Durum: **Devam ediyor**
 - [x] Production şema envanteri ve migration öncesi veri kalite kontrolü
 - [x] Şifreli production veritabanı ve Storage mantıksal yedeği
 - [x] Canlı veri kopyasında Faz 0–1 migration provası
-- [ ] Ayrı staging projesi veya Supabase preview branch'i
-- [ ] Staging şema envanteri ve veri kalite ön kontrolü
-- [ ] Staging veritabanı ve Storage yedeği
-- [ ] Faz 0–1 migration zincirinin staging uygulaması
-- [ ] Rol, portal, Storage, webhook ve backup/restore regresyonu
-- [ ] Production platform yedeği veya PITR güvencesi
-- [ ] Production bakım penceresi ve kontrollü yayın
+- [x] Ayrı staging yerine kullanıcı kararıyla mevcut `CRM` production projesinde
+  şifreli yedek, canlı veri kopyası provası ve kontrollü geçiş uygulanması
+- [x] Faz 0–1 migration zincirinin production'a uygulanması
+- [x] Production veri kalite, RLS, constraint ve private Storage kontrolleri
+- [x] Rol, portal, Storage, webhook ve backup doğrulama regresyonları
+- [x] Repo dışında şifreli production mantıksal yedeğinin geri açılarak doğrulanması
+- [x] Vercel Production secret'larının tamamlanması ve kontrollü yeniden yayın
+- [x] `abidinyildiz.com` üzerinde geçerli/geçersiz portal smoke kontrolleri
 
 ### Faz 3.2 — Tek şirket arayüz temizliği
 
