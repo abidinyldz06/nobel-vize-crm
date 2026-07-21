@@ -1,7 +1,7 @@
 # Production Olayı — Staff / Auth Bağlantısı
 
 Tarih: 21 Temmuz 2026
-Durum: **Düzeltme hazırlanıyor**
+Durum: **Tamamlandı**
 
 ## Belirti
 
@@ -46,5 +46,32 @@ ve aynı hatanın tekrarını önlemek için kalıcı hotfix hazırlandı.
 
 ## Tamamlama kanıtları
 
-Production uygulaması, migration, RLS görünürlüğü ve CI doğrulamaları
-tamamlandıktan sonra bu bölüm sonuçlarla güncellenecektir.
+| Kontrol | Sonuç |
+|---|---|
+| Yerel migration reset | Geçti |
+| Yerel şema lint | Geçti, 0 bulgu |
+| pgTAP | Geçti, 36/36 |
+| Uygulama kalite kapısı | Geçti; lint, typecheck, 17/17 Node testi ve build |
+| Playwright | Geçti, 5/5 |
+| GitHub application | Geçti |
+| GitHub database | Geçti |
+| GitHub browser | Geçti |
+| Vercel Preview | Geçti |
+| Production migration | Geçti, yerel/uzak 9/9 |
+| Production şema lint | Geçti, 0 bulgu |
+| Aktif personel / doğru Auth bağlantısı | 3/3 |
+| Yeniden bağlantı gereken personel | 0 |
+| Aktif admin | 1 |
+| Production müşteri sayısı | 9 |
+| Canlı Vercel yayını | `READY` |
+| Ana sayfa ve müşteri rotası smoke | HTTP 200 |
+
+Hotfix [PR #9](https://github.com/abidinyldz06/nobel-vize-crm/pull/9)
+üzerinden bütün kalite kapıları geçtikten sonra `main` dalına birleştirildi ve
+migration Production'a uygulandı.
+
+Mevcut erişim modelinde admin bütün müşterileri görür; danışmanlar yalnız
+kendilerine atanmış müşterileri görür. Production'daki iki danışmana atanmış
+müşteri bulunmadığı için danışman hesabında `0` görünmesi beklenen davranıştır.
+Bu durum Auth bağlantı hatası değildir; müşteri ataması yapıldığında ilgili
+danışmanın listesine yansır.
