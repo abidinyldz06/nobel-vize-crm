@@ -2,7 +2,7 @@
 
 Tarih: 21 Temmuz 2026
 Dal: `phase-3/3.2-single-company-ui`
-Durum: **Devam ediyor — production yayını bekleniyor**
+Durum: **Tamamlandı**
 
 ## Uygulanan değişiklikler
 
@@ -40,13 +40,29 @@ Durum: **Devam ediyor — production yayını bekleniyor**
 | `/pricing` 404 regresyonu | Geçti |
 | Oturumlu ayarlar temizliği | Geçti |
 
-## Production kabul ölçütleri
+## Production sonucu
 
-Faz 3.2 ancak aşağıdakiler tamamlandığında `Tamamlandı` olarak işaretlenecektir:
+| Kontrol | Sonuç |
+|---|---|
+| GitHub application | Geçti |
+| GitHub database | Geçti |
+| GitHub browser | Geçti |
+| Vercel Preview | Geçti |
+| Uyumlu production uygulama yayını | Geçti |
+| Production migration | Geçti, yerel/uzak 8/8 eşleşiyor |
+| Production şema lint | Geçti, 0 bulgu |
+| Tek şirket kaydı | Geçti, 1 kayıt |
+| Kaldırılan eski sütunlar | Geçti, PostgREST 400 |
+| Ana sayfa | HTTP 200 |
+| Anonim ayarlar yönlendirmesi | HTTP 200, giriş ekranı |
+| Kaldırılan `/pricing` | HTTP 404 |
+| Geçersiz portal bağlantısı | HTTP 200, kontrollü mesaj |
+| Geçerli müşteri portalı | HTTP 200, beklenen içerik |
 
-1. GitHub application, database, browser ve Vercel kontrolleri geçmelidir.
-2. Uyumlu uygulama sürümü production'a dağıtılmalıdır.
-3. `202607210001_phase3_single_company_settings.sql` production'a
-   uygulanmalıdır.
-4. Ayarlar, giriş, portal ve kaldırılan `/pricing` rotası smoke testlerinden
-   geçmelidir.
+Önce CI'dan geçmiş uyumlu uygulama production'a dağıtıldı, ardından
+`202607210001_phase3_single_company_settings.sql` migration'ı uygulandı. Bu
+sıra, eski uygulamanın kaldırılan sütunlara yazmaya çalışabileceği uyumsuzluk
+penceresini engelledi. Smoke sırasında kullanılan geçici anahtar, şirket yanıtı
+ve portal token dosyaları doğrulama sonunda silindi.
+
+Bu kanıtlarla **Faz 3.2 tamamlandı**. Sonraki çalışma paketi Faz 3.3'tür.
