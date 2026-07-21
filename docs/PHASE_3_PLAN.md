@@ -46,7 +46,7 @@ Durum: **Tamamlandı — 21 Temmuz 2026**
 
 ### Faz 3.2 — Tek şirket arayüz temizliği
 
-Durum: **Devam ediyor — production yayını bekleniyor**
+Durum: **Tamamlandı — 21 Temmuz 2026**
 
 - [x] SaaS planı, abonelik, kota ve yükseltme bileşenlerinin kaldırılması
 - [x] Public fiyatlandırma sayfasının kaldırılması
@@ -54,7 +54,7 @@ Durum: **Devam ediyor — production yayını bekleniyor**
 - [x] Şirket ayarlarının tek kayıtlı iç CRM davranışına dönüştürülmesi
 - [x] Çalışmayan bildirim seçeneklerinin kaldırılması
 - [x] Yerel uygulama, veritabanı ve tarayıcı regresyonları
-- [ ] Production migration, yayın ve smoke doğrulaması
+- [x] Production migration, yayın ve smoke doğrulaması
 
 ### Faz 3.3 — Görev ve gerçek bildirim sistemi
 

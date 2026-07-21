@@ -92,7 +92,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 Faz 3 alt aşama takibi:
 
 - **Faz 3.1 — Tamamlandı:** production hazırlığı, güvenli migration ve yayın doğrulaması
-- **Faz 3.2 — Devam ediyor:** kod ve yerel kontroller tamamlandı; production yayını bekleniyor
+- **Faz 3.2 — Tamamlandı:** tek şirket arayüzü, şema temizliği ve production doğrulaması
 - **Faz 3.3 — Bekliyor:** görev ve gerçek bildirim sistemi
 - **Faz 3.4 — Bekliyor:** başvuru süreç panosu
 - **Faz 3.5 — Bekliyor:** müşteri iletişimi ve portal
