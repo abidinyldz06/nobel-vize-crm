@@ -104,5 +104,10 @@ Ayrıntılı kapsam ve kabul ölçütleri `docs/PHASE_3_PLAN.md`; Faz 3.1 ve 3.2
 kanıtları ilgili uygulama raporlarındadır. Bir aşama
 staging/production kanıtı tamamlanmadan `Tamamlandı` olarak işaretlenmez.
 
+### Production hotfix kayıtları
+
+- 21 Temmuz 2026 — Staff/Auth bağlantısı ve RLS müşteri görünürlüğü:
+  `docs/PRODUCTION_INCIDENT_20260721_STAFF_AUTH_LINK.md`
+
 ## Sürüm Notları (Changelog)
 Geliştirme geçmişi ve sürüm notları için `CHANGELOG.md` dosyasına bakabilirsiniz.

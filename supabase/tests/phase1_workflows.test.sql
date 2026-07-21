@@ -3,7 +3,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET search_path TO public, extensions;
 
-SELECT plan(34);
+SELECT plan(36);
 
 SELECT has_table('public', 'country_visa_rules', 'canonical visa rules table exists');
 SELECT has_function('public', 'create_customer_application_v1', ARRAY['jsonb'], 'atomic customer workflow exists');
@@ -103,6 +103,12 @@ SELECT set_config(
 );
 SET LOCAL ROLE authenticated;
 
+SELECT results_eq(
+  $$ SELECT public.current_staff_id() $$,
+  $$ VALUES ('10000000-0000-0000-0000-000000000001'::UUID) $$,
+  'authenticated auth user resolves to the linked active staff row'
+);
+
 SELECT lives_ok(
   $$
     SELECT public.create_customer_application_v1(
@@ -126,6 +132,11 @@ SELECT results_eq(
   $$ SELECT count(*)::BIGINT FROM public.customers WHERE email = 'ayse@example.com' $$,
   $$ VALUES (1::BIGINT) $$,
   'one customer was created'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.customers $$,
+  $$ VALUES (1::BIGINT) $$,
+  'linked admin can read customers through RLS'
 );
 SELECT results_eq(
   $$ SELECT count(*)::BIGINT FROM public.applications WHERE country = 'Almanya' $$,
