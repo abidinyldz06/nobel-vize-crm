@@ -85,6 +85,11 @@ test('staff can open, close and use the profile menu', async ({ page }) => {
   await profileMenu.getByRole('menuitem', { name: 'Sistem Ayarları' }).click();
   await expect(page).toHaveURL('/settings');
   await expect(page.getByRole('heading', { name: 'Sistem Ayarları' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Şirket Bilgileri' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Güvenlik' })).toBeVisible();
+  await expect(page.getByText('Subdomain')).toHaveCount(0);
+  await expect(page.getByText('Aktif Plan')).toHaveCount(0);
+  await expect(page.getByText('Bildirim Ayarları')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
   await page.getByRole('menuitem', { name: 'Çıkış Yap' }).click();

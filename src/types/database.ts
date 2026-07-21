@@ -597,46 +597,25 @@ export type Database = {
       }
       tenants: {
         Row: {
-          company_name: string | null
+          company_name: string
           created_at: string
           email: string | null
           id: string
-          notify_email: boolean
-          notify_reminder: boolean
-          notify_status_change: boolean
-          notify_whatsapp: boolean
           phone: string | null
-          plan: string | null
-          primary_color: string | null
-          subdomain: string | null
         }
         Insert: {
-          company_name?: string | null
+          company_name?: string
           created_at?: string
           email?: string | null
           id?: string
-          notify_email?: boolean
-          notify_reminder?: boolean
-          notify_status_change?: boolean
-          notify_whatsapp?: boolean
           phone?: string | null
-          plan?: string | null
-          primary_color?: string | null
-          subdomain?: string | null
         }
         Update: {
-          company_name?: string | null
+          company_name?: string
           created_at?: string
           email?: string | null
           id?: string
-          notify_email?: boolean
-          notify_reminder?: boolean
-          notify_status_change?: boolean
-          notify_whatsapp?: boolean
           phone?: string | null
-          plan?: string | null
-          primary_color?: string | null
-          subdomain?: string | null
         }
         Relationships: []
       }

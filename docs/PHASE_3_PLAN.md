@@ -46,13 +46,15 @@ Durum: **Tamamlandı — 21 Temmuz 2026**
 
 ### Faz 3.2 — Tek şirket arayüz temizliği
 
-Durum: **Bekliyor**
+Durum: **Devam ediyor — production yayını bekleniyor**
 
-- SaaS planı, abonelik, kota ve yükseltme bileşenlerinin kaldırılması
-- Public fiyatlandırma sayfasının kaldırılması
-- Subdomain ve white-label ifadelerinin temizlenmesi
-- Şirket ayarlarının tek kayıtlı iç CRM davranışına dönüştürülmesi
-- Çalışmayan bildirim seçeneklerinin bağlanması veya kaldırılması
+- [x] SaaS planı, abonelik, kota ve yükseltme bileşenlerinin kaldırılması
+- [x] Public fiyatlandırma sayfasının kaldırılması
+- [x] Subdomain ve white-label ifadelerinin temizlenmesi
+- [x] Şirket ayarlarının tek kayıtlı iç CRM davranışına dönüştürülmesi
+- [x] Çalışmayan bildirim seçeneklerinin kaldırılması
+- [x] Yerel uygulama, veritabanı ve tarayıcı regresyonları
+- [ ] Production migration, yayın ve smoke doğrulaması
 
 ### Faz 3.3 — Görev ve gerçek bildirim sistemi
 

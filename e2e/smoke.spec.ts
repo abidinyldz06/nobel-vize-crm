@@ -15,11 +15,10 @@ test('anonymous users are redirected away from protected pages', async ({ page }
   await expect(page.getByRole('heading', { name: 'Hoş Geldiniz' })).toBeVisible();
 });
 
-test('public pricing page renders without authentication', async ({ page }) => {
-  await page.goto('/pricing');
+test('removed public pricing route returns not found', async ({ request }) => {
+  const response = await request.get('/pricing');
 
-  await expect(page.getByRole('heading', { name: /Vize Danışmanlık Süreçlerinizi/ })).toBeVisible();
-  await expect(page.getByText('₺1.499')).toBeVisible();
+  expect(response.status()).toBe(404);
 });
 
 test('unsigned Google Form webhook requests are rejected', async ({ request }) => {
