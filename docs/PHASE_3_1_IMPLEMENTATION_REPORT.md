@@ -1,8 +1,8 @@
 # Faz 3.1 — Staging ve Production Hazırlığı Uygulama Raporu
 
-Tarih: 20 Temmuz 2026
+Tarih: 20–21 Temmuz 2026
 Dal: `phase-3/internal-crm-production`
-Durum: **Devam ediyor**
+Durum: **Tamamlandı**
 
 ## Tamamlanan yerel çalışmalar
 
@@ -35,7 +35,7 @@ Durum: **Devam ediyor**
 | Veritabanı lint | Geçti, şema hatası yok |
 | pgTAP | Geçti, 25/25 |
 | Canlı veri kopyasında migration provası | Geçti, kayıt sayıları korundu |
-| Migration sonrası veri kalite kontrolü | Geçti; Auth hariç 17/18 sayaç sıfır |
+| Migration sonrası veri kalite kontrolü | Geçti; production'da 18/18 sayaç sıfır |
 | Anonim public politika kontrolü | Geçti, 0 politika |
 | Documents bucket gizlilik kontrolü | Geçti, private |
 | Playwright | Geçti, 5/5 |
@@ -47,6 +47,10 @@ Durum: **Devam ediyor**
 | GitHub Actions — database | Geçti |
 | GitHub Actions — browser | Geçti |
 | Vercel Preview | Geçti |
+| Production migration zinciri | Geçti, 7/7 migration yerel/uzak eşleşiyor |
+| Production constraint doğrulaması | Geçti, 28/28 constraint validated |
+| Production portal smoke | Geçti; geçerli ve geçersiz bağlantılar HTTP 200 |
+| `abidinyildiz.com` production yayını | Geçti |
 
 GitHub Actions'ın ilk browser turunda Node 20 WebSocket farkı yakalandı. `ws`
 transport düzeltmesi yerelde Node 20 ile doğrulandıktan sonra ikinci turdaki
@@ -56,21 +60,22 @@ application, database ve browser işlerinin tamamı başarılı oldu.
 
 Supabase CLI ile doğru production projesi olarak `CRM`
 (`zrxdwnshegihakqfszfh`) belirlendi ve salt-okunur kontroller tamamlandı.
-Production üzerinde migration uygulanmadı.
+Production migration zinciri kontrollü bakım penceresinde uygulandı ve
+production kontrolleri tamamlandı.
 
 | Kontrol | Bulgular |
 |---|---|
 | PostgreSQL | 17.6.1.127 |
-| Migration geçmişi | Uzakta boş; yerelde 6 bekleyen migration |
+| Migration geçmişi | Yerel ve uzak 7 migration eşleşiyor |
 | Şema lint | Hata yok |
 | Tahmini temel kayıtlar | 9 müşteri, 7 başvuru, 62 belge, 3 personel |
-| Eski güvenlik durumu | Müşteri, başvuru, belge ve ödeme için anonim genel okuma politikaları mevcut |
+| Anonim genel okuma politikaları | Kaldırıldı; production sonucu 0 politika |
 | Veri ilişkileri | Eksik müşteri/personel/başvuru ilişkisi yok |
 | Veri uyumsuzluğu | 1 `Öğrenci` vize tipi, 35 `tamamlandi` belge durumu |
 | Tekrarlı kural/personel | Yok |
 | Storage | `documents` bucket'ında 1 nesne, 250061 bayt |
-| Platform yedeği | PITR kapalı, listelenen fiziksel yedek yok |
-| Supabase branch | Staging/preview branch yok |
+| Mantıksal yedek | Şifreli, repo dışında ve bağımsız geri açma kontrolü geçti |
+| Supabase projeleri | Yalnız güncel `CRM` projesi kaldı; eski kullanılmayan proje silindi |
 
 Canlı veriye uygun migration öncesi kontrol için
 `phase1_pre_migration_data_preflight.sql` eklendi. Bulunan iki eski değer,
@@ -88,18 +93,28 @@ alana alındı. Bu kopya üzerinde altı migration sırasıyla başarıyla uygul
   klonda Auth şeması taşınmadığı için `staff_without_auth_user=3` görüldü;
   production ön kontrolünde aynı sayaç sıfırdır.
 
-Roller, şema, public veri ve Storage nesnesini içeren production öncesi yedek
-AES-256-CBC/PBKDF2 ile şifrelendi, repo dışında `600` izniyle saklandı ve
-geri açılarak doğrulandı. Parola macOS Keychain'dedir. Bu mantıksal yedek,
-Supabase platform yedeği veya ayrı staging ortamının yerini tutmaz.
+Roller, Auth, şema, public veri ve Storage nesnesini içeren production öncesi
+yedek AES-256-CBC/PBKDF2 ile şifrelendi, repo dışında `600` izniyle saklandı ve
+bağımsız olarak geri açılıp arşiv bütünlüğü doğrulandı. Parola macOS
+Keychain'dedir. Supabase ücretli PITR/branch kullanılmadığı için kullanıcı
+kararıyla ayrı staging yerine bu şifreli yedek ve canlı veri kopyası provası
+kalite kapısı olarak kullanıldı.
 
-Faz 3.1'in tamamlandı sayılması için:
+## Production geçiş sonucu
 
-1. Ayrı staging Supabase projesi veya güvenli preview branch oluşturulmalıdır.
-2. Faz 0–1 migration zinciri staging'e uygulanmalıdır.
-3. Rol, portal, private Storage, webhook ve restore regresyonları geçmelidir.
-4. Production için platform yedeği/PITR güvenceye alınmalıdır.
-5. Production uygulaması ayrı bakım penceresinde raporlanmalıdır.
+- `202607190001`–`202607200006` migration zinciri doğru `CRM` projesine
+  uygulandı; yerel ve uzak migration geçmişleri eşleşti.
+- Migration sonrası 18 veri kalite sayacının tamamı sıfırlandı; 9 müşteri,
+  7 başvuru, 62 belge ve 3 personel kaydı korundu.
+- Geçişte `NOT VALID` eklenen 28 check/foreign-key constraint yeni
+  `202607200006_phase1_validate_constraints.sql` migration'ıyla doğrulandı.
+- Public anonim politikalar sıfıra indi ve `documents` bucket private kaldı.
+- Vercel Production/Preview ortamlarına eksik sunucu tarafı
+  `SUPABASE_SERVICE_ROLE_KEY` güvenli değişkeni eklendi; değer rapora veya git
+  geçmişine yazılmadı.
+- En son başarılı Production sürümü yeni ortam ayarlarıyla yeniden dağıtıldı ve
+  `abidinyildiz.com` alan adına bağlandı.
+- Ana sayfa, geçersiz portal bağlantısı ve gerçek müşteri portalı HTTP 200
+  verdi; gerçek portal beklenen `Müşteri Portalı` içeriğiyle doğrulandı.
 
-Bu kanıtlar alınmadan README ve yol haritasında Faz 3.1 `Tamamlandı` olarak
-işaretlenmeyecektir.
+Bu kanıtlarla **Faz 3.1 tamamlandı**. Sonraki çalışma paketi Faz 3.2'dir.

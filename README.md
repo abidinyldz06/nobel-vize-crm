@@ -84,14 +84,14 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 
 | Faz | Durum | Rapor |
 |---|---|---|
-| Faz 0 — Güvenlik ve veri koruma | Kod tamamlandı; uzak ortam uygulaması bekliyor | `docs/PHASE_0_DEPLOYMENT_RUNBOOK.md` |
-| Faz 1 — Veritabanı standardizasyonu | Kod tamamlandı; uzak ortam uygulaması bekliyor | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
+| Faz 0 — Güvenlik ve veri koruma | Production'a uygulandı ve doğrulandı | `docs/PHASE_0_DEPLOYMENT_RUNBOOK.md` |
+| Faz 1 — Veritabanı standardizasyonu | Production'a uygulandı ve doğrulandı | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Devam ediyor | `docs/PHASE_3_PLAN.md` |
 
 Faz 3 alt aşama takibi:
 
-- **Faz 3.1 — Devam ediyor:** staging/production hazırlığı ve yayın engelleri
+- **Faz 3.1 — Tamamlandı:** production hazırlığı, güvenli migration ve yayın doğrulaması
 - **Faz 3.2 — Bekliyor:** tek şirket arayüz temizliği
 - **Faz 3.3 — Bekliyor:** görev ve gerçek bildirim sistemi
 - **Faz 3.4 — Bekliyor:** başvuru süreç panosu
