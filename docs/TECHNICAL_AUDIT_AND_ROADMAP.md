@@ -96,7 +96,7 @@ Faz 2 kapsamı, doğrulama matrisi ve kalan riskler
 
 - [x] Ürün kararı: Nobel Vize için tek şirketli iç CRM; SaaS ertelendi
 - [x] Faz 3.1 — Production hazırlığı ve yayın engelleri (tamamlandı 21 Temmuz 2026)
-- [ ] Faz 3.2 — Tek şirket arayüz temizliği
+- [ ] Faz 3.2 — Tek şirket arayüz temizliği (production yayını bekleniyor)
 - [ ] Faz 3.3 — Görev ve gerçek bildirim sistemi
 - [ ] Faz 3.4 — Başvuru süreç panosu
 - [ ] Faz 3.5 — Müşteri iletişimi ve portal

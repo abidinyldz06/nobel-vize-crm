@@ -3,7 +3,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET search_path TO public, extensions;
 
-SELECT plan(25);
+SELECT plan(34);
 
 SELECT has_table('public', 'country_visa_rules', 'canonical visa rules table exists');
 SELECT has_function('public', 'create_customer_application_v1', ARRAY['jsonb'], 'atomic customer workflow exists');
@@ -11,6 +11,40 @@ SELECT has_function('public', 'update_application_status_v1', ARRAY['uuid', 'tex
 SELECT has_function('public', 'restore_backup_v2', ARRAY['jsonb'], 'atomic restore exists');
 SELECT ok(to_regclass('public.uq_staff_user_id') IS NOT NULL, 'staff auth user uniqueness is enforced');
 SELECT ok(to_regclass('public.uq_country_visa_rules_match') IS NOT NULL, 'visa rule match uniqueness is enforced');
+SELECT ok(to_regclass('public.tenants_single_company_idx') IS NOT NULL, 'single company row uniqueness is enforced');
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.tenants $$,
+  $$ VALUES (1::BIGINT) $$,
+  'one company settings row is seeded'
+);
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'tenants' AND column_name = 'subdomain'),
+  'retired subdomain setting is removed'
+);
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'tenants' AND column_name = 'plan'),
+  'retired SaaS plan setting is removed'
+);
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'tenants' AND column_name = 'primary_color'),
+  'retired white-label color setting is removed'
+);
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'tenants' AND column_name = 'notify_email'),
+  'unused email notification setting is removed'
+);
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'tenants' AND column_name = 'notify_whatsapp'),
+  'unused WhatsApp notification setting is removed'
+);
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'tenants' AND column_name = 'notify_reminder'),
+  'unused reminder setting is removed'
+);
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'tenants' AND column_name = 'notify_status_change'),
+  'unused status notification setting is removed'
+);
 SELECT ok(
   NOT has_function_privilege('anon', 'public.create_customer_application_v1(jsonb)', 'EXECUTE'),
   'anon cannot execute customer workflow'

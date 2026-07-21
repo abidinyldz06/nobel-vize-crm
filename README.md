@@ -92,7 +92,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 Faz 3 alt aşama takibi:
 
 - **Faz 3.1 — Tamamlandı:** production hazırlığı, güvenli migration ve yayın doğrulaması
-- **Faz 3.2 — Bekliyor:** tek şirket arayüz temizliği
+- **Faz 3.2 — Devam ediyor:** kod ve yerel kontroller tamamlandı; production yayını bekleniyor
 - **Faz 3.3 — Bekliyor:** görev ve gerçek bildirim sistemi
 - **Faz 3.4 — Bekliyor:** başvuru süreç panosu
 - **Faz 3.5 — Bekliyor:** müşteri iletişimi ve portal
@@ -100,8 +100,8 @@ Faz 3 alt aşama takibi:
 - **Faz 3.7 — Bekliyor:** izleme ve iş sürekliliği
 - **Faz 3.8 — Bekliyor:** son kalite ve kullanıcı kabulü
 
-Ayrıntılı kapsam ve kabul ölçütleri `docs/PHASE_3_PLAN.md`, Faz 3.1'in güncel
-kanıtları ise `docs/PHASE_3_1_IMPLEMENTATION_REPORT.md` içindedir. Bir aşama
+Ayrıntılı kapsam ve kabul ölçütleri `docs/PHASE_3_PLAN.md`; Faz 3.1 ve 3.2
+kanıtları ilgili uygulama raporlarındadır. Bir aşama
 staging/production kanıtı tamamlanmadan `Tamamlandı` olarak işaretlenmez.
 
 ## Sürüm Notları (Changelog)
