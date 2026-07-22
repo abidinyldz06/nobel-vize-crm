@@ -60,7 +60,8 @@ export default function ProfileAnalysisModal({ customerId, currentScore, onClose
     const { error } = await supabase
       .from('customers')
       .update({ profile_score: newScore })
-      .eq('id', customerId);
+      .eq('id', customerId)
+      .eq('is_deleted', false);
 
     if (error) {
       setErrorMsg(error.message);

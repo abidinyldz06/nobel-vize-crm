@@ -8,7 +8,7 @@ export const revalidate = 0;
 export default async function EditCustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
-  const { data: customer } = await supabase.from('customers').select('*').eq('id', id).single();
+  const { data: customer } = await supabase.from('customers').select('*').eq('id', id).eq('is_deleted', false).single();
   const { data: staffList } = await supabase.from('staff').select('id, full_name, role').eq('is_active', true).order('full_name');
 
   if (!customer) return <div className="p-6 text-slate-500 dark:text-slate-400">Müşteri bulunamadı.</div>;

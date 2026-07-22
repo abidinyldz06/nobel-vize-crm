@@ -52,12 +52,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Geçersiz müşteri kimliği" }, { status: 400 });
   }
 
-  if (action === "delete") {
+  if (action === "archive") {
     if (staff.role !== "admin") {
-      return NextResponse.json({ error: "Toplu silme için yönetici yetkisi gerekiyor." }, { status: 403 });
+      return NextResponse.json({ error: "Toplu arşivleme için yönetici yetkisi gerekiyor." }, { status: 403 });
     }
-    // Supabase cascade ayarlıysa application ve documentler silinir.
-    const { error } = await supabase.from('customers').delete().in('id', customerIds);
+    const { error } = await supabase.rpc('archive_customers_v1', { p_customer_ids: customerIds });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   } 
   else if (action === "update_status") {
@@ -86,7 +85,7 @@ export async function POST(req: Request) {
     if (value !== null && value !== undefined && typeof value !== "string") {
       return NextResponse.json({ error: "Geçersiz danışman kimliği" }, { status: 400 });
     }
-    const { error } = await supabase.from('customers').update({ assigned_staff_id: value || null }).in('id', customerIds);
+    const { error } = await supabase.from('customers').update({ assigned_staff_id: value || null }).in('id', customerIds).eq('is_deleted', false);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     
     // Activity log

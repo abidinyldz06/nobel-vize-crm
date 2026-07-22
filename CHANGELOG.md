@@ -2,6 +2,20 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Acil Paket H2 Müşteri Arşivi
+
+### Veri güvenliği
+
+- Müşteri hard delete işlemi admin kontrollü soft delete akışına çevrildi.
+- Arşivleme ve geri yükleme işlemlerine atomik audit kaydı eklendi.
+- Aktif müşteri sorguları arşiv kayıtlarını dışarıda bırakacak biçimde güncellendi.
+- Admin Arşiv ekranı, geri yükleme ve 30 gün sonrası kontrollü kalıcı silme eklendi.
+
+### Kalite ve bağımlılıklar
+
+- Arşivleme yaşam döngüsü için pgTAP, güvenlik regresyonu ve oturumlu Playwright testi eklendi.
+- Next.js `16.2.11` sürümüne güncellendi; production bağımlılık audit bulguları giderildi.
+
 ## [Unreleased] — Faz 1 Veritabanı Standardizasyonu
 
 ### Veri bütünlüğü

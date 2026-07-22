@@ -56,6 +56,22 @@ Durum: **Tamamlandı — 21 Temmuz 2026**
 - [x] Yerel uygulama, veritabanı ve tarayıcı regresyonları
 - [x] Production migration, yayın ve smoke doğrulaması
 
+### Acil Paket H2 — Müşteri veri güvenliği ve arşiv
+
+Durum: **Devam ediyor — 22 Temmuz 2026**
+
+Bu paket Faz 3 numaralandırmasını değiştirmez. Mevcut hard delete davranışının
+veri kaybı riski nedeniyle Faz 3.3'ten önce uygulanır.
+
+- [x] Müşteriler için soft delete alanları ve indeksleri
+- [x] Yalnız admin tarafından çalıştırılabilen atomik arşiv/geri yükleme akışı
+- [x] Silme ve geri yükleme audit kayıtları
+- [x] Normal sorgulardan arşiv kayıtlarının çıkarılması
+- [x] Admin Arşiv ekranı
+- [x] 30 günü geçen kayıtlar için kontrollü manuel kalıcı silme
+- [x] pgTAP, uygulama ve Playwright regresyonları
+- [ ] Production migration ve yayın doğrulaması
+
 ### Faz 3.3 — Görev ve gerçek bildirim sistemi
 
 Durum: **Bekliyor**
@@ -72,6 +88,10 @@ Durum: **Bekliyor**
 - Başvuru durumları için operasyon panosu
 - Personel, ülke, tarih ve gecikme filtreleri
 - Kontrollü durum geçişleri ve atomik audit kaydı
+- Müşteri edit ekranında ülke, vize türü, durum ve başvuru profil alanları
+- Müşteri detayında kanonik Başvuru Bilgileri bölümü
+- Müşteri etiketleri, renkli badge ve etiket filtresi
+- Dashboard pasaport uyarıları ve aylık operasyon istatistikleri
 
 ### Faz 3.5 — Müşteri iletişimi ve portal
 
@@ -80,6 +100,8 @@ Durum: **Bekliyor**
 - Yönetilebilir WhatsApp ve e-posta şablonları
 - İletişim geçmişi ve başarısız gönderim kaydı
 - Portalda başvuru, evrak, randevu ve ödeme özetinin iyileştirilmesi
+- Müşteri kartında telefon, WhatsApp, e-posta ve hızlı not eylemleri
+- Başvuru, evrak, ödeme, randevu, iletişim ve notları birleştiren timeline
 
 ### Faz 3.6 — KVKK ve veri yaşam döngüsü
 

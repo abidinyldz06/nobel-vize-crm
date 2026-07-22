@@ -9,7 +9,7 @@ export default async function AddAppointmentPage({ params }: { params: Promise<{
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
 
-  const { data: customer } = await supabase.from('customers').select('*').eq('id', id).single();
+  const { data: customer } = await supabase.from('customers').select('*').eq('id', id).eq('is_deleted', false).single();
   const { data: applications } = await supabase
     .from('applications')
     .select('*')

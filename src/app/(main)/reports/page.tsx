@@ -47,12 +47,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const isAdmin = staffRecord?.role === 'admin';
   const staffId = staffRecord?.id;
 
-  const totalCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true });
-  const monthlyCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true }).gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString());
+  const totalCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true }).eq('is_deleted', false);
+  const monthlyCustomersQuery = supabase.from('customers').select('*', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', startDate.toISOString()).lt('created_at', endDate.toISOString());
   // These records feed all-time, active, yearly and selected-period metrics.
   // Keeping the complete authorized set prevents the old six-month truncation bug.
-  const allAppsQuery = supabase.from('applications').select('id, customer_id, country, visa_type, status, total_fee, created_at, updated_at, customers!inner(id, assigned_staff_id)');
-  const allCustomersQuery = supabase.from('customers').select('id, assigned_staff_id, created_at');
+  const allAppsQuery = supabase.from('applications').select('id, customer_id, country, visa_type, status, total_fee, created_at, updated_at, customers!inner(id, assigned_staff_id)').eq('customers.is_deleted', false);
+  const allCustomersQuery = supabase.from('customers').select('id, assigned_staff_id, created_at').eq('is_deleted', false);
 
   if (!isAdmin && staffId) {
     totalCustomersQuery.eq('assigned_staff_id', staffId);
@@ -265,7 +265,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   }> = [];
   let rejectedAppsData: Array<{ rejection_reason: string; country: string; visa_type: string }> = [];
   if (isAdmin) {
-    const { data: perfApps } = await supabase.from('applications').select('id, customer_id, status, created_at, updated_at, customers!inner(assigned_staff_id)');
+    const { data: perfApps } = await supabase.from('applications').select('id, customer_id, status, created_at, updated_at, customers!inner(assigned_staff_id)').eq('customers.is_deleted', false);
     const { data: perfPayments } = await supabase.from('payments').select('amount, status, application_id');
     const { data: rejectedApps } = await supabase
       .from('applications')

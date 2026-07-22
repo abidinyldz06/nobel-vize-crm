@@ -25,13 +25,13 @@ export default async function Dashboard() {
   const staffId = staffRecord?.id;
 
   // Build query filters based on role
-  const customerQuery = supabase.from('customers').select('*', { count: 'exact', head: true });
-  const appQuery = supabase.from('applications').select('id, status, country, total_fee, created_at, customer_id, customers!inner(id, first_name, last_name)');
-  const activeAppsQuery = supabase.from('applications').select('id, customers!inner(id)', { count: 'exact', head: true }).not('status', 'in', '(onaylandi,reddedildi,kapandi)');
-  const recentCustomerQuery = supabase.from('customers').select('id, first_name, last_name, created_at, assigned_staff_id');
-  const todayAppsQuery = supabase.from('applications').select('id, country, status, customer_id, customers!inner(id)').gte('created_at', new Date().toISOString().split('T')[0]);
-  const monthlyAppsQuery = supabase.from('applications').select('total_fee, customer_id, customers!inner(id)');
-  const appointmentsQuery = supabase.from('applications').select('id, appointment_date, appointment_location, customer_id, customers!inner(id, first_name, last_name)').not('appointment_date', 'is', null).gte('appointment_date', new Date().toISOString()).order('appointment_date', { ascending: true }).limit(4);
+  const customerQuery = supabase.from('customers').select('*', { count: 'exact', head: true }).eq('is_deleted', false);
+  const appQuery = supabase.from('applications').select('id, status, country, total_fee, created_at, customer_id, customers!inner(id, first_name, last_name)').eq('customers.is_deleted', false);
+  const activeAppsQuery = supabase.from('applications').select('id, customers!inner(id)', { count: 'exact', head: true }).eq('customers.is_deleted', false).not('status', 'in', '(onaylandi,reddedildi,kapandi)');
+  const recentCustomerQuery = supabase.from('customers').select('id, first_name, last_name, created_at, assigned_staff_id').eq('is_deleted', false);
+  const todayAppsQuery = supabase.from('applications').select('id, country, status, customer_id, customers!inner(id)').eq('customers.is_deleted', false).gte('created_at', new Date().toISOString().split('T')[0]);
+  const monthlyAppsQuery = supabase.from('applications').select('total_fee, customer_id, customers!inner(id)').eq('customers.is_deleted', false);
+  const appointmentsQuery = supabase.from('applications').select('id, appointment_date, appointment_location, customer_id, customers!inner(id, first_name, last_name)').eq('customers.is_deleted', false).not('appointment_date', 'is', null).gte('appointment_date', new Date().toISOString()).order('appointment_date', { ascending: true }).limit(4);
 
   // Danışman: filter by assigned_staff_id on the customers table
   if (!isAdmin && staffId) {
@@ -76,7 +76,7 @@ export default async function Dashboard() {
   
   if (!isAdmin && staffId) {
     // Danışmanın müşterilerinin başvuru ID'lerini bulalım
-    const { data: staffApps } = await supabase.from('applications').select('id, customers!inner(id)').eq('customers.assigned_staff_id', staffId);
+    const { data: staffApps } = await supabase.from('applications').select('id, customers!inner(id)').eq('customers.is_deleted', false).eq('customers.assigned_staff_id', staffId);
     const appIds = staffApps?.map(a => a.id) || [];
     if (appIds.length > 0) {
       const [{ data: d }, { data: p }] = await Promise.all([
@@ -123,6 +123,7 @@ export default async function Dashboard() {
   const chartsAppsQuery = supabase
     .from('applications')
     .select('country, status, created_at, customers!inner(assigned_staff_id)')
+    .eq('customers.is_deleted', false)
     .gte('created_at', sixMonthsAgoDate.toISOString());
 
   if (!isAdmin && staffId) {

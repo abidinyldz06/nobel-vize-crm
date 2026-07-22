@@ -27,7 +27,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   const isAdmin = staffRecord?.role === 'admin';
   const staffId = staffRecord?.id;
 
-  const { data: customer } = await supabase.from('customers').select('*').eq('id', id).single();
+  const { data: customer } = await supabase.from('customers').select('*').eq('id', id).eq('is_deleted', false).single();
   if (!customer) return <div className="p-6 text-slate-500 dark:text-slate-400">Müşteri bulunamadı.</div>;
 
   if (!isAdmin && staffId && customer.assigned_staff_id !== staffId) {

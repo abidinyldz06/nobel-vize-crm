@@ -55,6 +55,7 @@ export default function DocumentItem({ doc }: { doc: Tables<'documents'> }) {
               .from('customers')
               .select('profile_score, email, phone, financial_status')
               .eq('id', app.customer_id)
+              .eq('is_deleted', false)
               .single();
 
             if (customer) {
@@ -68,7 +69,8 @@ export default function DocumentItem({ doc }: { doc: Tables<'documents'> }) {
               await supabase
                 .from('customers')
                 .update({ profile_score: newScore })
-                .eq('id', app.customer_id);
+                .eq('id', app.customer_id)
+                .eq('is_deleted', false);
             }
           }
         }

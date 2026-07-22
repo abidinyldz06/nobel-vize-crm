@@ -16,14 +16,15 @@ export default async function OverdueDocuments({ isAdmin, staffId }: { isAdmin: 
 
   let query = supabase
     .from('documents')
-    .select('id, document_type, requested_at, application_id, applications!inner(id, country, customer_id, customers(id, first_name, last_name, phone))')
+    .select('id, document_type, requested_at, application_id, applications!inner(id, country, customer_id, customers!inner(id, first_name, last_name, phone))')
+    .eq('applications.customers.is_deleted', false)
     .eq('status', 'bekleniyor')
     .lt('requested_at', threeDaysAgo)
     .order('requested_at', { ascending: true });
 
   if (!isAdmin && staffId) {
     // Danışmanın müşterilerinin application ID'lerini bul
-    const { data: staffApps } = await supabase.from('applications').select('id, customers!inner(id)').eq('customers.assigned_staff_id', staffId);
+    const { data: staffApps } = await supabase.from('applications').select('id, customers!inner(id)').eq('customers.is_deleted', false).eq('customers.assigned_staff_id', staffId);
     const appIds = staffApps?.map(a => a.id) || [];
     if (appIds.length === 0) return null;
     query = query.in('application_id', appIds);

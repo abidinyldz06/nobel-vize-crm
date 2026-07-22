@@ -1,11 +1,12 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
-import { MoreVertical, Edit, UserPlus, Trash2, AlertCircle } from "lucide-react"
+import { MoreVertical, Edit, UserPlus, Archive, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 import { assignStaff } from "@/app/actions/assign-staff"
 import type { Tables } from "@/types/database"
+import { toast } from "sonner"
 
 export default function CustomerActionMenu({ customerId, isAdmin, currentStaffId }: { customerId: string, isAdmin: boolean, currentStaffId?: string }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -42,9 +43,23 @@ export default function CustomerActionMenu({ customerId, isAdmin, currentStaffId
   const handleDelete = async () => {
     setIsDeleting(true)
     const supabase = createSupabaseBrowserClient()
-    await supabase.from('customers').delete().eq('id', customerId)
+    const { data, error } = await supabase.rpc('archive_customers_v1', { p_customer_ids: [customerId] })
+    setIsDeleting(false)
+
+    if (error) {
+      toast.error(error.message || "Müşteri arşivlenemedi.")
+      return
+    }
+
+    if (!data) {
+      toast.error("Müşteri bulunamadı veya zaten arşivlenmiş.")
+      return
+    }
+
     setIsOpen(false)
     setShowDeleteConfirm(false)
+    toast.success("Müşteri Arşiv'e taşındı.")
+    router.push('/customers')
     router.refresh()
   }
 
@@ -60,6 +75,9 @@ export default function CustomerActionMenu({ customerId, isAdmin, currentStaffId
   return (
     <div className="relative inline-block text-left" ref={menuRef}>
       <button 
+        type="button"
+        aria-label="Müşteri işlemlerini aç"
+        data-testid={`customer-actions-${customerId}`}
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(!isOpen) }} 
         className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors inline-flex"
       >
@@ -86,12 +104,16 @@ export default function CustomerActionMenu({ customerId, isAdmin, currentStaffId
               </button>
             )}
 
-            <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowDeleteConfirm(true); setIsOpen(false) }}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-left"
-            >
-              <Trash2 className="w-4 h-4" /> Sil
-            </button>
+            {isAdmin && (
+              <button
+                type="button"
+                data-testid={`archive-customer-${customerId}`}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowDeleteConfirm(true); setIsOpen(false) }}
+                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-left"
+              >
+                <Archive className="w-4 h-4" /> Arşive Taşı
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -102,24 +124,26 @@ export default function CustomerActionMenu({ customerId, isAdmin, currentStaffId
           <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl p-6 max-w-sm w-full shadow-2xl">
             <div className="flex items-center gap-3 mb-4 text-red-500">
               <AlertCircle className="w-6 h-6" />
-              <h3 className="text-lg font-bold">Müşteriyi Sil</h3>
+              <h3 className="text-lg font-bold">Müşteriyi Arşivle</h3>
             </div>
             <p className="text-slate-600 dark:text-slate-400 text-sm mb-6">
-              Bu müşteriyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve müşteriye ait tüm başvuru, evrak ve ödeme kayıtları da silinir.
+              Bu müşteri aktif listelerden kaldırılarak Arşiv&apos;e taşınacak. Başvuru, evrak ve ödeme kayıtları korunur; admin daha sonra geri yükleyebilir.
             </p>
             <div className="flex gap-3 justify-end">
               <button 
+                type="button"
                 onClick={() => setShowDeleteConfirm(false)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 İptal
               </button>
               <button 
+                type="button"
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
               >
-                {isDeleting ? "Siliniyor..." : "Evet, Sil"}
+                {isDeleting ? "Arşivleniyor..." : "Evet, Arşivle"}
               </button>
             </div>
           </div>

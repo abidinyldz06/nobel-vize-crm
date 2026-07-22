@@ -21,6 +21,7 @@ export default async function AppointmentsPage() {
       appointment_location,
       customers!inner (id, first_name, last_name, phone)
     `)
+    .eq('customers.is_deleted', false)
     .not('appointment_date', 'is', null)
     .order('appointment_date', { ascending: true });
 

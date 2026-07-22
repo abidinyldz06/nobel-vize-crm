@@ -26,6 +26,7 @@ export async function GET(request: Request) {
     customerFields.map(field => supabase
       .from('customers')
       .select('id, first_name, last_name, phone, email, passport_no')
+      .eq('is_deleted', false)
       .ilike(field, searchPattern)
       .limit(5)),
   );
@@ -45,6 +46,7 @@ export async function GET(request: Request) {
     ['country', 'status'].map(field => supabase
       .from('applications')
       .select('id, country, status, customer_id, customers!inner(first_name, last_name)')
+      .eq('customers.is_deleted', false)
       .ilike(field, searchPattern)
       .limit(5)),
   );

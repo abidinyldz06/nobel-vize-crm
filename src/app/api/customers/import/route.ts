@@ -61,7 +61,8 @@ export async function POST(req: Request) {
   // Fetch existing customers to handle duplicates
   const { data: existingCustomers, error: existingCustomersError } = await supabase
     .from('customers')
-    .select('id, phone, email');
+    .select('id, phone, email')
+    .eq('is_deleted', false);
   if (existingCustomersError) {
     return NextResponse.json({ error: "Mevcut müşteri listesi alınamadı." }, { status: 500 });
   }
@@ -97,7 +98,7 @@ export async function POST(req: Request) {
             first_name: row.first_name.trim(),
             last_name: row.last_name.trim(),
             passport_no: row.passport_no || null,
-          }).eq('id', duplicate.id);
+          }).eq('id', duplicate.id).eq('is_deleted', false);
           
           if (updateErr) throw new Error(`Müşteri güncellenemedi: ${row.first_name} ${row.last_name}`);
           results.updated++;
