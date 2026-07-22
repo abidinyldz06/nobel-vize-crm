@@ -89,15 +89,17 @@ Ayrıntılı uygulama ve doğrulama kaydı:
 
 ### Faz 3.4 — Başvuru süreç panosu
 
-Durum: **Bekliyor**
+Durum: **Uygulama tamamlandı — production doğrulaması bekliyor (22 Temmuz 2026)**
 
-- Başvuru durumları için operasyon panosu
-- Personel, ülke, tarih ve gecikme filtreleri
-- Kontrollü durum geçişleri ve atomik audit kaydı
-- Müşteri edit ekranında ülke, vize türü, durum ve başvuru profil alanları
-- Müşteri detayında kanonik Başvuru Bilgileri bölümü
-- Müşteri etiketleri, renkli badge ve etiket filtresi
-- Dashboard pasaport uyarıları ve aylık operasyon istatistikleri
+- [x] **3.4.1 bitti:** başvuru süreç panosu, operasyon filtreleri ve kontrollü/atomik durum geçişleri
+- [x] **3.4.2 bitti:** müşteri edit/detay ekranlarında kanonik ülke, vize ve başvuru profil alanları
+- [x] **3.4.3 bitti:** RLS korumalı müşteri etiketleri, renkli badge ve etiket filtresi
+- [x] **3.4.4 bitti:** dashboard pasaport uyarıları ve aylık başvuru/onay/red/bekleyen/gelir istatistikleri
+- [x] **3.4.5 bitti:** telefon, WhatsApp, e-posta, atomik hızlı not ve birleşik müşteri timeline'ı
+- [ ] **3.4.6:** GitHub kalite kapıları, production migration, yayın ve canlı smoke doğrulaması
+
+Ayrıntılı uygulama ve doğrulama kaydı:
+`docs/PHASE_3_4_IMPLEMENTATION_REPORT.md`.
 
 ### Faz 3.5 — Müşteri iletişimi ve portal
 
@@ -106,8 +108,7 @@ Durum: **Bekliyor**
 - Yönetilebilir WhatsApp ve e-posta şablonları
 - İletişim geçmişi ve başarısız gönderim kaydı
 - Portalda başvuru, evrak, randevu ve ödeme özetinin iyileştirilmesi
-- Müşteri kartında telefon, WhatsApp, e-posta ve hızlı not eylemleri
-- Başvuru, evrak, ödeme, randevu, iletişim ve notları birleştiren timeline
+- Müşteri kartı hızlı eylemleri ve birleşik timeline Faz 3.4.5 kapsamında erkenden tamamlandı
 
 ### Faz 3.6 — KVKK ve veri yaşam döngüsü
 

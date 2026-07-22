@@ -20,7 +20,8 @@ export default async function CustomersPage() {
     .from('customers')
     .select(`
       id, first_name, last_name, phone, email, created_at, profile_score, assigned_staff_id,
-      applications (id, country, status, created_at)
+      applications (id, country, status, created_at),
+      customer_tags (tag:tags (id, name, color))
     `)
     .eq('is_deleted', false)
     .order('created_at', { ascending: false });
@@ -44,6 +45,7 @@ export default async function CustomersPage() {
       latest_application_id: latest?.id ?? null,
       country: latest?.country ?? null,
       status: latest?.status ?? null,
+      tags: customer.customer_tags.map(item => item.tag).filter(Boolean),
     };
   });
 

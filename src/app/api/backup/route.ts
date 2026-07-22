@@ -7,9 +7,11 @@ import type { Json } from "@/types/database";
 const TABLES_ORDER = [
   "tenants",
   "staff",
+  "tags",
   "countries",
   "country_visa_rules",
   "customers",
+  "customer_tags",
   "applications",
   "documents",
   "notes",
@@ -28,9 +30,11 @@ type BackupTable = typeof TABLES_ORDER[number];
 const TABLE_ORDER_COLUMNS: Record<BackupTable, string> = {
   tenants: "id",
   staff: "id",
+  tags: "id",
   countries: "id",
   country_visa_rules: "id",
   customers: "id",
+  customer_tags: "customer_id",
   applications: "id",
   documents: "id",
   notes: "id",

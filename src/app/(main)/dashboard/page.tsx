@@ -3,7 +3,8 @@ import { Users, FileText, Calendar, AlertCircle, CheckCircle2, Plus, ArrowRight,
 import Link from "next/link";
 import OverdueDocuments from "@/components/OverdueDocuments";
 import DashboardCharts from "@/components/DashboardCharts";
-import { sumExpectedRevenue, sumPayments, summarizeDocuments } from "@/lib/report-metrics";
+import { sumPayments } from "@/lib/report-metrics";
+import { passportExpiryState, summarizeMonthlyDashboard } from "@/lib/dashboard-metrics";
 import type { Tables } from "@/types/database";
 
 export const revalidate = 0;
@@ -29,9 +30,16 @@ export default async function Dashboard() {
   const appQuery = supabase.from('applications').select('id, status, country, total_fee, created_at, customer_id, customers!inner(id, first_name, last_name)').eq('customers.is_deleted', false);
   const activeAppsQuery = supabase.from('applications').select('id, customers!inner(id)', { count: 'exact', head: true }).eq('customers.is_deleted', false).not('status', 'in', '(onaylandi,reddedildi,kapandi)');
   const recentCustomerQuery = supabase.from('customers').select('id, first_name, last_name, created_at, assigned_staff_id').eq('is_deleted', false);
-  const todayAppsQuery = supabase.from('applications').select('id, country, status, customer_id, customers!inner(id)').eq('customers.is_deleted', false).gte('created_at', new Date().toISOString().split('T')[0]);
-  const monthlyAppsQuery = supabase.from('applications').select('total_fee, customer_id, customers!inner(id)').eq('customers.is_deleted', false);
+  const monthlyAppsQuery = supabase.from('applications').select('status, total_fee, created_at, customer_id, customers!inner(id)').eq('customers.is_deleted', false);
   const appointmentsQuery = supabase.from('applications').select('id, appointment_date, appointment_location, customer_id, customers!inner(id, first_name, last_name)').eq('customers.is_deleted', false).not('appointment_date', 'is', null).gte('appointment_date', new Date().toISOString()).order('appointment_date', { ascending: true }).limit(4);
+  const passportLimit = new Date();
+  passportLimit.setMonth(passportLimit.getMonth() + 6);
+  const passportWarningsQuery = supabase.from('customers')
+    .select('id, first_name, last_name, passport_no, passport_expiry, assigned_staff_id')
+    .eq('is_deleted', false)
+    .not('passport_expiry', 'is', null)
+    .lte('passport_expiry', passportLimit.toISOString().slice(0, 10))
+    .order('passport_expiry', { ascending: true });
 
   // Danışman: filter by assigned_staff_id on the customers table
   if (!isAdmin && staffId) {
@@ -39,9 +47,9 @@ export default async function Dashboard() {
     recentCustomerQuery.eq('assigned_staff_id', staffId);
     appQuery.eq('customers.assigned_staff_id', staffId);
     activeAppsQuery.eq('customers.assigned_staff_id', staffId);
-    todayAppsQuery.eq('customers.assigned_staff_id', staffId);
     monthlyAppsQuery.eq('customers.assigned_staff_id', staffId);
     appointmentsQuery.eq('customers.assigned_staff_id', staffId);
+    passportWarningsQuery.eq('assigned_staff_id', staffId);
   }
 
   const [
@@ -49,13 +57,13 @@ export default async function Dashboard() {
     { data: allApps },
     { count: activeApps },
     { data: recentCustomers },
-    { data: todayApps },
+    { data: passportWarnings },
   ] = await Promise.all([
     customerQuery,
     appQuery.order('created_at', { ascending: false }).limit(5),
     activeAppsQuery,
     recentCustomerQuery.order('created_at', { ascending: false }).limit(6),
-    todayAppsQuery,
+    passportWarningsQuery,
   ]);
 
   // Yeni Sorgular (Faz 2)
@@ -66,12 +74,9 @@ export default async function Dashboard() {
   monthlyAppsQuery.gte('created_at', startOfMonth.toISOString());
 
   const { data: monthlyApps } = await monthlyAppsQuery;
-  const expectedMonthlyRevenue = sumExpectedRevenue(monthlyApps ?? []);
-
   const { data: upcomingAppointments } = await appointmentsQuery;
 
-  // Documents and payments
-  let allDocs: Pick<Tables<'documents'>, 'status'>[] = [];
+  // Payment metrics
   let allPayments: Pick<Tables<'payments'>, 'amount' | 'status' | 'created_at'>[] = [];
   
   if (!isAdmin && staffId) {
@@ -79,26 +84,19 @@ export default async function Dashboard() {
     const { data: staffApps } = await supabase.from('applications').select('id, customers!inner(id)').eq('customers.is_deleted', false).eq('customers.assigned_staff_id', staffId);
     const appIds = staffApps?.map(a => a.id) || [];
     if (appIds.length > 0) {
-      const [{ data: d }, { data: p }] = await Promise.all([
-        supabase.from('documents').select('status').in('application_id', appIds),
-        supabase.from('payments').select('amount, status, created_at').in('application_id', appIds)
-      ]);
-      allDocs = d ?? [];
-      allPayments = p ?? [];
+      const { data: payments } = await supabase.from('payments').select('amount, status, created_at').in('application_id', appIds);
+      allPayments = payments ?? [];
     }
   } else {
-    const [{ data: d }, { data: p }] = await Promise.all([
-      supabase.from('documents').select('status'),
-      supabase.from('payments').select('amount, status, created_at')
-    ]);
-    allDocs = d ?? [];
-    allPayments = p ?? [];
+    const { data: payments } = await supabase.from('payments').select('amount, status, created_at');
+    allPayments = payments ?? [];
   }
-
-  const { pending: pendingDocs, completed: completedDocs } = summarizeDocuments(allDocs);
 
   // Payment metrics
   const pendingPayments = sumPayments(allPayments, 'bekliyor');
+  const monthlyStats = summarizeMonthlyDashboard(monthlyApps ?? [], allPayments, startOfMonth);
+  const expiredPassportCount = (passportWarnings ?? []).filter(customer => passportExpiryState(customer.passport_expiry!).expired).length;
+  const expiringPassportCount = (passportWarnings ?? []).length - expiredPassportCount;
 
   const today = new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -192,15 +190,15 @@ export default async function Dashboard() {
         </Link>
       </header>
 
-      {/* Stat Cards — 6 metrics */}
+      {/* Stat Cards — Faz 3.4 monthly metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         {[
           { label: "Toplam Müşteri",  value: totalCustomers ?? 0, icon: Users,         accent: "border-t-blue-500",    iconBg: "bg-blue-500/10",    iconColor: "text-blue-400",    href: "/customers" },
-          { label: "Aktif Başvuru",   value: activeApps ?? 0,     icon: FileText,       accent: "border-t-purple-500",  iconBg: "bg-purple-500/10",  iconColor: "text-purple-400",  href: "/customers" },
-          { label: "Evrak Bekliyor",  value: pendingDocs,         icon: AlertCircle,    accent: "border-t-amber-500",   iconBg: "bg-amber-500/10",   iconColor: "text-amber-400",   href: "/customers" },
-          { label: "Evrak Tamam",     value: completedDocs,       icon: CheckCircle2,   accent: "border-t-emerald-500", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400", href: "/customers" },
-          { label: "Aylık Beklenen",  value: `₺${(expectedMonthlyRevenue/1000).toFixed(0)}K`, icon: DollarSign, accent: "border-t-indigo-500", iconBg: "bg-indigo-500/10", iconColor: "text-indigo-400", href: "/reports" },
-          { label: "Bugünkü Başvuru", value: todayApps?.length ?? 0, icon: Calendar,   accent: "border-t-sky-500",     iconBg: "bg-sky-500/10",     iconColor: "text-sky-400",     href: "/appointments" },
+          { label: "Bu Ay Başvuru", value: monthlyStats.applications, icon: FileText, accent: "border-t-sky-500", iconBg: "bg-sky-500/10", iconColor: "text-sky-400", href: "/applications" },
+          { label: "Bu Ay Onaylanan", value: monthlyStats.approved, icon: CheckCircle2, accent: "border-t-emerald-500", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400", href: "/applications" },
+          { label: "Bu Ay Reddedilen", value: monthlyStats.rejected, icon: AlertCircle, accent: "border-t-red-500", iconBg: "bg-red-500/10", iconColor: "text-red-400", href: "/applications" },
+          { label: "Bekleyen Başvuru", value: activeApps ?? 0, icon: Calendar, accent: "border-t-purple-500", iconBg: "bg-purple-500/10", iconColor: "text-purple-400", href: "/applications" },
+          { label: "Bu Ay Gelir", value: `₺${monthlyStats.revenue.toLocaleString('tr-TR')}`, icon: DollarSign, accent: "border-t-indigo-500", iconBg: "bg-indigo-500/10", iconColor: "text-indigo-400", href: "/reports" },
         ].map((s, i) => (
           <Link key={i} href={s.href} className={`bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] border-t-2 ${s.accent} p-4 rounded-2xl shadow-lg hover:bg-slate-100 dark:bg-[#1a2232] transition-colors group`}>
             <div className={`w-8 h-8 ${s.iconBg} rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
@@ -210,6 +208,35 @@ export default async function Dashboard() {
             <p className="text-xs text-slate-500 mt-0.5 leading-tight">{s.label}</p>
           </Link>
         ))}
+      </div>
+
+      {/* Passport warnings */}
+      <div className="mb-6 overflow-hidden rounded-2xl border border-amber-500/20 bg-white shadow-lg dark:bg-[#0d1420]" data-testid="passport-warning-card">
+        <div className="flex flex-col gap-2 border-b border-slate-200 bg-amber-500/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-[#1f2937]">
+          <div>
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white"><AlertCircle className="h-4 w-4 text-amber-500" /> Pasaport Uyarıları</h2>
+            <p className="mt-1 text-xs text-slate-500">{expiringPassportCount} pasaport 6 ay içinde bitiyor{expiredPassportCount > 0 ? ` · ${expiredPassportCount} pasaportun süresi dolmuş` : ''}.</p>
+          </div>
+          <Link href="/customers" className="text-xs font-semibold text-amber-600 hover:text-amber-500">Müşterileri aç →</Link>
+        </div>
+        {(passportWarnings ?? []).length > 0 ? (
+          <div className="grid divide-y divide-slate-200 md:grid-cols-2 md:divide-x md:divide-y-0 dark:divide-[#1f2937]">
+            {(passportWarnings ?? []).slice(0, 8).map(customer => {
+              const state = passportExpiryState(customer.passport_expiry!);
+              return (
+                <Link key={customer.id} href={`/customers/${customer.id}`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-white/[0.02]">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{customer.first_name} {customer.last_name}</p>
+                    <p className="text-[10px] text-slate-500">{customer.passport_no || 'Pasaport no yok'}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${state.expired ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'}`}>
+                    {state.expired ? 'Süresi dolmuş' : `${state.days} gün kaldı`}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        ) : <p className="px-5 py-5 text-sm text-slate-500">Önümüzdeki 6 ay içinde pasaport uyarısı yok.</p>}
       </div>
 
       {/* Admin only: pending fee warning */}

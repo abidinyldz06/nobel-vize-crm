@@ -2,6 +2,25 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 3.4 Başvuru ve Müşteri Operasyonu
+
+### Başvuru yönetimi
+
+- Personel, ülke, tarih ve gecikme filtreli yatay süreç panosu eklendi.
+- Geçersiz aşama atlamaları veritabanında engellendi; durum, toplu durum ve randevu işlemleri atomik audit akışlarına taşındı.
+- Müşteri düzenleme ve detay ekranlarına ülke, vize türü, seyahat aracı, konaklama, meslek, çocuk ve uyruk alanları eklendi.
+
+### Müşteri deneyimi ve dashboard
+
+- VIP, Acil, Reddi Var ve Premium hazır etiketleri; renkli rozet ve etiket filtresi eklendi.
+- Telefon, WhatsApp, e-posta ve audit'li hızlı not eylemleri eklendi.
+- Başvuru, evrak, ödeme, randevu, iletişim ve notları birleştiren dikey timeline eklendi.
+- Altı aylık pasaport uyarıları ve aylık başvuru/onay/red/bekleyen/gerçekleşen gelir kartları eklendi.
+
+### Kalite
+
+- pgTAP, güvenlik, dashboard birim testleri ve birleşik Playwright kullanıcı akışı genişletildi.
+
 ## [Unreleased] — Acil Paket H2 Müşteri Arşivi
 
 ### Veri güvenliği

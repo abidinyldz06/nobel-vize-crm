@@ -1,7 +1,3 @@
-"use client"
-import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { useRouter } from "next/navigation";
 import { Check, Clock, Edit2, AlertCircle } from "lucide-react";
 
 // Full 8-step status flow as per spec
@@ -30,41 +26,16 @@ export const STATUS_CONFIG: Record<string, { label: string; color: string; bg: s
 };
 
 export default function StatusTimeline({
-  applicationId,
   currentStatus,
 }: {
-  applicationId: string;
   currentStatus: string;
 }) {
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
   // Only show first 6 main steps in the timeline bar (onaylandi/reddedildi shown separately)
   const mainSteps = STATUS_STEPS.slice(0, 6);
   
   const isFinalState = ['onaylandi', 'reddedildi', 'itiraz', 'kapandi'].includes(currentStatus);
   const currentIndex = mainSteps.findIndex(s => s.key === currentStatus);
   const progress = isFinalState ? 100 : Math.max(0, Math.min(100, (currentIndex / (mainSteps.length - 1)) * 100));
-
-  const updateStatus = async (newStatus: string) => {
-    if (newStatus === currentStatus) return;
-    setLoading(true);
-    
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.rpc("update_application_status_v1", {
-      p_application_id: applicationId,
-      p_status: newStatus,
-      p_rejection_reason: undefined,
-      p_action: `Durum güncellendi: ${STATUS_CONFIG[newStatus]?.label || newStatus}`,
-    });
-
-    if (!error) {
-      router.refresh();
-    } else {
-      alert("Durum güncellenirken hata: " + error.message);
-    }
-    setLoading(false);
-  };
 
   // Determine track color based on final state
   const trackColor = currentStatus === "reddedildi" ? "bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.5)]" :
@@ -131,12 +102,9 @@ export default function StatusTimeline({
             }
 
             return (
-              <button
+              <div
                 key={step.key}
-                onClick={() => updateStatus(step.key)}
-                disabled={loading}
-                title={`${step.short} olarak işaretle`}
-                className="flex flex-col items-center gap-2 group disabled:cursor-wait"
+                className="flex flex-col items-center gap-2"
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 border-2 ${circleColor}`}>
                   <Icon className={`w-3.5 h-3.5 ${isCurrent ? "text-slate-900 dark:text-white" : isDone ? "text-white" : "text-slate-600 group-hover:text-blue-400"}`} />
@@ -149,7 +117,7 @@ export default function StatusTimeline({
                     {badgeText}
                   </span>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
@@ -162,7 +130,7 @@ export default function StatusTimeline({
         </div>
       </div>
 
-      {/* Final outcome buttons — Onaylandı / Reddedildi / İtiraz / Kapandı */}
+      {/* Final outcome indicators — Onaylandı / Reddedildi / İtiraz / Kapandı */}
       <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-200 dark:border-[#1f2937]">
         <p className="text-[10px] text-slate-500 w-full mb-1">Sonuç:</p>
         {[
@@ -171,16 +139,14 @@ export default function StatusTimeline({
           { key: "itiraz",     label: "⚠ İtiraz",      cls: "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20" },
           { key: "kapandi",    label: "— Kapandı",     cls: "bg-slate-800/50 border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-700" },
         ].map(btn => (
-          <button
+          <span
             key={btn.key}
-            onClick={() => updateStatus(btn.key)}
-            disabled={loading}
-            className={`px-3 py-1 rounded-lg border text-[11px] font-semibold transition-all disabled:opacity-50 ${btn.cls} ${
+            className={`px-3 py-1 rounded-lg border text-[11px] font-semibold ${btn.cls} ${
               currentStatus === btn.key ? "ring-2 ring-white/20 scale-105" : ""
             }`}
           >
             {btn.label}
-          </button>
+          </span>
         ))}
       </div>
     </div>

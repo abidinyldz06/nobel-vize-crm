@@ -2,10 +2,11 @@ import { Edit, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import StatusTimeline from "@/components/StatusTimeline";
+import StatusUpdater from "@/components/StatusUpdater";
 import DocumentItem from "@/components/DocumentItem";
 import NotesPanel from "@/components/NotesPanel";
 import PaymentsPanel from "@/components/PaymentsPanel";
-import ActivityLog from "@/components/ActivityLog";
+import CustomerTimeline from "@/components/CustomerTimeline";
 import CommunicationPanel from "@/components/CommunicationPanel";
 import VisaHistoryPanel from "@/components/VisaHistoryPanel";
 import ProfileAnalysisButton from "@/components/ProfileAnalysisButton";
@@ -15,6 +16,13 @@ import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
 import WhatsAppTemplates from "@/components/WhatsAppTemplates";
 import CustomerActionMenu from "@/components/CustomerActionMenu";
 import PortalShareButton from "@/components/PortalShareButton";
+import {
+  ACCOMMODATION_OPTIONS,
+  NATIONALITY_OPTIONS,
+  OCCUPATION_OPTIONS,
+  TRAVEL_METHOD_OPTIONS,
+  optionLabel,
+} from "@/lib/application-profile";
 
 export const revalidate = 0;
 
@@ -201,8 +209,16 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
             )}
           </div>
 
-          {/* Activity Log */}
-          {activeApp && <ActivityLog logs={activityLogs ?? []} />}
+          {/* Unified activity timeline */}
+          {activeApp && (
+            <CustomerTimeline
+              logs={activityLogs ?? []}
+              notes={notes ?? []}
+              documents={documents ?? []}
+              payments={payments ?? []}
+              communications={communications ?? []}
+            />
+          )}
 
           {/* Notes */}
           {activeApp && <NotesPanel applicationId={activeApp.id} initialNotes={notes ?? []} />}
@@ -220,6 +236,31 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
         {/* RIGHT COLUMN */}
         <div className="lg:col-span-8 space-y-5">
 
+          {/* Application Details */}
+          {activeApp && (
+            <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg">
+              <div className="px-6 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a]">
+                <h2 className="text-slate-900 dark:text-white font-semibold">Başvuru Bilgileri</h2>
+              </div>
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-4 px-6 py-5 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  { label: 'Ülke', value: activeApp.country },
+                  { label: 'Vize Türü', value: VISA_TYPE_LABELS[activeApp.visa_type] || activeApp.visa_type },
+                  { label: 'Seyahat Aracı', value: optionLabel(TRAVEL_METHOD_OPTIONS, activeApp.travel_method) },
+                  { label: 'Konaklama', value: optionLabel(ACCOMMODATION_OPTIONS, activeApp.accommodation) },
+                  { label: 'Meslek', value: optionLabel(OCCUPATION_OPTIONS, activeApp.occupation) },
+                  { label: 'Çocuk', value: activeApp.with_children === null ? 'Belirtilmedi' : activeApp.with_children ? 'Var' : 'Yok' },
+                  { label: 'Uyruk', value: optionLabel(NATIONALITY_OPTIONS, activeApp.nationality) },
+                ].map(item => (
+                  <div key={item.label}>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{item.label}</dt>
+                    <dd className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-200">{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
           {/* Timeline */}
           {activeApp && (
             <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl p-6 shadow-lg">
@@ -234,7 +275,10 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   currentStaffId={customer.assigned_staff_id ?? undefined}
                 />
               </div>
-              <StatusTimeline applicationId={activeApp.id} currentStatus={activeApp.status || 'profil_analizi'} />
+              <div className="mb-4 flex justify-end">
+                <StatusUpdater applicationId={activeApp.id} currentStatus={activeApp.status || 'profil_analizi'} />
+              </div>
+              <StatusTimeline currentStatus={activeApp.status || 'profil_analizi'} />
             </div>
           )}
 

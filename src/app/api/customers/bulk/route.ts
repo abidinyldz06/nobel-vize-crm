@@ -66,17 +66,15 @@ export async function POST(req: Request) {
     if (!applicationIds.every(id => typeof id === "string") || typeof value !== "string" || !ALLOWED_STATUSES.has(value)) {
       return NextResponse.json({ error: "Geçersiz başvuru durumu" }, { status: 400 });
     }
-    const { error } = await supabase.from('applications').update({ status: value }).in('id', applicationIds);
+    if (value === "reddedildi") {
+      return NextResponse.json({ error: "Ret sebebi gerektiği için reddetme işlemini başvuru detayından yapın." }, { status: 400 });
+    }
+    const { error } = await supabase.rpc('bulk_update_application_status_v1', {
+      p_application_ids: applicationIds,
+      p_status: value,
+      p_action: `Başvuru durumu toplu güncellendi: ${value}`,
+    });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    
-    // Activity log
-    const logs = customerIds.map(cId => ({
-      action: `Durum toplu olarak güncellendi: ${value}`,
-      type: 'status',
-      customer_id: cId,
-      performed_by
-    }));
-    await supabase.from('activity_log').insert(logs);
   }
   else if (action === "assign_staff") {
     if (staff.role !== "admin") {

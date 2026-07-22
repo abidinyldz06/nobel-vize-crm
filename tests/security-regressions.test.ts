@@ -86,6 +86,37 @@ describe("security regression guards", () => {
     assert.match(migration, /task_assignee_customer_mismatch/);
     assert.match(migration, /REVOKE INSERT, UPDATE, DELETE ON TABLE public\.tasks, public\.notifications FROM authenticated/);
   });
+
+  it("keeps application status changes behind controlled audited workflows", async () => {
+    const [statusRoute, bulkRoute, appointmentAction, migration] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/applications/status/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/customers/bulk/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/actions/update-customer.ts"), "utf8"),
+      readFile(path.join(projectRoot, "supabase/migrations/202607220003_phase34_application_workflow.sql"), "utf8"),
+    ]);
+
+    assert.match(statusRoute, /update_application_status_v1/);
+    assert.match(bulkRoute, /bulk_update_application_status_v1/);
+    assert.match(appointmentAction, /set_application_appointment_v1/);
+    assert.doesNotMatch(bulkRoute, /\.from\(['"]applications['"]\)[\s\S]{0,200}?\.update\(/);
+    assert.doesNotMatch(appointmentAction, /\.from\(['"]applications['"]\)[\s\S]{0,200}?\.update\(/);
+    assert.match(migration, /application_status_transition_allowed/);
+    assert.match(migration, /REVOKE UPDATE ON TABLE public\.applications FROM authenticated/);
+    assert.match(migration, /INSERT INTO public\.activity_log/);
+  });
+
+  it("keeps customer tags inside backup and atomic restore coverage", async () => {
+    const [backupRoute, migration] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/backup/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "supabase/migrations/202607220006_phase34_tag_backup.sql"), "utf8"),
+    ]);
+
+    assert.match(backupRoute, /"tags"/);
+    assert.match(backupRoute, /"customer_tags"/);
+    assert.match(migration, /INSERT INTO public\.tags/);
+    assert.match(migration, /INSERT INTO public\.customer_tags/);
+    assert.match(migration, /backup_tags_required_for_customer_tags/);
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {

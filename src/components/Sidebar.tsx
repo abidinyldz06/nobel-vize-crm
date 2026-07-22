@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Calendar, Settings, LogOut, Globe, BarChart3, UserCog, ListTodo } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, Settings, LogOut, Globe, BarChart3, UserCog, ListTodo, Columns3 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import type { CurrentStaffProfile } from "@/types/staff-profile";
 
@@ -24,6 +24,7 @@ export default function Sidebar({
   const baseLinks = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/customers", icon: Users, label: "Müşteriler" },
+    { href: "/applications", icon: Columns3, label: "Başvurular" },
     { href: "/countries", icon: Globe, label: "Ülke & Evraklar" },
     { href: "/appointments", icon: Calendar, label: "Randevular" },
     { href: "/tasks", icon: ListTodo, label: "Görevler" },

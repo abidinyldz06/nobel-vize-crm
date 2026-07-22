@@ -55,6 +55,34 @@ export async function createCustomerWithApplication(formData: FormData) {
       service_fee: serviceFeeStr || null,
     })
     customerId = result.customer_id
+    if (result.application_id) {
+      const { error: profileError } = await supabase.rpc('update_customer_application_v1', {
+        p_customer_id: result.customer_id,
+        p_application_id: result.application_id,
+        p_payload: {
+          first_name: firstName,
+          last_name: lastName,
+          phone,
+          email: email || null,
+          financial_status: 'orta',
+          profile_score: 30,
+          passport_no: passportNo || null,
+          passport_expiry: passportExpiry || null,
+          passport_issuing_country: passportIssuingCountry,
+          notes: consultantNote || null,
+          assigned_staff_id: finalAssignedStaffId || null,
+          country_id: countryId,
+          visa_type: visaType,
+          status: 'profil_analizi',
+          travel_method: travelMethod || null,
+          accommodation: accommodation || null,
+          occupation: occupation || null,
+          with_children: withChildren || null,
+          nationality: nationality || null,
+        },
+      })
+      if (profileError) throw profileError
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Müşteri oluşturulamadı'
     console.error("Atomic customer workflow error:", message)
