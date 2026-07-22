@@ -327,10 +327,12 @@ export type Database = {
         Row: {
           assigned_staff_id: string | null
           created_at: string
+          deleted_at: string | null
           email: string | null
           financial_status: string | null
           first_name: string
           id: string
+          is_deleted: boolean
           last_name: string
           monthly_income: number | null
           notes: string | null
@@ -345,10 +347,12 @@ export type Database = {
         Insert: {
           assigned_staff_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           financial_status?: string | null
           first_name: string
           id?: string
+          is_deleted?: boolean
           last_name: string
           monthly_income?: number | null
           notes?: string | null
@@ -363,10 +367,12 @@ export type Database = {
         Update: {
           assigned_staff_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           financial_status?: string | null
           first_name?: string
           id?: string
+          is_deleted?: boolean
           last_name?: string
           monthly_income?: number | null
           notes?: string | null
@@ -738,6 +744,10 @@ export type Database = {
       }
     }
     Functions: {
+      archive_customers_v1: {
+        Args: { p_customer_ids: string[] }
+        Returns: number
+      }
       can_access_application: {
         Args: { target_application_id: string }
         Returns: boolean
@@ -756,7 +766,28 @@ export type Database = {
       }
       current_staff_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      list_archived_customers_v1: {
+        Args: never
+        Returns: {
+          assigned_staff_id: string
+          deleted_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+          purge_eligible: boolean
+        }[]
+      }
+      purge_deleted_customers_v1: {
+        Args: { p_customer_ids: string[] }
+        Returns: number
+      }
       restore_backup_v2: { Args: { p_backup: Json }; Returns: Json }
+      restore_customers_v1: {
+        Args: { p_customer_ids: string[] }
+        Returns: number
+      }
       storage_document_id: { Args: { object_name: string }; Returns: string }
       update_application_status_v1: {
         Args: {

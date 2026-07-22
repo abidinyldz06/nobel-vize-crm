@@ -3,7 +3,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET search_path TO public, extensions;
 
-SELECT plan(36);
+SELECT plan(55);
 
 SELECT has_table('public', 'country_visa_rules', 'canonical visa rules table exists');
 SELECT has_function('public', 'create_customer_application_v1', ARRAY['jsonb'], 'atomic customer workflow exists');
@@ -12,6 +12,12 @@ SELECT has_function('public', 'restore_backup_v2', ARRAY['jsonb'], 'atomic resto
 SELECT ok(to_regclass('public.uq_staff_user_id') IS NOT NULL, 'staff auth user uniqueness is enforced');
 SELECT ok(to_regclass('public.uq_country_visa_rules_match') IS NOT NULL, 'visa rule match uniqueness is enforced');
 SELECT ok(to_regclass('public.tenants_single_company_idx') IS NOT NULL, 'single company row uniqueness is enforced');
+SELECT has_column('public', 'customers', 'is_deleted', 'customers have a soft-delete flag');
+SELECT has_column('public', 'customers', 'deleted_at', 'customers record archive time');
+SELECT has_function('public', 'archive_customers_v1', ARRAY['uuid[]'], 'atomic customer archive exists');
+SELECT has_function('public', 'restore_customers_v1', ARRAY['uuid[]'], 'atomic customer restore exists');
+SELECT has_function('public', 'list_archived_customers_v1', ARRAY[]::TEXT[], 'admin archive listing exists');
+SELECT has_function('public', 'purge_deleted_customers_v1', ARRAY['uuid[]'], 'controlled permanent delete exists');
 SELECT results_eq(
   $$ SELECT count(*)::BIGINT FROM public.tenants $$,
   $$ VALUES (1::BIGINT) $$,
@@ -134,6 +140,41 @@ SELECT results_eq(
   'one customer was created'
 );
 SELECT results_eq(
+  $$ SELECT public.archive_customers_v1(ARRAY[(SELECT id FROM public.customers WHERE email = 'ayse@example.com')]::UUID[]) $$,
+  $$ VALUES (1) $$,
+  'admin archives a customer atomically'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.customers WHERE email = 'ayse@example.com' $$,
+  $$ VALUES (0::BIGINT) $$,
+  'archived customer is hidden by normal RLS reads'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.list_archived_customers_v1() WHERE email = 'ayse@example.com' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'admin archive listing returns the archived customer'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE action = 'Müşteri silindi: Ayşe Yılmaz — Test Admin' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'customer archive writes the required named audit entry'
+);
+SELECT results_eq(
+  $$ SELECT public.restore_customers_v1(ARRAY[(SELECT id FROM public.list_archived_customers_v1() WHERE email = 'ayse@example.com')]::UUID[]) $$,
+  $$ VALUES (1) $$,
+  'admin restores an archived customer'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.customers WHERE email = 'ayse@example.com' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'restored customer returns to normal RLS reads'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE action = 'Müşteri geri yüklendi: Ayşe Yılmaz — Test Admin' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'customer restore writes a named audit entry'
+);
+SELECT results_eq(
   $$ SELECT count(*)::BIGINT FROM public.customers $$,
   $$ VALUES (1::BIGINT) $$,
   'linked admin can read customers through RLS'
@@ -149,7 +190,7 @@ SELECT results_eq(
   'canonical rule produced its document'
 );
 SELECT results_eq(
-  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE performed_by_staff_id = '10000000-0000-0000-0000-000000000001' $$,
+  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE performed_by_staff_id = '10000000-0000-0000-0000-000000000001' AND action LIKE 'Yeni başvuru oluşturuldu:%' $$,
   $$ VALUES (1::BIGINT) $$,
   'activity actor is stored as a staff foreign key'
 );
@@ -197,6 +238,90 @@ SELECT results_eq(
   $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE action = 'Test durum değişikliği' $$,
   $$ VALUES (1::BIGINT) $$,
   'status change created its activity log'
+);
+
+RESET ROLE;
+INSERT INTO auth.users (id, email, role, aud, email_confirmed_at)
+VALUES (
+  '20000000-0000-0000-0000-000000000002',
+  'consultant@example.com',
+  'authenticated',
+  'authenticated',
+  now()
+);
+INSERT INTO public.staff (id, user_id, full_name, email, role, is_active)
+VALUES (
+  '10000000-0000-0000-0000-000000000002',
+  '20000000-0000-0000-0000-000000000002',
+  'Test Consultant',
+  'consultant@example.com',
+  'consultant',
+  true
+);
+SELECT set_config(
+  'request.jwt.claims',
+  '{"sub":"20000000-0000-0000-0000-000000000002","role":"authenticated"}',
+  true
+);
+SET LOCAL ROLE authenticated;
+SELECT throws_ok(
+  $$ SELECT public.archive_customers_v1(ARRAY['10000000-0000-0000-0000-000000000099']::UUID[]) $$,
+  '42501',
+  'admin_required',
+  'consultant cannot archive customers'
+);
+
+RESET ROLE;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"sub":"20000000-0000-0000-0000-000000000001","role":"authenticated"}',
+  true
+);
+SET LOCAL ROLE authenticated;
+INSERT INTO public.customers (id, first_name, last_name, phone, email, assigned_staff_id)
+VALUES (
+  '50000000-0000-0000-0000-000000000002',
+  'Kalıcı',
+  'Silme',
+  '05550000002',
+  'purge@example.com',
+  '10000000-0000-0000-0000-000000000001'
+);
+SELECT results_eq(
+  $$ SELECT public.archive_customers_v1(ARRAY['50000000-0000-0000-0000-000000000002']::UUID[]) $$,
+  $$ VALUES (1) $$,
+  'purge candidate first moves to archive'
+);
+SELECT results_eq(
+  $$ SELECT public.purge_deleted_customers_v1(ARRAY['50000000-0000-0000-0000-000000000002']::UUID[]) $$,
+  $$ VALUES (0) $$,
+  'customer cannot be permanently deleted before 30 days'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.list_archived_customers_v1() WHERE id = '50000000-0000-0000-0000-000000000002' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'young archive record remains available'
+);
+
+RESET ROLE;
+UPDATE public.customers
+SET deleted_at = now() - interval '31 days'
+WHERE id = '50000000-0000-0000-0000-000000000002';
+SELECT set_config(
+  'request.jwt.claims',
+  '{"sub":"20000000-0000-0000-0000-000000000001","role":"authenticated"}',
+  true
+);
+SET LOCAL ROLE authenticated;
+SELECT results_eq(
+  $$ SELECT public.purge_deleted_customers_v1(ARRAY['50000000-0000-0000-0000-000000000002']::UUID[]) $$,
+  $$ VALUES (1) $$,
+  'admin permanently deletes an archive record after 30 days'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE customer_id IS NULL AND action = 'Müşteri kalıcı silindi: Kalıcı Silme — Test Admin' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'permanent delete leaves a non-cascading audit entry'
 );
 
 RESET ROLE;

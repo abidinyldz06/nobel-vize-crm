@@ -54,6 +54,21 @@ describe("security regression guards", () => {
       assert.doesNotMatch(source, /!staffRecord\s*\|\|\s*staffRecord\.role\s*===\s*['"]admin['"]/, sourceFile);
     }
   });
+
+  it("keeps customer deletion behind the admin-only archive workflow", async () => {
+    const [actionMenu, bulkRoute, migration] = await Promise.all([
+      readFile(path.join(projectRoot, "src/components/CustomerActionMenu.tsx"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/customers/bulk/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "supabase/migrations/202607220001_customer_soft_delete.sql"), "utf8"),
+    ]);
+
+    assert.doesNotMatch(actionMenu, /\.from\(['"]customers['"]\)\.delete\(/);
+    assert.doesNotMatch(bulkRoute, /\.from\(['"]customers['"]\)\.delete\(/);
+    assert.match(actionMenu, /archive_customers_v1/);
+    assert.match(bulkRoute, /archive_customers_v1/);
+    assert.match(migration, /IF NOT public\.is_admin\(\) THEN/);
+    assert.match(migration, /Müşteri silindi:/);
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {

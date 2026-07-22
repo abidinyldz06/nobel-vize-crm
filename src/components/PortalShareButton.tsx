@@ -50,7 +50,8 @@ export default function PortalShareButton({ customer }: PortalShareButtonProps) 
       const { error } = await supabase
         .from('customers')
         .update({ portal_token: newToken })
-        .eq('id', customer.id);
+        .eq('id', customer.id)
+        .eq('is_deleted', false);
         
       if (error) throw error;
       

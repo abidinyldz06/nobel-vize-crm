@@ -15,7 +15,8 @@ export default async function StaffPage() {
   // Get customer count per staff
   const { data: customerCounts } = await supabase
     .from('customers')
-    .select('assigned_staff_id');
+    .select('assigned_staff_id')
+    .eq('is_deleted', false);
 
   const countMap: Record<string, number> = {};
   customerCounts?.forEach((customer) => {

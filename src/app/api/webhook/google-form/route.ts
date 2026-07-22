@@ -128,6 +128,7 @@ export async function POST(request: Request) {
       .from('customers')
       .select('id')
       .eq('phone', normalizedPhone)
+      .eq('is_deleted', false)
       .limit(1);
 
     if (!searchError && (!existingCustomers || existingCustomers.length === 0) && normalizedEmail) {
@@ -135,6 +136,7 @@ export async function POST(request: Request) {
         .from('customers')
         .select('id')
         .eq('email', normalizedEmail)
+        .eq('is_deleted', false)
         .limit(1);
       existingCustomers = emailResult.data;
       searchError = emailResult.error;

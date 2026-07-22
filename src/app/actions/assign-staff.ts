@@ -9,6 +9,7 @@ export async function assignStaff(customerId: string, staffId: string | null) {
     .from('customers')
     .update({ assigned_staff_id: staffId })
     .eq('id', customerId)
+    .eq('is_deleted', false)
 
   if (error) {
     return { error: "Danışman atanırken hata oluştu: " + error.message }

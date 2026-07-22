@@ -38,6 +38,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
     .from('customers')
     .select('id, first_name, last_name')
     .eq('portal_token', token)
+    .eq('is_deleted', false)
     .single();
   
   if (!customer) {

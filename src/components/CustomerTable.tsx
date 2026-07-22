@@ -2,7 +2,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, Filter, Clock, CheckCircle2, AlertCircle, FileText, Calendar, Loader, XCircle, Trash2, MessageCircle, RefreshCw, X } from "lucide-react";
+import { Search, Filter, Clock, CheckCircle2, AlertCircle, FileText, Calendar, Loader, XCircle, Archive, MessageCircle, RefreshCw, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import CustomerActionMenu from "./CustomerActionMenu";
 import { toast } from "sonner";
@@ -78,7 +78,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
     }
   };
 
-  const handleBulkAction = async (action: 'update_status' | 'assign_staff' | 'delete', value?: string) => {
+  const handleBulkAction = async (action: 'update_status' | 'assign_staff' | 'archive', value?: string) => {
     if (selected.length === 0) return;
     
     setIsProcessing(true);
@@ -196,7 +196,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                 disabled={isProcessing}
                 className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-xs font-bold transition-colors whitespace-nowrap"
               >
-                <Trash2 className="w-4 h-4" /> Sil
+                <Archive className="w-4 h-4" /> Arşivle
               </button>
             )}
 
@@ -216,23 +216,23 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-[#0d1420] w-full max-w-sm rounded-2xl shadow-xl border border-slate-200 dark:border-[#1f2937] p-6 text-center">
             <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-8 h-8" />
+              <Archive className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Seçili Müşterileri Sil</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Seçili Müşterileri Arşivle</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-              Seçtiğiniz <strong>{selected.length}</strong> müşteri kalıcı olarak silinecektir. Bu müşterilere ait tüm başvuru, evrak ve ödeme kayıtları da geri döndürülemez şekilde silinir. Onaylıyor musunuz?
+              Seçtiğiniz <strong>{selected.length}</strong> müşteri aktif listelerden kaldırılarak Arşiv&apos;e taşınacaktır. İlişkili kayıtlar korunur. Onaylıyor musunuz?
             </p>
             <div className="flex gap-3">
               <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-2.5 rounded-xl font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-[#1a2232] hover:bg-slate-200 dark:hover:bg-[#1f2937] transition-colors">
                 İptal
               </button>
               <button 
-                onClick={() => handleBulkAction('delete')} 
+                onClick={() => handleBulkAction('archive')}
                 disabled={isProcessing}
                 className="flex-1 py-2.5 rounded-xl font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
               >
-                {isProcessing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                Evet, Sil
+                {isProcessing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Archive className="w-4 h-4" />}
+                Evet, Arşivle
               </button>
             </div>
           </div>

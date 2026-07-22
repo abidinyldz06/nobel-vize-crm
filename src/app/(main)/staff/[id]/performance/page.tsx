@@ -22,6 +22,7 @@ export default async function StaffPerformanceDetail({ params }: { params: Promi
   const { data: customers } = await supabase
     .from('customers')
     .select('id, first_name, last_name, created_at')
+    .eq('is_deleted', false)
     .eq('assigned_staff_id', id)
     .order('created_at', { ascending: false });
 

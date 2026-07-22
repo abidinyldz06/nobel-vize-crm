@@ -58,6 +58,7 @@ export async function updateCustomer(formData: FormData) {
     .from('customers')
     .update(updateData)
     .eq('id', id)
+    .eq('is_deleted', false)
 
   if (error) {
     console.error("Update error:", error.message)
@@ -128,6 +129,7 @@ export async function checkAppointmentDensity(dateStr: string, location: string)
   const { data, error } = await supabase
     .from('applications')
     .select('id, appointment_date, customers!inner(first_name, last_name)')
+    .eq('customers.is_deleted', false)
     .not('appointment_date', 'is', null)
     .gte('appointment_date', startOfDay.toISOString())
     .lte('appointment_date', endOfDay.toISOString())

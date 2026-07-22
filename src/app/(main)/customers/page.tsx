@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Users } from "lucide-react";
+import { Archive, Plus, Users } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import CustomerTable from "@/components/CustomerTable";
 import ExportButton from "@/components/ExportButton";
@@ -22,6 +22,7 @@ export default async function CustomersPage() {
       id, first_name, last_name, phone, email, created_at, profile_score, assigned_staff_id,
       applications (id, country, status, created_at)
     `)
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (!isAdmin && staffId) {
@@ -63,6 +64,11 @@ export default async function CustomersPage() {
           <p className="text-slate-500 text-xs mt-0.5">Sistemdeki tüm müşteriler ve başvuru durumları.</p>
         </div>
         <div className="flex items-center gap-3">
+          {isAdmin && (
+            <Link href="/customers/archive" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:border-[#1f2937] dark:bg-[#0d1420] dark:text-slate-300 dark:hover:bg-[#1a2232]">
+              <Archive className="h-4 w-4 text-amber-500" /> Arşiv
+            </Link>
+          )}
           <ExportButton data={flat} />
           <Link href="/customers/new" className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30">
             <Plus className="w-4 h-4" />
