@@ -13,7 +13,7 @@ import ProfileAnalysisButton from "@/components/ProfileAnalysisButton";
 import PdfExportButton from "@/components/PdfExportButton";
 import FamilyMembersPanel from "@/components/FamilyMembersPanel";
 import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
-import WhatsAppTemplates from "@/components/WhatsAppTemplates";
+import MessageComposer from "@/components/MessageComposer";
 import CustomerActionMenu from "@/components/CustomerActionMenu";
 import PortalShareButton from "@/components/PortalShareButton";
 import {
@@ -57,6 +57,11 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     .order('created_at', { ascending: false });
 
   const activeApp = applications?.[0];
+
+  const [{ data: messageTemplates }, { data: company }] = await Promise.all([
+    supabase.from('message_templates').select('*').eq('is_active', true).order('channel').order('name'),
+    supabase.from('tenants').select('company_name').single(),
+  ]);
 
   let documents = null;
   let notes = null;
@@ -125,7 +130,9 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   first_name: customer.first_name,
                   last_name: customer.last_name,
                   phone: customer.phone,
-                  portal_token: customer.portal_token
+                  portal_token: customer.portal_token,
+                  portal_token_expires_at: customer.portal_token_expires_at,
+                  portal_access_enabled: customer.portal_access_enabled,
                 }} />
                 <PdfExportButton />
                 <ProfileAnalysisButton customerId={customer.id} currentScore={customer.profile_score || 0} />
@@ -328,20 +335,10 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                 )}
               </div>
 
-              {/* WhatsApp Mesaj Şablonları */}
-              {customer.phone && (
+              {/* Yönetilebilir WhatsApp / e-posta mesaj şablonları */}
+              {activeApp && company && (
                 <div className="px-4 py-3 border-t border-slate-200 dark:border-[#1f2937] flex flex-wrap gap-2">
-                  <WhatsAppTemplates customer={customer} activeApp={activeApp} documents={documents || []} payments={payments || []} />
-                  {customer.email && (
-                    <a
-                      href={`mailto:${customer.email}?subject=${encodeURIComponent(`${activeApp?.country || ''} Vize Başvurusu — Evrak Listesi`)}&body=${encodeURIComponent(
-                        `Merhaba ${customer.first_name} Bey/Hanım,\n\n${activeApp?.country || ''} vize başvurunuz için gereken evraklar:\n\n${(documents || []).map((document, index) => `${index + 1}. ${document.document_type} - ${document.status === 'onaylandi' ? 'Tamamlandı ✓' : 'Bekleniyor'}`).join('\n')}\n\nSaygılarımızla,\nNobel Vize`
-                      )}`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-[11px] font-semibold rounded-lg transition-all"
-                    >
-                      ✉️ E-posta ile Gönder
-                    </a>
-                  )}
+                  <MessageComposer customer={customer} application={activeApp} documents={documents || []} payments={payments || []} templates={messageTemplates ?? []} company={company} />
                 </div>
               )}
             </div>

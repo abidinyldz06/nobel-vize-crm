@@ -7,6 +7,7 @@ import type { Json } from "@/types/database";
 const TABLES_ORDER = [
   "tenants",
   "staff",
+  "message_templates",
   "tags",
   "countries",
   "country_visa_rules",
@@ -30,6 +31,7 @@ type BackupTable = typeof TABLES_ORDER[number];
 const TABLE_ORDER_COLUMNS: Record<BackupTable, string> = {
   tenants: "id",
   staff: "id",
+  message_templates: "id",
   tags: "id",
   countries: "id",
   country_visa_rules: "id",
@@ -60,8 +62,16 @@ interface BackupV2 {
     included: false;
     note: string;
   };
-  tables: Record<BackupTable, unknown[]>;
+  tables: Record<string, unknown[]>;
 }
+
+const OPTIONAL_V2_TABLES = new Set<BackupTable>([
+  "message_templates",
+  "tags",
+  "customer_tags",
+  "tasks",
+  "notifications",
+]);
 
 function isBackupV2(value: unknown): value is BackupV2 {
   if (!value || typeof value !== "object") return false;
@@ -69,7 +79,8 @@ function isBackupV2(value: unknown): value is BackupV2 {
   if (backup.format !== "nobel-vize-crm-backup" || backup.version !== "2.0") return false;
   if (!backup.tables || typeof backup.tables !== "object" || Array.isArray(backup.tables)) return false;
   const tables = backup.tables as Record<string, unknown>;
-  return TABLES_ORDER.every(table => Array.isArray(tables[table]));
+  return TABLES_ORDER.every(table => OPTIONAL_V2_TABLES.has(table) || Array.isArray(tables[table]))
+    && TABLES_ORDER.every(table => tables[table] === undefined || Array.isArray(tables[table]));
 }
 
 async function exportTable(table: BackupTable): Promise<unknown[]> {
@@ -113,7 +124,7 @@ export async function GET() {
         included: false,
         note: "Belge metadata kayitlari dahildir; storage dosya binary'leri ayri yedeklenmelidir.",
       },
-      tables: Object.fromEntries(tableEntries) as Record<BackupTable, unknown[]>,
+      tables: Object.fromEntries(tableEntries) as Record<string, unknown[]>,
     };
 
     return new NextResponse(JSON.stringify(backup, null, 2), {

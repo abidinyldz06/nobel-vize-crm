@@ -1,19 +1,21 @@
 "use client"
 import { useState } from "react";
-import { Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database } from "lucide-react";
+import { Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database, MessagesSquare } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import AuditLog from "@/components/AuditLog";
 import BackupPanel from "@/components/BackupPanel";
 import type { Tables, TablesUpdate } from "@/types/database";
+import MessageTemplatesSettings from "@/components/MessageTemplatesSettings";
 
 const TABS = [
   { id: "company", label: "Şirket Bilgileri", icon: Building2 },
+  { id: "messages", label: "Mesaj Şablonları", icon: MessagesSquare },
   { id: "security", label: "Güvenlik", icon: Shield },
   { id: "audit", label: "Sistem Log", icon: ClipboardList },
   { id: "backup", label: "Veri Yedekleme", icon: Database },
 ];
 
-export default function SettingsClient({ company }: { company: Tables<'tenants'> }) {
+export default function SettingsClient({ company, messageTemplates }: { company: Tables<'tenants'>; messageTemplates: Tables<'message_templates'>[] }) {
   const supabase = createSupabaseBrowserClient();
   const [activeTab, setActiveTab] = useState("company");
   const [saving, setSaving] = useState(false);
@@ -230,13 +232,17 @@ export default function SettingsClient({ company }: { company: Tables<'tenants'>
           <AuditLog />
         )}
 
+        {activeTab === "messages" && (
+          <MessageTemplatesSettings initialTemplates={messageTemplates} />
+        )}
+
         {/* Backup Tab */}
         {activeTab === "backup" && (
           <BackupPanel />
         )}
 
         {/* Save Button */}
-        {activeTab !== "audit" && activeTab !== "backup" && (
+        {activeTab !== "audit" && activeTab !== "backup" && activeTab !== "messages" && (
           <div className="flex justify-end pt-2">
           <button
             onClick={handleSave}

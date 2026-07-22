@@ -2,6 +2,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import { Check, Clock, AlertCircle, Calendar, FileText, CreditCard, MapPin, Phone, MessageCircle, CheckCircle2, Globe, Mail } from "lucide-react";
 import PrintButton from "@/components/Portal/PrintButton";
+import { APPLICATION_STATUS_META, isApplicationStatus } from "@/lib/application-status";
 
 export const revalidate = 0;
 
@@ -36,9 +37,11 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
   const supabase = createSupabaseAdminClient();
   const { data: customer } = await supabase
     .from('customers')
-    .select('id, first_name, last_name')
+    .select('id, first_name, last_name, portal_access_enabled, portal_token_expires_at')
     .eq('portal_token', token)
     .eq('is_deleted', false)
+    .eq('portal_access_enabled', true)
+    .gt('portal_token_expires_at', new Date().toISOString())
     .single();
   
   if (!customer) {
@@ -52,6 +55,13 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
       </div>
     );
   }
+
+  await supabase.from('customers').update({ portal_last_accessed_at: new Date().toISOString() }).eq('id', customer.id);
+
+  const { data: company } = await supabase
+    .from('tenants')
+    .select('company_name, email, phone')
+    .single();
   
   // GÜVENLİK: Sadece gerekli başvuru bilgileri çekilir
   const { data: applications } = await supabase
@@ -61,6 +71,11 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
     .order('created_at', { ascending: false });
     
   const activeApp = applications?.[0];
+  const companyName = company?.company_name || 'Nobel Vize';
+  const companyPhone = company?.phone || '';
+  const companyEmail = company?.email || '';
+  const phoneDigits = companyPhone.replace(/\D/g, '');
+  const whatsappPhone = phoneDigits.startsWith('90') ? phoneDigits : phoneDigits.startsWith('0') ? `9${phoneDigits}` : `90${phoneDigits}`;
 
   let documents: PortalDocument[] | null = null;
   let payments: PortalPayment[] | null = null;
@@ -108,7 +123,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                 <Globe className="w-6 h-6 text-white print:text-blue-600" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white tracking-tight print:text-slate-900">Nobel Vize</h1>
+                <h1 className="text-xl font-bold text-white tracking-tight print:text-slate-900">{companyName}</h1>
                 <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-wider print:text-slate-500">Müşteri Portalı</p>
               </div>
             </div>
@@ -350,6 +365,25 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
               </div>
             </div>
 
+            {applications && applications.length > 1 && (
+              <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm dark:border-[#1f2937] dark:bg-[#0d1420] md:p-8" data-testid="portal-application-history">
+                <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">Başvuru Geçmişi</h2>
+                <div className="divide-y divide-slate-200 dark:divide-[#1f2937]">
+                  {applications.map(application => (
+                    <div key={application.id} className="flex items-center justify-between gap-4 py-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{application.country} · {VISA_TYPE_LABELS[application.visa_type] || application.visa_type}</p>
+                        <p className="mt-0.5 text-xs text-slate-500">{new Date(application.created_at).toLocaleDateString('tr-TR')}</p>
+                      </div>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold text-slate-600 dark:bg-[#1a2232] dark:text-slate-300">
+                        {isApplicationStatus(application.status) ? APPLICATION_STATUS_META[application.status].label : application.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </>
         ) : (
           <div className="bg-white dark:bg-[#0d1420] p-12 rounded-[32px] shadow-sm border border-slate-200 dark:border-[#1f2937] text-center">
@@ -370,21 +404,21 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
             <p className="text-slate-400 text-sm font-medium mb-8 max-w-sm mx-auto leading-relaxed print:hidden">Vize sürecinizle ilgili aklınıza takılan her şey için bize doğrudan ulaşabilirsiniz.</p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto print:hidden">
-              <a href="tel:+908500000000" className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all text-sm font-bold w-full backdrop-blur-md">
+              {companyPhone && <a href={`tel:${companyPhone}`} className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all text-sm font-bold w-full backdrop-blur-md">
                 <Phone className="w-4 h-4 text-blue-400" /> Bizi Arayın
-              </a>
-              <a href="https://wa.me/908500000000" target="_blank" className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/20 text-[#25D366] rounded-2xl transition-all text-sm font-bold w-full backdrop-blur-md">
+              </a>}
+              {companyPhone && <a href={`https://wa.me/${whatsappPhone}`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/20 text-[#25D366] rounded-2xl transition-all text-sm font-bold w-full backdrop-blur-md">
                 <MessageCircle className="w-4 h-4" /> WhatsApp
-              </a>
+              </a>}
             </div>
 
             <div className="mt-8 pt-8 border-t border-slate-800 print:border-none print:mt-0 print:pt-0 flex flex-col gap-2">
-              <p className="text-xs text-slate-500 font-medium">Bu bilgiler Nobel Vize CRM tarafından sağlanmaktadır.</p>
+              <p className="text-xs text-slate-500 font-medium">Bu bilgiler {companyName} CRM tarafından sağlanmaktadır.</p>
               <div className="flex items-center justify-center gap-4 text-xs text-slate-400 print:text-slate-600">
-                <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> info@nobelvize.com</span>
-                <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> 0850 000 00 00</span>
+                {companyEmail && <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {companyEmail}</span>}
+                {companyPhone && <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {companyPhone}</span>}
               </div>
-              <p className="text-[10px] text-slate-600 mt-2">&copy; {new Date().getFullYear()} Nobel Vize. Tüm hakları saklıdır.</p>
+              <p className="text-[10px] text-slate-600 mt-2">&copy; {new Date().getFullYear()} {companyName}. Tüm hakları saklıdır.</p>
             </div>
           </div>
         </div>

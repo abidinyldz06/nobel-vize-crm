@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { Phone, MessageCircle, Mail, MessageSquare, Users, Send, Loader2, Clock, AlertTriangle, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Phone, MessageCircle, Mail, MessageSquare, Users, Send, Loader2, Clock, AlertTriangle, ArrowUpRight, ArrowDownLeft, CheckCircle2, XCircle } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type Communication = Tables<'communications'>;
@@ -42,44 +42,48 @@ export default function CommunicationPanel({ customerId, applicationId, initialC
     setSaving(true);
     setErrorMsg("");
 
-    const { data: { user } } = await supabase.auth.getUser();
-    let authorName = "Danışman";
-    if (user?.id) {
-      const { data: staffData } = await supabase.from('staff').select('full_name').eq('user_id', user.id).single();
-      if (staffData?.full_name) authorName = staffData.full_name;
-    }
-
-    const { data, error } = await supabase
-      .from("communications")
-      .insert([{ 
+    const { data: communicationId, error } = await supabase.rpc("record_communication_v1", {
+      p_payload: {
         customer_id: customerId,
         application_id: applicationId,
         type: form.type,
         direction: form.direction,
         subject: form.subject.trim() || null,
-        content: form.content.trim(), 
-        performed_by: authorName 
-      }])
-      .select()
-      .single();
+        content: form.content.trim(),
+        status: "kaydedildi",
+      },
+    });
 
-    if (!error && data) {
-      setComms(prev => [data, ...prev]);
+    if (!error && communicationId) {
+      const { data } = await supabase.from("communications").select("*").eq("id", communicationId).single();
+      if (data) setComms(prev => [data, ...prev]);
       setForm({ type: "telefon", direction: "giden", subject: "", content: "" });
       setShowForm(false);
-      
-      // Activity Log Ekle
-      await supabase.from("activity_log").insert([{
-        application_id: applicationId,
-        customer_id: customerId,
-        action: `İletişim eklendi: ${TYPE_LABELS[form.type] || form.type} (${form.direction === 'giden' ? 'Giden' : 'Gelen'})`,
-        performed_by: authorName,
-      }]);
-
     } else {
       setErrorMsg(error?.message || "Bilinmeyen hata");
     }
     setSaving(false);
+  };
+
+  const setDelivery = async (communicationId: string, status: "gonderildi" | "basarisiz") => {
+    const reason = status === "basarisiz" ? window.prompt("Başarısızlık sebebi")?.trim() : null;
+    if (status === "basarisiz" && !reason) return;
+    const failureReason = reason || null;
+    const { error } = await supabase.rpc("set_communication_delivery_v1", {
+      p_communication_id: communicationId,
+      p_status: status,
+      p_failure_reason: failureReason ?? undefined,
+    });
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
+    setComms(current => current.map(item => item.id === communicationId ? {
+      ...item,
+      status,
+      failure_reason: failureReason,
+      sent_at: status === "gonderildi" ? new Date().toISOString() : null,
+    } : item));
   };
 
   return (
@@ -163,7 +167,7 @@ export default function CommunicationPanel({ customerId, applicationId, initialC
       {/* Communications List */}
       <div className="max-h-64 overflow-y-auto divide-y divide-slate-200 dark:divide-[#1f2937]">
         {comms.length > 0 ? comms.map(comm => (
-          <div key={comm.id} className="px-5 py-3.5 hover:bg-slate-100 dark:bg-[#1a2232] transition-colors flex gap-3">
+          <div key={comm.id} data-testid={`communication-${comm.id}`} className="px-5 py-3.5 hover:bg-slate-100 dark:bg-[#1a2232] transition-colors flex gap-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${comm.direction === 'giden' ? 'bg-purple-500/20 text-purple-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
               {TYPE_ICONS[comm.type] || <MessageCircle className="w-3.5 h-3.5" />}
             </div>
@@ -188,8 +192,18 @@ export default function CommunicationPanel({ customerId, applicationId, initialC
                 {comm.content}
               </p>
               <div className="mt-1.5 flex justify-end">
-                 <span className="text-[10px] font-medium text-slate-500">{comm.performed_by || "Danışman"}</span>
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <span className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${comm.status === "gonderildi" ? "bg-emerald-500/10 text-emerald-600" : comm.status === "basarisiz" ? "bg-red-500/10 text-red-500" : "bg-amber-500/10 text-amber-600"}`}>{comm.status}</span>
+                  <span className="text-[10px] font-medium text-slate-500">{comm.performed_by || "Danışman"}</span>
+                </div>
               </div>
+              {comm.failure_reason && <p className="mt-1 text-[10px] text-red-500">Hata: {comm.failure_reason}</p>}
+              {comm.status === "hazirlandi" && (
+                <div className="mt-2 flex justify-end gap-2">
+                  <button type="button" onClick={() => setDelivery(comm.id, "gonderildi")} className="flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 className="h-3 w-3" /> Gönderildi</button>
+                  <button type="button" onClick={() => setDelivery(comm.id, "basarisiz")} className="flex items-center gap-1 rounded-md bg-red-500/10 px-2 py-1 text-[10px] font-semibold text-red-500"><XCircle className="h-3 w-3" /> Başarısız</button>
+                </div>
+              )}
             </div>
           </div>
         )) : (

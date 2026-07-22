@@ -3,7 +3,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET search_path TO public, extensions;
 
-SELECT plan(118);
+SELECT plan(148);
 
 SELECT has_table('public', 'country_visa_rules', 'canonical visa rules table exists');
 SELECT has_function('public', 'create_customer_application_v1', ARRAY['jsonb'], 'atomic customer workflow exists');
@@ -28,6 +28,28 @@ SELECT has_column('public', 'applications', 'occupation', 'applications store oc
 SELECT has_column('public', 'applications', 'with_children', 'applications store child status');
 SELECT has_column('public', 'applications', 'nationality', 'applications store nationality');
 SELECT has_function('public', 'restore_backup_v2', ARRAY['jsonb'], 'atomic restore exists');
+SELECT has_table('public', 'message_templates', 'managed message template catalog exists');
+SELECT has_function('public', 'upsert_message_template_v1', ARRAY['uuid', 'jsonb'], 'admin template workflow exists');
+SELECT has_function('public', 'record_communication_v1', ARRAY['jsonb'], 'atomic communication workflow exists');
+SELECT has_function('public', 'set_communication_delivery_v1', ARRAY['uuid', 'text', 'text'], 'communication delivery workflow exists');
+SELECT has_function('public', 'rotate_customer_portal_token_v1', ARRAY['uuid', 'integer'], 'controlled portal token rotation exists');
+SELECT has_function('public', 'set_customer_portal_access_v1', ARRAY['uuid', 'boolean'], 'controlled portal access workflow exists');
+SELECT has_column('public', 'communications', 'status', 'communications record delivery status');
+SELECT has_column('public', 'communications', 'template_id', 'communications reference their template');
+SELECT has_column('public', 'communications', 'failure_reason', 'communications record delivery failures');
+SELECT has_column('public', 'customers', 'portal_token_expires_at', 'portal links expire');
+SELECT has_column('public', 'customers', 'portal_access_enabled', 'portal access can be revoked');
+SELECT has_column('public', 'customers', 'portal_last_accessed_at', 'portal access time is tracked');
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.message_templates WHERE system_key IS NOT NULL $$,
+  $$ VALUES (11::BIGINT) $$,
+  'ready-to-use WhatsApp and email templates are seeded'
+);
+SELECT ok(NOT has_table_privilege('authenticated', 'public.communications', 'INSERT'), 'direct communication inserts are revoked');
+SELECT ok(NOT has_table_privilege('authenticated', 'public.communications', 'UPDATE'), 'direct communication updates are revoked');
+SELECT ok(has_function_privilege('authenticated', 'public.record_communication_v1(jsonb)', 'EXECUTE'), 'staff can execute controlled communication workflow');
+SELECT ok(NOT has_function_privilege('anon', 'public.record_communication_v1(jsonb)', 'EXECUTE'), 'anon cannot record communications');
+SELECT ok(has_function_privilege('authenticated', 'public.rotate_customer_portal_token_v1(uuid,integer)', 'EXECUTE'), 'staff can rotate an accessible portal link');
 SELECT results_eq(
   $$
     SELECT count(*)::BIGINT
@@ -252,6 +274,88 @@ SELECT results_eq(
   $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE performed_by_staff_id = '10000000-0000-0000-0000-000000000001' AND action LIKE 'Yeni başvuru oluşturuldu:%' $$,
   $$ VALUES (1::BIGINT) $$,
   'activity actor is stored as a staff foreign key'
+);
+
+SELECT lives_ok(
+  $$
+    SELECT public.upsert_message_template_v1(
+      '70000000-0000-0000-0000-000000000001',
+      '{"name":"Test Mesajı","channel":"email","subject_template":"Test konusu","body_template":"Merhaba {{first_name}}","is_active":true}'::JSONB
+    )
+  $$,
+  'admin creates a managed message template'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.message_templates WHERE id = '70000000-0000-0000-0000-000000000001' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'managed message template is stored'
+);
+SELECT lives_ok(
+  $$
+    SELECT public.record_communication_v1(
+      jsonb_build_object(
+        'customer_id', (SELECT id FROM public.customers WHERE email = 'ayse@example.com'),
+        'application_id', (SELECT id FROM public.applications WHERE country = 'Almanya' LIMIT 1),
+        'template_id', '70000000-0000-0000-0000-000000000001',
+        'type', 'email',
+        'direction', 'giden',
+        'subject', 'Test konusu',
+        'content', 'Merhaba Ayşe',
+        'recipient', 'ayse@example.com',
+        'status', 'hazirlandi'
+      )
+    )
+  $$,
+  'staff records a prepared communication atomically'
+);
+SELECT results_eq(
+  $$ SELECT status FROM public.communications WHERE recipient = 'ayse@example.com' $$,
+  $$ VALUES ('hazirlandi'::TEXT) $$,
+  'prepared communication is not falsely marked sent'
+);
+SELECT throws_ok(
+  $$
+    SELECT public.set_communication_delivery_v1(
+      (SELECT id FROM public.communications WHERE recipient = 'ayse@example.com'),
+      'basarisiz',
+      NULL
+    )
+  $$,
+  '22023',
+  'failure_reason_required',
+  'failed delivery requires a reason'
+);
+SELECT lives_ok(
+  $$
+    SELECT public.set_communication_delivery_v1(
+      (SELECT id FROM public.communications WHERE recipient = 'ayse@example.com'),
+      'basarisiz',
+      'Test teslimat hatası'
+    )
+  $$,
+  'staff records a failed delivery with its reason'
+);
+SELECT results_eq(
+  $$ SELECT status FROM public.communications WHERE recipient = 'ayse@example.com' $$,
+  $$ VALUES ('basarisiz'::TEXT) $$,
+  'failed communication status is persisted'
+);
+SELECT lives_ok(
+  $$ SELECT public.rotate_customer_portal_token_v1((SELECT id FROM public.customers WHERE email = 'ayse@example.com'), 30) $$,
+  'staff rotates an accessible portal token'
+);
+SELECT ok(
+  (SELECT portal_token_expires_at > now() FROM public.customers WHERE email = 'ayse@example.com'),
+  'rotated portal link has a future expiry'
+);
+SELECT lives_ok(
+  $$ SELECT public.set_customer_portal_access_v1((SELECT id FROM public.customers WHERE email = 'ayse@example.com'), false) $$,
+  'staff revokes customer portal access'
+);
+SELECT results_eq(
+  $$ SELECT portal_access_enabled FROM public.customers WHERE email = 'ayse@example.com' $$,
+  $$ VALUES (false) $$,
+  'revoked portal access remains disabled'
 );
 
 SELECT throws_ok(
@@ -699,6 +803,7 @@ SELECT jsonb_build_object(
   'tables', jsonb_build_object(
     'tenants', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.tenants row),
     'staff', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.staff row),
+    'message_templates', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.message_templates row),
     'tags', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.tags row),
     'countries', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.countries row),
     'country_visa_rules', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.country_visa_rules row),
@@ -740,6 +845,10 @@ SELECT ok(
 SELECT ok(
   (SELECT count(*) FROM public.customer_tags) > 0,
   'full v2 restore preserves customer tags'
+);
+SELECT ok(
+  (SELECT count(*) FROM public.message_templates) > 0,
+  'full v2 restore preserves message templates'
 );
 SELECT lives_ok(
   $$

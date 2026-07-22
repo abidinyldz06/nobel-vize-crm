@@ -103,12 +103,21 @@ Ayrıntılı uygulama ve doğrulama kaydı:
 
 ### Faz 3.5 — Müşteri iletişimi ve portal
 
-Durum: **Bekliyor**
+Durum: **Devam ediyor — yerel uygulama ve doğrulama tamamlandı**
 
-- Yönetilebilir WhatsApp ve e-posta şablonları
-- İletişim geçmişi ve başarısız gönderim kaydı
-- Portalda başvuru, evrak, randevu ve ödeme özetinin iyileştirilmesi
-- Müşteri kartı hızlı eylemleri ve birleşik timeline Faz 3.4.5 kapsamında erkenden tamamlandı
+- [x] **3.5.1 bitti:** admin tarafından yönetilen WhatsApp ve e-posta şablonları
+- [x] **3.5.2 bitti:** ortak mesaj hazırlayıcı ve kontrollü değişken çözümleme
+- [x] **3.5.3 bitti:** atomik iletişim kaydı, gönderim/başarısızlık durumu ve audit izi
+- [x] **3.5.4 bitti:** süreli portal bağlantısı yenileme, devre dışı bırakma ve yeniden açma
+- [x] **3.5.5 bitti:** portal başvuru, evrak, randevu, ödeme, geçmiş ve şirket iletişim özeti
+- [ ] **3.5.6 devam ediyor:** GitHub kalite kapıları, production migration, yayın ve canlı doğrulama
+
+Not: WhatsApp ve e-posta işlemleri kullanıcının cihazındaki ilgili uygulamayı
+açar. Harici bir gönderim sağlayıcısı bağlı olmadığı için sistem teslimatı
+otomatik olarak iddia etmez; personel sonucu iletişim kaydında işaretler.
+
+Ayrıntılı uygulama ve doğrulama kaydı:
+`docs/PHASE_3_5_IMPLEMENTATION_REPORT.md`.
 
 ### Faz 3.6 — KVKK ve veri yaşam döngüsü
 

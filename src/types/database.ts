@@ -190,10 +190,15 @@ export type Database = {
           created_at: string
           customer_id: string | null
           direction: string
+          failure_reason: string | null
           id: string
           performed_by: string | null
           performed_by_staff_id: string | null
+          recipient: string | null
+          sent_at: string | null
+          status: string
           subject: string | null
+          template_id: string | null
           type: string
         }
         Insert: {
@@ -202,10 +207,15 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           direction?: string
+          failure_reason?: string | null
           id?: string
           performed_by?: string | null
           performed_by_staff_id?: string | null
+          recipient?: string | null
+          sent_at?: string | null
+          status?: string
           subject?: string | null
+          template_id?: string | null
           type: string
         }
         Update: {
@@ -214,10 +224,15 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           direction?: string
+          failure_reason?: string | null
           id?: string
           performed_by?: string | null
           performed_by_staff_id?: string | null
+          recipient?: string | null
+          sent_at?: string | null
+          status?: string
           subject?: string | null
+          template_id?: string | null
           type?: string
         }
         Relationships: [
@@ -240,6 +255,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -408,7 +430,10 @@ export type Database = {
           passport_issuing_country: string | null
           passport_no: string | null
           phone: string | null
+          portal_access_enabled: boolean
+          portal_last_accessed_at: string | null
           portal_token: string | null
+          portal_token_expires_at: string | null
           profile_score: number
           updated_at: string
         }
@@ -428,7 +453,10 @@ export type Database = {
           passport_issuing_country?: string | null
           passport_no?: string | null
           phone?: string | null
+          portal_access_enabled?: boolean
+          portal_last_accessed_at?: string | null
           portal_token?: string | null
+          portal_token_expires_at?: string | null
           profile_score?: number
           updated_at?: string
         }
@@ -448,7 +476,10 @@ export type Database = {
           passport_issuing_country?: string | null
           passport_no?: string | null
           phone?: string | null
+          portal_access_enabled?: boolean
+          portal_last_accessed_at?: string | null
           portal_token?: string | null
+          portal_token_expires_at?: string | null
           profile_score?: number
           updated_at?: string
         }
@@ -546,6 +577,53 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_templates: {
+        Row: {
+          body_template: string
+          channel: string
+          created_at: string
+          created_by_staff_id: string | null
+          id: string
+          is_active: boolean
+          name: string
+          subject_template: string | null
+          system_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          body_template: string
+          channel: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          subject_template?: string | null
+          system_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body_template?: string
+          channel?: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          subject_template?: string | null
+          system_key?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_templates_created_by_staff_id_fkey"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -1060,10 +1138,15 @@ export type Database = {
         Args: { p_customer_ids: string[] }
         Returns: number
       }
+      record_communication_v1: { Args: { p_payload: Json }; Returns: string }
       restore_backup_v2: { Args: { p_backup: Json }; Returns: Json }
       restore_customers_v1: {
         Args: { p_customer_ids: string[] }
         Returns: number
+      }
+      rotate_customer_portal_token_v1: {
+        Args: { p_customer_id: string; p_valid_days?: number }
+        Returns: Json
       }
       set_application_appointment_v1: {
         Args: {
@@ -1072,6 +1155,18 @@ export type Database = {
           p_location: string
           p_system?: string
         }
+        Returns: Json
+      }
+      set_communication_delivery_v1: {
+        Args: {
+          p_communication_id: string
+          p_failure_reason?: string
+          p_status: string
+        }
+        Returns: undefined
+      }
+      set_customer_portal_access_v1: {
+        Args: { p_customer_id: string; p_enabled: boolean }
         Returns: Json
       }
       set_customer_tags_v1: {
@@ -1100,6 +1195,10 @@ export type Database = {
           p_payload: Json
         }
         Returns: Json
+      }
+      upsert_message_template_v1: {
+        Args: { p_payload: Json; p_template_id: string }
+        Returns: string
       }
     }
     Enums: {
