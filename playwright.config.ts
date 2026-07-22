@@ -9,6 +9,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? [['html', { open: 'never' }], ['github']] : 'list',
+  expect: {
+    timeout: externalBaseUrl ? 30_000 : 5_000,
+  },
   use: {
     baseURL: externalBaseUrl ?? 'http://127.0.0.1:3100',
     trace: 'on-first-retry',

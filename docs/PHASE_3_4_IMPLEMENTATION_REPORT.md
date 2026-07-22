@@ -2,7 +2,7 @@
 
 Tarih: 22 Temmuz 2026
 Dal: `phase-3.4/application-board`
-Durum: **Uygulama tamamlandı — production doğrulaması bekliyor**
+Durum: **Tamamlandı ve production'da doğrulandı**
 
 ## Aşama durumu
 
@@ -21,8 +21,8 @@ Durum: **Uygulama tamamlandı — production doğrulaması bekliyor**
 - **3.4.5 bitti:** müşteri kartında telefon, WhatsApp, e-posta ve atomik hızlı
   not; başvuru, evrak, ödeme, randevu, iletişim ve notları birleştiren dikey
   timeline tamamlandı.
-- **3.4.6 devam ediyor:** GitHub kalite kapıları, production migration, Vercel
-  yayını ve canlı smoke doğrulaması.
+- **3.4.6 bitti:** GitHub kalite kapıları, şifreli yedek, production migration,
+  Vercel yayını ve oturumlu canlı smoke doğrulaması tamamlandı.
 
 ## Veri modeli ve güvenlik
 
@@ -44,7 +44,7 @@ Durum: **Uygulama tamamlandı — production doğrulaması bekliyor**
 |---|---|
 | Temiz Supabase migration reset | Geçti |
 | Veritabanı lint | Geçti, 0 bulgu |
-| pgTAP | Geçti, 117/117 |
+| pgTAP | Geçti, 118/118 |
 | ESLint | Geçti |
 | TypeScript | Geçti |
 | Node uygulama/güvenlik testleri | Geçti, 23/23 |
@@ -55,12 +55,29 @@ Durum: **Uygulama tamamlandı — production doğrulaması bekliyor**
 
 ## Production kontrol listesi
 
-- [ ] Migration öncesi şifreli veritabanı, rol ve Storage yedeği
-- [ ] Doğru CRM projesi (`zrxdwnshegihakqfszfh`) için migration preflight
-- [ ] `202607220003`–`202607220006` migration'larının uygulanması
-- [ ] Production veritabanı lint ve şema/veri koruma kontrolü
-- [ ] Vercel production dağıtımı ve `abidinyildiz.com` alias kontrolü
-- [ ] Oturumlu süreç panosu, edit/detay, etiket, dashboard, hızlı not ve timeline smoke testi
-- [ ] Geçici Auth/personel/müşteri/test verilerinin tamamen temizlenmesi
+- [x] Migration öncesi şifreli veritabanı, rol ve Storage yedeği
+- [x] Doğru CRM projesi (`zrxdwnshegihakqfszfh`) için migration preflight
+- [x] `202607220003`–`202607220007` migration'larının uygulanması
+- [x] Production veritabanı lint ve şema/veri koruma kontrolü
+- [x] Vercel production dağıtımı ve `abidinyildiz.com` alias kontrolü
+- [x] Oturumlu süreç panosu, edit/detay, etiket, dashboard, hızlı not ve timeline smoke testi
+- [x] Geçici Auth/personel/müşteri/test verilerinin tamamen temizlenmesi
 
-Production kanıtları tamamlanmadan Faz 3.4 final olarak kapatılmayacaktır.
+## Production kanıtları
+
+- Migration öncesi veritabanı, roller ve tek Storage nesnesi repo dışında
+  AES-256 ile şifrelenip bağımsız açma/checksum kontrolünden geçirildi.
+- CRM production migration zinciri `202607220001`–`202607220007` dahil yerel
+  ve uzak veritabanında birebir eşleşiyor; uzak veritabanı lint sonucu 0 bulgu.
+- Canlı şemada eski kurulumdan kalan yinelenen `applications.customer_id`
+  foreign key kaldırıldı; kanonik `applications_customer_fk` korundu ve ilişki
+  sayısı pgTAP ile kilitlendi.
+- Production oturum yönlendirmesi, yeni auth çerezinin ayrı dashboard isteğinde
+  okunacağı biçimde sağlamlaştırıldı.
+- `abidinyildiz.com` güncel Vercel production dağıtımına bağlı ve `READY`.
+- Canlı Playwright akışı 1/1 geçti. Test sonunda geçici Auth, personel, müşteri,
+  başvuru, ödeme, ülke, etiket ve aktivite kayıtları temizlendi.
+- Son veri koruma sayımı: 9 müşteri, 3 personel, 7 başvuru ve 4 hazır etiket.
+
+GitHub kalite kapıları PR #15, PR #16 ve PR #17 üzerinde application, database,
+browser ve Vercel kontrollerinin tamamı geçtikten sonra birleştirildi.

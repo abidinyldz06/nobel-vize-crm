@@ -20,6 +20,10 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
 ### Kalite
 
 - pgTAP, güvenlik, dashboard birim testleri ve birleşik Playwright kullanıcı akışı genişletildi.
+- Production oturum yönlendirmesi yeni auth çerezini ayrı dashboard isteğinde okuyacak biçimde sağlamlaştırıldı.
+- Eski production şemasındaki yinelenen başvuru-müşteri foreign key kaldırılarak PostgREST ilişki belirsizliği giderildi.
+- Production-smoke modu, canlı ortam taban URL'si ve uzak sorgulara uygun bekleme süreleriyle eklendi.
+- Faz 3.4 migration'ları, Vercel yayını ve oturumlu canlı E2E akışı doğrulandı.
 
 ## [Unreleased] — Acil Paket H2 Müşteri Arşivi
 

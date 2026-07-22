@@ -89,14 +89,14 @@ Ayrıntılı uygulama ve doğrulama kaydı:
 
 ### Faz 3.4 — Başvuru süreç panosu
 
-Durum: **Uygulama tamamlandı — production doğrulaması bekliyor (22 Temmuz 2026)**
+Durum: **Tamamlandı — 22 Temmuz 2026**
 
 - [x] **3.4.1 bitti:** başvuru süreç panosu, operasyon filtreleri ve kontrollü/atomik durum geçişleri
 - [x] **3.4.2 bitti:** müşteri edit/detay ekranlarında kanonik ülke, vize ve başvuru profil alanları
 - [x] **3.4.3 bitti:** RLS korumalı müşteri etiketleri, renkli badge ve etiket filtresi
 - [x] **3.4.4 bitti:** dashboard pasaport uyarıları ve aylık başvuru/onay/red/bekleyen/gelir istatistikleri
 - [x] **3.4.5 bitti:** telefon, WhatsApp, e-posta, atomik hızlı not ve birleşik müşteri timeline'ı
-- [ ] **3.4.6:** GitHub kalite kapıları, production migration, yayın ve canlı smoke doğrulaması
+- [x] **3.4.6 bitti:** GitHub kalite kapıları, production migration, yayın ve canlı smoke doğrulaması
 
 Ayrıntılı uygulama ve doğrulama kaydı:
 `docs/PHASE_3_4_IMPLEMENTATION_REPORT.md`.
