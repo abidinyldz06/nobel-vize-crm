@@ -2,16 +2,39 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { updateCustomer } from "@/app/actions/update-customer";
 import { Edit2, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { VISA_TYPE_LABELS } from "@/lib/visa-types";
+import {
+  ACCOMMODATION_OPTIONS,
+  NATIONALITY_OPTIONS,
+  OCCUPATION_OPTIONS,
+  TRAVEL_METHOD_OPTIONS,
+} from "@/lib/application-profile";
+import {
+  APPLICATION_STATUS_META,
+  APPLICATION_TRANSITIONS,
+  isApplicationStatus,
+} from "@/lib/application-status";
 
 export const revalidate = 0;
 
 export default async function EditCustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
-  const { data: customer } = await supabase.from('customers').select('*').eq('id', id).eq('is_deleted', false).single();
-  const { data: staffList } = await supabase.from('staff').select('id, full_name, role').eq('is_active', true).order('full_name');
+  const [{ data: customer }, { data: staffList }, { data: activeApp }, { data: countries }, { data: tags }, { data: customerTags }] = await Promise.all([
+    supabase.from('customers').select('*').eq('id', id).eq('is_deleted', false).single(),
+    supabase.from('staff').select('id, full_name, role').eq('is_active', true).order('full_name'),
+    supabase.from('applications').select('*').eq('customer_id', id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('countries').select('id, name').eq('active', true).order('name'),
+    supabase.from('tags').select('id, name, color').order('name'),
+    supabase.from('customer_tags').select('tag_id').eq('customer_id', id),
+  ]);
 
   if (!customer) return <div className="p-6 text-slate-500 dark:text-slate-400">Müşteri bulunamadı.</div>;
+  if (!activeApp) return <div className="p-6 text-slate-500 dark:text-slate-400">Bu müşteriye ait düzenlenebilir bir başvuru bulunamadı.</div>;
+
+  const currentStatus = isApplicationStatus(activeApp.status) ? activeApp.status : 'profil_analizi';
+  const availableStatuses = [currentStatus, ...APPLICATION_TRANSITIONS[currentStatus]];
+  const selectedTagIds = new Set((customerTags ?? []).map(item => item.tag_id));
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#060d1a] p-6">
@@ -30,6 +53,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
 
         <form action={updateCustomer} className="space-y-5">
           <input type="hidden" name="id" value={customer.id} />
+          <input type="hidden" name="applicationId" value={activeApp.id} />
 
           {/* Kişisel Bilgiler */}
           <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden">
@@ -60,6 +84,94 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
                 <input name="email" type="email" defaultValue={customer.email || ''}
                   className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
               </div>
+            </div>
+          </div>
+
+          {/* Başvuru Bilgileri */}
+          <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a]">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Başvuru Bilgileri</h2>
+              <p className="mt-1 text-[10px] text-slate-500">Yalnız izin verilen sonraki durumlar gösterilir; ret seçiminde açıklama zorunludur.</p>
+            </div>
+            <div className="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ülke</label>
+                <select required aria-label="Ülke" name="countryId" defaultValue={activeApp.country_id || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                  <option value="">— Ülke Seçin —</option>
+                  {countries?.map(country => <option key={country.id} value={country.id}>{country.name}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Vize Türü</label>
+                <select required aria-label="Vize Türü" name="visaType" defaultValue={activeApp.visa_type} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                  {Object.entries(VISA_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Başvuru Durumu</label>
+                <select required aria-label="Başvuru Durumu" name="applicationStatus" defaultValue={currentStatus} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                  {availableStatuses.map(status => <option key={status} value={status}>{APPLICATION_STATUS_META[status].label}</option>)}
+                </select>
+              </div>
+              {availableStatuses.includes('reddedildi') && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ret Sebebi</label>
+                  <input name="rejectionReason" type="text" maxLength={2000} defaultValue={activeApp.rejection_reason || ''} placeholder="Reddedildi seçilirse zorunlu" className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-red-500" />
+                </div>
+              )}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Seyahat Aracı</label>
+                <select aria-label="Seyahat Aracı" name="travelMethod" defaultValue={activeApp.travel_method || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                  <option value="">— Belirtilmedi —</option>
+                  {Object.entries(TRAVEL_METHOD_OPTIONS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Konaklama</label>
+                <select aria-label="Konaklama" name="accommodation" defaultValue={activeApp.accommodation || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                  <option value="">— Belirtilmedi —</option>
+                  {Object.entries(ACCOMMODATION_OPTIONS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Meslek</label>
+                <select aria-label="Meslek" name="occupation" defaultValue={activeApp.occupation || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                  <option value="">— Belirtilmedi —</option>
+                  {Object.entries(OCCUPATION_OPTIONS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Çocuk Durumu</label>
+                <select aria-label="Çocuk Durumu" name="withChildren" defaultValue={activeApp.with_children === null ? '' : String(activeApp.with_children)} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                  <option value="">— Belirtilmedi —</option>
+                  <option value="false">Yok</option>
+                  <option value="true">Var</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Uyruk</label>
+                <select aria-label="Uyruk" name="nationality" defaultValue={activeApp.nationality || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                  <option value="">— Belirtilmedi —</option>
+                  {Object.entries(NATIONALITY_OPTIONS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Müşteri Etiketleri */}
+          <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a]">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Müşteri Etiketleri</h2>
+            </div>
+            <div className="flex flex-wrap gap-3 px-6 py-5">
+              {tags?.map(tag => (
+                <label key={tag.id} className="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-[#1f2937]">
+                  <input type="checkbox" name="tagIds" value={tag.id} defaultChecked={selectedTagIds.has(tag.id)} className="h-4 w-4 rounded" />
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: tag.color }} />
+                  <span className="font-medium text-slate-700 dark:text-slate-200">{tag.name}</span>
+                </label>
+              ))}
+              {(!tags || tags.length === 0) && <p className="text-sm text-slate-500">Tanımlı etiket bulunamadı.</p>}
             </div>
           </div>
 

@@ -3,19 +3,12 @@ import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Loader2, X, AlertCircle } from "lucide-react";
-
-const STATUS_OPTIONS = [
-  { key: "profil_analizi", label: "Profil Analizi", color: "text-slate-500 dark:text-slate-400" },
-  { key: "evrak_bekleniyor", label: "Evrak Bekleniyor", color: "text-amber-500" },
-  { key: "randevu_bekleniyor", label: "Randevu Bekleniyor", color: "text-orange-500" },
-  { key: "randevu_alindi", label: "Randevu Alındı", color: "text-blue-400" },
-  { key: "evrak_hazirlaniyor", label: "Evrak Hazırlanıyor", color: "text-indigo-400" },
-  { key: "basvuru_yapildi", label: "Başvuru Yapıldı", color: "text-purple-400" },
-  { key: "onaylandi", label: "Onaylandı ✓", color: "text-emerald-500" },
-  { key: "reddedildi", label: "Reddedildi ✗", color: "text-red-400" },
-  { key: "itiraz", label: "İtiraz", color: "text-yellow-500" },
-  { key: "kapandi", label: "Kapandı", color: "text-slate-600 dark:text-slate-400" },
-];
+import {
+  APPLICATION_STATUS_META,
+  APPLICATION_TRANSITIONS,
+  isApplicationStatus,
+  type ApplicationStatus,
+} from "@/lib/application-status";
 
 const REJECTION_REASONS = [
   { key: "gelir_yetersiz", label: "Gelir yetersiz / Şüpheli finansal tablo" },
@@ -34,7 +27,8 @@ export default function StatusUpdater({
   applicationId: string;
   currentStatus: string;
 }) {
-  const [status, setStatus] = useState(currentStatus);
+  const initialStatus: ApplicationStatus = isApplicationStatus(currentStatus) ? currentStatus : "profil_analizi";
+  const [status, setStatus] = useState<ApplicationStatus>(initialStatus);
   const [loading, setLoading] = useState(false);
   
   // Modal states
@@ -46,6 +40,7 @@ export default function StatusUpdater({
 
   const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value;
+    if (!isApplicationStatus(newStatus) || newStatus === status) return;
     
     if (newStatus === "reddedildi") {
       setIsModalOpen(true);
@@ -55,7 +50,7 @@ export default function StatusUpdater({
     await saveStatus(newStatus, null);
   };
 
-  const saveStatus = async (newStatus: string, reasonKey: string | null) => {
+  const saveStatus = async (newStatus: ApplicationStatus, reasonKey: string | null) => {
     setLoading(true);
     setIsModalOpen(false);
 
@@ -66,8 +61,8 @@ export default function StatusUpdater({
     }
 
     const supabase = createSupabaseBrowserClient();
-    const oldStatusLabel = STATUS_OPTIONS.find(o => o.key === status)?.label || status;
-    const newStatusLabel = STATUS_OPTIONS.find(o => o.key === newStatus)?.label || newStatus;
+    const oldStatusLabel = APPLICATION_STATUS_META[status].label;
+    const newStatusLabel = APPLICATION_STATUS_META[newStatus].label;
     let actionLog = `Durum "${oldStatusLabel}" aşamasından "${newStatusLabel}" aşamasına değiştirildi`;
     if (reasonText) {
       actionLog += ` (Ret Sebebi: ${reasonText})`;
@@ -76,7 +71,7 @@ export default function StatusUpdater({
     const { error } = await supabase.rpc("update_application_status_v1", {
       p_application_id: applicationId,
       p_status: newStatus,
-      p_rejection_reason: reasonKey ?? undefined,
+      p_rejection_reason: reasonText ?? undefined,
       p_action: actionLog,
     });
 
@@ -95,7 +90,8 @@ export default function StatusUpdater({
     saveStatus("reddedildi", rejectionReason);
   };
 
-  const current = STATUS_OPTIONS.find(o => o.key === status);
+  const availableStatuses = [status, ...APPLICATION_TRANSITIONS[status]];
+  const current = APPLICATION_STATUS_META[status];
 
   return (
     <>
@@ -106,10 +102,10 @@ export default function StatusUpdater({
             value={status}
             onChange={handleStatusChange}
             disabled={loading}
-            className={`appearance-none pl-3 pr-8 py-2 rounded-xl border border-slate-700 bg-slate-800 text-sm font-medium cursor-pointer focus:outline-none focus:border-primary transition-colors disabled:opacity-50 ${current?.color}`}
+            className={`appearance-none pl-3 pr-8 py-2 rounded-xl border border-slate-700 bg-slate-800 text-sm font-medium cursor-pointer focus:outline-none focus:border-primary transition-colors disabled:opacity-50 ${current.color}`}
           >
-            {STATUS_OPTIONS.map(opt => (
-              <option key={opt.key} value={opt.key}>{opt.label}</option>
+            {availableStatuses.map(optionStatus => (
+              <option key={optionStatus} value={optionStatus}>{APPLICATION_STATUS_META[optionStatus].label}</option>
             ))}
           </select>
           <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 dark:text-slate-400 pointer-events-none" />

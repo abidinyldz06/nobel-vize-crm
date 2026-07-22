@@ -3,11 +3,30 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET search_path TO public, extensions;
 
-SELECT plan(84);
+SELECT plan(117);
 
 SELECT has_table('public', 'country_visa_rules', 'canonical visa rules table exists');
 SELECT has_function('public', 'create_customer_application_v1', ARRAY['jsonb'], 'atomic customer workflow exists');
 SELECT has_function('public', 'update_application_status_v1', ARRAY['uuid', 'text', 'text', 'text'], 'atomic status workflow exists');
+SELECT has_function('public', 'application_status_transition_allowed', ARRAY['text', 'text'], 'status transition rule exists');
+SELECT has_function('public', 'bulk_update_application_status_v1', ARRAY['uuid[]', 'text', 'text'], 'atomic bulk status workflow exists');
+SELECT has_function('public', 'set_application_appointment_v1', ARRAY['uuid', 'timestamp with time zone', 'text', 'text'], 'atomic appointment workflow exists');
+SELECT has_function('public', 'update_customer_application_v1', ARRAY['uuid', 'uuid', 'jsonb'], 'atomic customer and application edit workflow exists');
+SELECT has_table('public', 'tags', 'customer tag catalog exists');
+SELECT has_table('public', 'customer_tags', 'customer tag relation exists');
+SELECT has_function('public', 'set_customer_tags_v1', ARRAY['uuid', 'uuid[]'], 'controlled customer tag workflow exists');
+SELECT has_function('public', 'add_customer_quick_note_v1', ARRAY['uuid', 'text'], 'atomic customer quick note workflow exists');
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.tags WHERE name IN ('VIP', 'Acil', 'Reddi Var', 'Premium') $$,
+  $$ VALUES (4::BIGINT) $$,
+  'four ready-to-use customer tags are seeded'
+);
+SELECT has_column('public', 'applications', 'country_id', 'applications reference the canonical country');
+SELECT has_column('public', 'applications', 'travel_method', 'applications store travel method');
+SELECT has_column('public', 'applications', 'accommodation', 'applications store accommodation');
+SELECT has_column('public', 'applications', 'occupation', 'applications store occupation');
+SELECT has_column('public', 'applications', 'with_children', 'applications store child status');
+SELECT has_column('public', 'applications', 'nationality', 'applications store nationality');
 SELECT has_function('public', 'restore_backup_v2', ARRAY['jsonb'], 'atomic restore exists');
 SELECT ok(to_regclass('public.uq_staff_user_id') IS NOT NULL, 'staff auth user uniqueness is enforced');
 SELECT ok(to_regclass('public.uq_country_visa_rules_match') IS NOT NULL, 'visa rule match uniqueness is enforced');
@@ -262,6 +281,149 @@ SELECT results_eq(
   $$ VALUES (1::BIGINT) $$,
   'status change created its activity log'
 );
+SELECT results_eq(
+  $$ SELECT public.application_status_transition_allowed('evrak_bekleniyor', 'randevu_bekleniyor') $$,
+  $$ VALUES (true) $$,
+  'adjacent operational transition is allowed'
+);
+SELECT results_eq(
+  $$ SELECT public.application_status_transition_allowed('evrak_bekleniyor', 'onaylandi') $$,
+  $$ VALUES (false) $$,
+  'skipping directly to approval is not allowed'
+);
+SELECT throws_ok(
+  $$
+    SELECT public.update_application_status_v1(
+      (SELECT id FROM public.applications WHERE country = 'Almanya' LIMIT 1),
+      'onaylandi',
+      NULL,
+      'Geçersiz atlama'
+    )
+  $$,
+  '22023',
+  'application_status_transition_not_allowed:evrak_bekleniyor->onaylandi',
+  'invalid transition is rejected before update and audit'
+);
+SELECT results_eq(
+  $$ SELECT status FROM public.applications WHERE country = 'Almanya' LIMIT 1 $$,
+  $$ VALUES ('evrak_bekleniyor'::TEXT) $$,
+  'rejected transition leaves status unchanged'
+);
+SELECT results_eq(
+  $$
+    SELECT public.bulk_update_application_status_v1(
+      ARRAY[(SELECT id FROM public.applications WHERE country = 'Almanya' LIMIT 1)]::UUID[],
+      'randevu_bekleniyor',
+      'Toplu kontrollü geçiş'
+    )
+  $$,
+  $$ VALUES (1) $$,
+  'bulk status workflow updates an allowed set atomically'
+);
+SELECT results_eq(
+  $$ SELECT status FROM public.applications WHERE country = 'Almanya' LIMIT 1 $$,
+  $$ VALUES ('randevu_bekleniyor'::TEXT) $$,
+  'bulk workflow stores the target status'
+);
+SELECT lives_ok(
+  $$
+    SELECT public.set_application_appointment_v1(
+      (SELECT id FROM public.applications WHERE country = 'Almanya' LIMIT 1),
+      now() + interval '10 days',
+      'Ankara VFS',
+      'VFS'
+    )
+  $$,
+  'appointment and status update in one workflow'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.applications WHERE country = 'Almanya' AND status = 'randevu_alindi' AND appointment_location = 'Ankara VFS' AND appointment_date IS NOT NULL $$,
+  $$ VALUES (1::BIGINT) $$,
+  'appointment workflow stores date, location and controlled status'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE action LIKE 'Randevu eklendi: VFS — % (Ankara VFS)' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'appointment workflow writes its audit entry'
+);
+SELECT lives_ok(
+  $$
+    SELECT public.update_customer_application_v1(
+      application.customer_id,
+      application.id,
+      jsonb_build_object(
+        'first_name', customer.first_name,
+        'last_name', customer.last_name,
+        'phone', customer.phone,
+        'email', customer.email,
+        'financial_status', customer.financial_status,
+        'profile_score', customer.profile_score,
+        'country_id', '30000000-0000-0000-0000-000000000001',
+        'visa_type', 'turistik',
+        'status', application.status,
+        'travel_method', 'ucak',
+        'accommodation', 'otel',
+        'occupation', 'calisan',
+        'with_children', false,
+        'nationality', 'tc',
+        'tag_ids', (SELECT jsonb_agg(id) FROM public.tags WHERE name IN ('VIP', 'Acil'))
+      )
+    )
+    FROM public.applications AS application
+    JOIN public.customers AS customer ON customer.id = application.customer_id
+    WHERE application.country = 'Almanya'
+    LIMIT 1
+  $$,
+  'customer and application profile update atomically'
+);
+SELECT results_eq(
+  $$
+    SELECT country_id::TEXT, travel_method, accommodation, occupation, with_children, nationality
+    FROM public.applications
+    WHERE country = 'Almanya'
+    LIMIT 1
+  $$,
+  $$ VALUES ('30000000-0000-0000-0000-000000000001'::TEXT, 'ucak'::TEXT, 'otel'::TEXT, 'calisan'::TEXT, false, 'tc'::TEXT) $$,
+  'application profile fields persist on the canonical application record'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE action = 'Müşteri ve başvuru bilgileri güncellendi' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'customer and application edit writes an audit entry'
+);
+SELECT results_eq(
+  $$
+    SELECT count(*)::BIGINT
+    FROM public.customer_tags
+    WHERE customer_id = (SELECT customer_id FROM public.applications WHERE country = 'Almanya' LIMIT 1)
+  $$,
+  $$ VALUES (2::BIGINT) $$,
+  'selected customer tags persist through the edit workflow'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE action = 'Müşteri etiketleri güncellendi (2 etiket)' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'tag update writes its audit entry'
+);
+SELECT lives_ok(
+  $$
+    SELECT public.add_customer_quick_note_v1(
+      (SELECT customer_id FROM public.applications WHERE country = 'Almanya' LIMIT 1),
+      'Faz 3.4 hızlı not testi'
+    )
+  $$,
+  'staff adds a quick note to the latest accessible application'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.notes WHERE content = 'Faz 3.4 hızlı not testi' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'quick note persists on the application'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE action = 'Hızlı not eklendi' AND type = 'note' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'quick note creates its audit entry'
+);
 
 RESET ROLE;
 INSERT INTO auth.users (id, email, role, aud, email_confirmed_at)
@@ -295,6 +457,9 @@ SELECT throws_ok(
 );
 
 RESET ROLE;
+UPDATE public.applications
+SET appointment_date = now() + interval '36 hours'
+WHERE country = 'Almanya';
 SELECT set_config(
   'request.jwt.claims',
   '{"sub":"20000000-0000-0000-0000-000000000001","role":"authenticated"}',
@@ -394,9 +559,6 @@ SELECT set_config(
   true
 );
 SET LOCAL ROLE authenticated;
-UPDATE public.applications
-SET appointment_date = now() + interval '36 hours'
-WHERE country = 'Almanya';
 INSERT INTO public.documents (id, application_id, document_type, category, is_required, status, requested_at)
 VALUES (
   '60000000-0000-0000-0000-000000000001',
@@ -520,9 +682,11 @@ SELECT jsonb_build_object(
   'tables', jsonb_build_object(
     'tenants', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.tenants row),
     'staff', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.staff row),
+    'tags', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.tags row),
     'countries', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.countries row),
     'country_visa_rules', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.country_visa_rules row),
     'customers', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.customers row),
+    'customer_tags', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.customer_tags row),
     'applications', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.applications row),
     'documents', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.documents row),
     'notes', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.notes row),
@@ -556,9 +720,15 @@ SELECT ok(
   (SELECT count(*) FROM public.notifications) > 0,
   'full v2 restore preserves personal notifications'
 );
+SELECT ok(
+  (SELECT count(*) FROM public.customer_tags) > 0,
+  'full v2 restore preserves customer tags'
+);
 SELECT lives_ok(
   $$
-    SELECT public.restore_backup_v2(payload #- '{tables,tasks}' #- '{tables,notifications}')
+    SELECT public.restore_backup_v2(
+      payload #- '{tables,tasks}' #- '{tables,notifications}' #- '{tables,tags}' #- '{tables,customer_tags}'
+    )
     FROM phase1_backup_payload
   $$,
   'legacy v2 backup without phase 3.3 tables remains restorable'

@@ -2,11 +2,11 @@
 import { requireStaff } from "@/lib/authz"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import type { TablesUpdate } from "@/types/database"
 
 export async function updateCustomer(formData: FormData) {
-  const { supabase, user, staff } = await requireStaff()
+  const { supabase, staff } = await requireStaff()
   const id = formData.get('id') as string
+  const applicationId = formData.get('applicationId') as string
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
   const phone = formData.get('phone') as string
@@ -15,6 +15,16 @@ export async function updateCustomer(formData: FormData) {
   const monthlyIncome = formData.get('monthlyIncome') ? parseInt(formData.get('monthlyIncome') as string) : null
   const assignedStaffId = formData.get('assignedStaffId') as string
   const notes = formData.get('notes') as string
+  const countryId = formData.get('countryId') as string
+  const visaType = formData.get('visaType') as string
+  const applicationStatus = formData.get('applicationStatus') as string
+  const rejectionReason = formData.get('rejectionReason') as string
+  const travelMethod = formData.get('travelMethod') as string
+  const accommodation = formData.get('accommodation') as string
+  const occupation = formData.get('occupation') as string
+  const withChildren = formData.get('withChildren') as string
+  const nationality = formData.get('nationality') as string
+  const tagIds = formData.getAll('tagIds').map(value => String(value))
   
   // Passport Data
   const passportNo = formData.get('passportNo') as string
@@ -33,51 +43,48 @@ export async function updateCustomer(formData: FormData) {
   // Max 100
   profileScore = Math.min(100, profileScore)
 
-  const isAdmin = staff.role === 'admin'
-
-  const updateData: TablesUpdate<'customers'> = {
-    first_name: firstName,
-    last_name: lastName,
-    phone,
-    email: email || null,
-    financial_status: financialStatus || null,
-    monthly_income: monthlyIncome,
-    notes: notes || null,
-    profile_score: profileScore,
-    passport_no: passportNo || null,
-    passport_expiry: passportExpiry || null,
-    passport_issuing_country: passportIssuingCountry,
-  }
-
-  // Sadece adminler atama değiştirebilir. Danışmanlar değiştiremez.
-  if (isAdmin) {
-    updateData.assigned_staff_id = assignedStaffId || null;
-  }
-
-  const { error } = await supabase
-    .from('customers')
-    .update(updateData)
-    .eq('id', id)
-    .eq('is_deleted', false)
+  const { error } = await supabase.rpc('update_customer_application_v1', {
+    p_customer_id: id,
+    p_application_id: applicationId,
+    p_payload: {
+      first_name: firstName,
+      last_name: lastName,
+      phone,
+      email: email || null,
+      financial_status: financialStatus || 'orta',
+      monthly_income: monthlyIncome,
+      notes: notes || null,
+      profile_score: profileScore,
+      passport_no: passportNo || null,
+      passport_expiry: passportExpiry || null,
+      passport_issuing_country: passportIssuingCountry,
+      assigned_staff_id: staff.role === 'admin' ? (assignedStaffId || null) : undefined,
+      country_id: countryId,
+      visa_type: visaType,
+      status: applicationStatus,
+      rejection_reason: rejectionReason || null,
+      travel_method: travelMethod || null,
+      accommodation: accommodation || null,
+      occupation: occupation || null,
+      with_children: withChildren || null,
+      nationality: nationality || null,
+      tag_ids: tagIds,
+    },
+  })
 
   if (error) {
     console.error("Update error:", error.message)
     redirect(`/customers/${id}/edit?error=` + encodeURIComponent(error.message))
   }
 
-  await supabase.from('activity_log').insert([{
-    customer_id: id,
-    action: "Müşteri bilgileri güncellendi",
-    performed_by: user?.email || 'Danışman',
-  }])
-
   revalidatePath(`/customers/${id}`)
+  revalidatePath('/applications')
   revalidatePath('/customers')
   redirect(`/customers/${id}`)
 }
 
 export async function addAppointment(formData: FormData) {
-  const { supabase, user } = await requireStaff()
+  const { supabase } = await requireStaff()
   const customerId = formData.get('customerId') as string
   const applicationId = formData.get('applicationId') as string
   const date = formData.get('date') as string
@@ -86,27 +93,17 @@ export async function addAppointment(formData: FormData) {
   const system = formData.get('appointmentSystem') as string || 'VFS'
   const datetime = `${date}T${time}:00`
 
-  const { error } = await supabase
-    .from('applications')
-    .update({
-      appointment_date: datetime,
-      appointment_location: location,
-      status: 'randevu_alindi'
-    })
-    .eq('id', applicationId)
+  const { error } = await supabase.rpc('set_application_appointment_v1', {
+    p_application_id: applicationId,
+    p_appointment_date: datetime,
+    p_location: location,
+    p_system: system,
+  })
 
   if (error) {
     console.error("Appointment error:", error.message)
     redirect(`/customers/${customerId}?error=` + encodeURIComponent(error.message))
   }
-
-  // Log activity
-  await supabase.from('activity_log').insert([{
-    application_id: applicationId,
-    customer_id: customerId,
-    action: `Randevu eklendi: ${system} — ${new Date(datetime).toLocaleString('tr-TR')} (${location})`,
-    performed_by: user?.email || 'Danışman',
-  }])
 
   revalidatePath(`/customers/${customerId}`)
   redirect(`/customers/${customerId}`)

@@ -12,6 +12,9 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 - **Müşteri Portalı (Extranet)**: Müşterilerin kendilerine özel güvenli (token tabanlı) link üzerinden başvuru süreçlerini canlı takip edebilmeleri.
 - **Audit Log (Sistem Logu)**: Hangi personelin hangi müşteri üzerinde ne zaman değişiklik yaptığının detaylı kaydı.
 - **Görev ve Gerçek Bildirimler**: Personel bazlı manuel görevler; randevu, geciken evrak, bekleyen ödeme ve hareketsiz başvuru hatırlatmaları; kişiye özel okundu durumu.
+- **Başvuru Süreç Panosu**: Kontrollü durum geçişleri, personel/ülke/tarih/gecikme filtreleri ve atomik audit kaydı.
+- **Müşteri Deneyimi**: Kanonik başvuru bilgileri, renkli etiketler, hızlı iletişim/not eylemleri ve birleşik müşteri timeline'ı.
+- **Operasyon Dashboard'u**: Aylık başvuru/onay/red/gelir metrikleri ile süresi dolan veya altı ay içinde bitecek pasaport uyarıları.
 - **Yedekleme ve Dışa Aktarma**: Tam sistem yedeğini JSON olarak indirebilme, müşteri verilerini CSV olarak dışa aktarabilme.
 
 ## Teknoloji Yığını
@@ -96,7 +99,7 @@ Faz 3 alt aşama takibi:
 - **Faz 3.2 — Tamamlandı:** tek şirket arayüzü, şema temizliği ve production doğrulaması
 - **Acil Paket H2 — Tamamlandı:** müşteri soft delete, Arşiv, kontrollü kalıcı silme ve production doğrulaması (`docs/H2_CUSTOMER_ARCHIVE_REPORT.md`)
 - **Faz 3.3 — Tamamlandı:** 3.3.1–3.3.7 bitti; görevler, kişisel bildirimler, otomatik hatırlatmalar, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_3_IMPLEMENTATION_REPORT.md`)
-- **Faz 3.4 — Bekliyor:** başvuru süreç panosu
+- **Faz 3.4 — Uygulama tamamlandı, production doğrulaması bekliyor:** süreç panosu, başvuru profil alanları, etiketler, dashboard metrikleri, hızlı eylemler ve timeline (`docs/PHASE_3_4_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.5 — Bekliyor:** müşteri iletişimi ve portal
 - **Faz 3.6 — Bekliyor:** KVKK ve veri yaşam döngüsü
 - **Faz 3.7 — Bekliyor:** izleme ve iş sürekliliği

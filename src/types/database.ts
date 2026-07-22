@@ -94,52 +94,70 @@ export type Database = {
       }
       applications: {
         Row: {
+          accommodation: string | null
           appointment_date: string | null
           appointment_location: string | null
           assigned_staff_id: string | null
           consulate_fee: number
           country: string
+          country_id: string | null
           created_at: string
           customer_id: string
           id: string
+          nationality: string | null
+          occupation: string | null
           rejection_reason: string | null
           service_fee: number
           status: string
           total_fee: number
+          travel_method: string | null
           updated_at: string
           visa_type: string
+          with_children: boolean | null
         }
         Insert: {
+          accommodation?: string | null
           appointment_date?: string | null
           appointment_location?: string | null
           assigned_staff_id?: string | null
           consulate_fee?: number
           country: string
+          country_id?: string | null
           created_at?: string
           customer_id: string
           id?: string
+          nationality?: string | null
+          occupation?: string | null
           rejection_reason?: string | null
           service_fee?: number
           status?: string
           total_fee?: number
+          travel_method?: string | null
           updated_at?: string
           visa_type?: string
+          with_children?: boolean | null
         }
         Update: {
+          accommodation?: string | null
           appointment_date?: string | null
           appointment_location?: string | null
           assigned_staff_id?: string | null
           consulate_fee?: number
           country?: string
+          country_id?: string | null
           created_at?: string
           customer_id?: string
           id?: string
+          nationality?: string | null
+          occupation?: string | null
           rejection_reason?: string | null
           service_fee?: number
           status?: string
           total_fee?: number
+          travel_method?: string | null
           updated_at?: string
           visa_type?: string
+          with_children?: boolean | null
         }
         Relationships: [
           {
@@ -147,6 +165,13 @@ export type Database = {
             columns: ["assigned_staff_id"]
             isOneToOne: false
             referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_country_id_fk"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
             referencedColumns: ["id"]
           },
           {
@@ -319,6 +344,49 @@ export type Database = {
             columns: ["country_id"]
             isOneToOne: false
             referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_tags: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_tags_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_tags_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
             referencedColumns: ["id"]
           },
         ]
@@ -678,6 +746,27 @@ export type Database = {
         }
         Relationships: []
       }
+      tags: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           application_id: string | null
@@ -910,8 +999,24 @@ export type Database = {
       }
     }
     Functions: {
+      add_customer_quick_note_v1: {
+        Args: { p_content: string; p_customer_id: string }
+        Returns: string
+      }
+      application_status_transition_allowed: {
+        Args: { p_from: string; p_to: string }
+        Returns: boolean
+      }
       archive_customers_v1: {
         Args: { p_customer_ids: string[] }
+        Returns: number
+      }
+      bulk_update_application_status_v1: {
+        Args: {
+          p_action?: string
+          p_application_ids: string[]
+          p_status: string
+        }
         Returns: number
       }
       can_access_application: {
@@ -960,6 +1065,19 @@ export type Database = {
         Args: { p_customer_ids: string[] }
         Returns: number
       }
+      set_application_appointment_v1: {
+        Args: {
+          p_application_id: string
+          p_appointment_date: string
+          p_location: string
+          p_system?: string
+        }
+        Returns: Json
+      }
+      set_customer_tags_v1: {
+        Args: { p_customer_id: string; p_tag_ids: string[] }
+        Returns: number
+      }
       set_task_status_v1: {
         Args: { p_status: string; p_task_id: string }
         Returns: boolean
@@ -972,6 +1090,14 @@ export type Database = {
           p_application_id: string
           p_rejection_reason?: string
           p_status: string
+        }
+        Returns: Json
+      }
+      update_customer_application_v1: {
+        Args: {
+          p_application_id: string
+          p_customer_id: string
+          p_payload: Json
         }
         Returns: Json
       }

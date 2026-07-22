@@ -6,6 +6,7 @@ import { Search, Filter, Clock, CheckCircle2, AlertCircle, FileText, Calendar, L
 import type { LucideIcon } from "lucide-react";
 import CustomerActionMenu from "./CustomerActionMenu";
 import { toast } from "sonner";
+import CustomerQuickActions from "./CustomerQuickActions";
 
 type Customer = {
   id: string;
@@ -19,6 +20,7 @@ type Customer = {
   status?: string | null;
   latest_application_id?: string | null;
   assigned_staff_id: string | null;
+  tags: { id: string; name: string; color: string }[];
 };
 
 type StaffOption = {
@@ -45,6 +47,13 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
   const router = useRouter();
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [tagFilter, setTagFilter] = useState("all");
+
+  const availableTags = useMemo(() => {
+    const tagMap = new Map<string, { id: string; name: string; color: string }>();
+    customers.forEach(customer => customer.tags.forEach(tag => tagMap.set(tag.id, tag)));
+    return [...tagMap.values()].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+  }, [customers]);
   
   // Bulk Selection State
   const [selected, setSelected] = useState<string[]>([]);
@@ -62,9 +71,10 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
         (c.country || "").toLowerCase().includes(q);
       const matchesStatus =
         statusFilter === "all" || (c.status || "profil_analizi") === statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesTag = tagFilter === "all" || c.tags.some(tag => tag.id === tagFilter);
+      return matchesSearch && matchesStatus && matchesTag;
     });
-  }, [customers, search, statusFilter]);
+  }, [customers, search, statusFilter, tagFilter]);
 
   const toggleSelect = (id: string) => {
     setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -264,6 +274,17 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
               ))}
             </select>
           </div>
+          <div className="flex items-center px-4 py-2.5 bg-slate-50 dark:bg-[#060c18] border border-slate-200 dark:border-[#1f2937] rounded-xl">
+            <select
+              aria-label="Etikete göre filtrele"
+              value={tagFilter}
+              onChange={event => setTagFilter(event.target.value)}
+              className="bg-transparent focus:outline-none text-sm font-medium text-slate-700 dark:text-slate-300 min-w-[140px] appearance-none cursor-pointer"
+            >
+              <option value="all">Tüm Etiketler</option>
+              {availableTags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -327,6 +348,13 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                           <Link href={`/customers/${customer.id}`} className="font-medium text-slate-900 dark:text-slate-200 group-hover:text-blue-400 transition-colors">
                             {customer.first_name} {customer.last_name}
                           </Link>
+                          {customer.tags.length > 0 && (
+                            <div className="mt-1 flex max-w-[220px] flex-wrap gap-1" data-testid={`customer-tags-${customer.id}`}>
+                              {customer.tags.map(tag => (
+                                <span key={tag.id} className="rounded-full px-2 py-0.5 text-[9px] font-bold text-white" style={{ backgroundColor: tag.color }}>{tag.name}</span>
+                              ))}
+                            </div>
+                          )}
                           {customer.profile_score != null && (
                             <div className="flex items-center gap-1.5 mt-0.5">
                               <div className="w-10 h-1 bg-slate-200 dark:bg-[#1f2937] rounded-full overflow-hidden">
@@ -362,11 +390,14 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                       {new Date(customer.created_at).toLocaleDateString('tr-TR')}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <CustomerActionMenu 
-                        customerId={customer.id} 
-                        isAdmin={isAdmin} 
-                        currentStaffId={customer.assigned_staff_id ?? undefined}
-                      />
+                      <div className="flex items-center justify-end gap-1">
+                        <CustomerQuickActions customerId={customer.id} firstName={customer.first_name} phone={customer.phone} email={customer.email} />
+                        <CustomerActionMenu
+                          customerId={customer.id}
+                          isAdmin={isAdmin}
+                          currentStaffId={customer.assigned_staff_id ?? undefined}
+                        />
+                      </div>
                     </td>
                   </tr>
                 );
@@ -407,6 +438,13 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                       </Link>
                       <CustomerActionMenu customerId={customer.id} isAdmin={isAdmin} currentStaffId={customer.assigned_staff_id ?? undefined} />
                     </div>
+                    {customer.tags.length > 0 && (
+                      <div className="mb-2 flex flex-wrap gap-1" data-testid={`customer-tags-mobile-${customer.id}`}>
+                        {customer.tags.map(tag => (
+                          <span key={tag.id} className="rounded-full px-2 py-0.5 text-[9px] font-bold text-white" style={{ backgroundColor: tag.color }}>{tag.name}</span>
+                        ))}
+                      </div>
+                    )}
                     
                     <div className="flex flex-wrap gap-2 mb-2 text-[11px]">
                       {customer.country ? (
@@ -427,6 +465,10 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
                       <p className="flex items-center gap-1.5"><Search className="w-3 h-3" /> {customer.phone || 'Tel yok'}</p>
                       <p className="flex items-center gap-1.5"><FileText className="w-3 h-3" /> {customer.email || 'E-posta yok'}</p>
+                    </div>
+
+                    <div className="mt-2">
+                      <CustomerQuickActions customerId={customer.id} firstName={customer.first_name} phone={customer.phone} email={customer.email} />
                     </div>
 
                     {customer.profile_score != null && (
