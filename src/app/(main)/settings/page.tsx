@@ -7,12 +7,14 @@ export const revalidate = 0;
 export default async function SettingsPage() {
   const { supabase } = await requireAdminPage();
 
-  const [{ data: company, error }, { data: templates, error: templatesError }] = await Promise.all([
+  const [{ data: company, error }, { data: templates, error: templatesError }, { data: privacyNotices, error: privacyError }, { data: privacySettings, error: settingsError }] = await Promise.all([
     supabase.from('tenants').select('id, company_name, email, phone, created_at').single(),
     supabase.from('message_templates').select('*').order('channel').order('name'),
+    supabase.from('privacy_notice_versions').select('*').order('effective_at', { ascending: false }),
+    supabase.from('privacy_settings').select('*').single(),
   ]);
 
-  if (error || !company || templatesError) {
+  if (error || !company || templatesError || privacyError || settingsError || !privacySettings) {
     throw new Error("Tek şirket ayarları yüklenemedi.");
   }
 
@@ -25,7 +27,7 @@ export default async function SettingsPage() {
           </h1>
           <p className="text-slate-500 text-xs mt-0.5">Nobel Vize şirket bilgilerini, güvenliği ve sistem verilerini yönetin.</p>
         </div>
-        <SettingsClient company={company} messageTemplates={templates ?? []} />
+        <SettingsClient company={company} messageTemplates={templates ?? []} privacyNotices={privacyNotices ?? []} privacySettings={privacySettings} />
       </div>
     </div>
   );

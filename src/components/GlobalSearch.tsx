@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, X, User, Globe, FileText, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { maskPassport, maskPhone } from "@/lib/masking";
 
 interface GlobalSearchProps {
   open: boolean;
@@ -132,7 +133,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                               {c.first_name} {c.last_name}
                             </p>
                             <p className="text-xs text-slate-500 mt-0.5 truncate">
-                              {c.phone ? `📞 ${c.phone}` : ''} {c.passport_no ? `🛂 ${c.passport_no}` : ''}
+                              {c.phone ? `📞 ${maskPhone(c.phone)}` : ''} {c.passport_no ? `🛂 ${maskPassport(c.passport_no)}` : ''}
                             </p>
                           </div>
                           <ArrowRight className="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />

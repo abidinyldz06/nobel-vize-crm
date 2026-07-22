@@ -7,7 +7,10 @@ export const revalidate = 0;
 
 export default async function CustomerArchivePage() {
   const { supabase } = await requireAdminPage();
-  const { data, error } = await supabase.rpc("list_archived_customers_v1");
+  const [{ data, error }, { data: privacyCandidates, error: privacyError }] = await Promise.all([
+    supabase.rpc("list_archived_customers_v1"),
+    supabase.rpc("list_archived_customer_privacy_v1"),
+  ]);
 
   return (
     <div className="min-h-screen bg-white p-6 dark:bg-[#060d1a]">
@@ -19,16 +22,16 @@ export default async function CustomerArchivePage() {
           <h1 className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
             <Archive className="h-5 w-5 text-amber-500" /> Müşteri Arşivi
           </h1>
-          <p className="mt-0.5 text-xs text-slate-500">Arşivlenen müşterileri geri yükleyin veya 30 gün sonra kalıcı silin.</p>
+          <p className="mt-0.5 text-xs text-slate-500">Arşiv kayıtlarını geri yükleyin veya onaylı talep, bekleme süresi ve anonimleştirme sonrasında kalıcı silin.</p>
         </div>
       </div>
 
-      {error ? (
+      {error || privacyError ? (
         <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-500">
-          Arşiv yüklenemedi: {error.message}
+          Arşiv yüklenemedi: {error?.message || privacyError?.message}
         </div>
       ) : (
-        <CustomerArchiveTable customers={(data ?? []) as ArchivedCustomer[]} />
+        <CustomerArchiveTable customers={(data ?? []) as ArchivedCustomer[]} privacyCandidates={privacyCandidates ?? []} />
       )}
     </div>
   );

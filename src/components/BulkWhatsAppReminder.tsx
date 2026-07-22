@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MessageCircle, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { maskPhone } from "@/lib/masking";
 
 interface ReminderCustomer {
   customer: {
@@ -110,7 +111,7 @@ export default function BulkWhatsAppReminder({ customersList }: { customersList:
                           {c.customer.first_name} {c.customer.last_name}
                         </p>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          {c.docs.length} evrak gecikti • {c.customer.phone || 'Telefon yok'}
+                          {c.docs.length} evrak gecikti • {c.customer.phone ? maskPhone(c.customer.phone) : 'Telefon yok'}
                         </p>
                       </div>
                     </div>

@@ -4,6 +4,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { Users, Plus, X, Loader2, Trash2 } from "lucide-react";
 import type { Tables } from "@/types/database";
+import { maskPassport } from "@/lib/masking";
 
 export default function FamilyMembersPanel({ customerId, initialMembers }: { customerId: string, initialMembers: Tables<'family_members'>[] }) {
   const [members, setMembers] = useState<Tables<'family_members'>[]>(initialMembers || []);
@@ -127,7 +128,7 @@ export default function FamilyMembersPanel({ customerId, initialMembers }: { cus
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-200">{m.full_name}</p>
                 <p className="text-[10px] text-slate-500 mt-0.5">
                   <span className="bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded">{m.relationship}</span>
-                  {m.passport_no && <span className="ml-2">Pasaport: {m.passport_no}</span>}
+                  {m.passport_no && <span className="ml-2">Pasaport: {maskPassport(m.passport_no)}</span>}
                 </p>
               </div>
               <button onClick={() => handleDelete(m.id)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all">

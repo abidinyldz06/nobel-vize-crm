@@ -16,6 +16,8 @@ import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
 import MessageComposer from "@/components/MessageComposer";
 import CustomerActionMenu from "@/components/CustomerActionMenu";
 import PortalShareButton from "@/components/PortalShareButton";
+import CustomerPrivacyPanel from "@/components/CustomerPrivacyPanel";
+import SensitiveValue from "@/components/SensitiveValue";
 import {
   ACCOMMODATION_OPTIONS,
   NATIONALITY_OPTIONS,
@@ -58,9 +60,13 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
   const activeApp = applications?.[0];
 
-  const [{ data: messageTemplates }, { data: company }] = await Promise.all([
+  const [{ data: messageTemplates }, { data: company }, { data: privacyNotices }, { data: privacyDeliveries }, { data: customerConsents }, { data: dataRequests }] = await Promise.all([
     supabase.from('message_templates').select('*').eq('is_active', true).order('channel').order('name'),
     supabase.from('tenants').select('company_name').single(),
+    supabase.from('privacy_notice_versions').select('*').order('effective_at', { ascending: false }),
+    supabase.from('customer_privacy_notices').select('*').eq('customer_id', id).order('delivered_at', { ascending: false }),
+    supabase.from('customer_consents').select('*').eq('customer_id', id).order('decision_at', { ascending: false }).order('created_at', { ascending: false }),
+    supabase.from('data_subject_requests').select('*').eq('customer_id', id).order('requested_at', { ascending: false }),
   ]);
 
   let documents = null;
@@ -175,9 +181,9 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
             <div className="space-y-2 text-sm border-t border-slate-200 dark:border-[#1f2937] pt-4">
               {[
-                { label: "Telefon", value: customer.phone },
-                { label: "E-posta", value: customer.email },
-                { label: "Pasaport", value: customer.passport_no },
+                { label: "Telefon", value: customer.phone ? <SensitiveValue value={customer.phone} kind="phone" /> : null },
+                { label: "E-posta", value: customer.email ? <SensitiveValue value={customer.email} kind="email" /> : null },
+                { label: "Pasaport", value: customer.passport_no ? <SensitiveValue value={customer.passport_no} kind="passport" /> : null },
                 { label: "Geçerlilik", value: customer.passport_expiry ? new Date(customer.passport_expiry).toLocaleDateString('tr-TR') : null },
                 { label: "Kayıt", value: new Date(customer.created_at).toLocaleDateString('tr-TR') },
                 { label: "Finansal", value: customer.financial_status ? { dusuk: "Düşük", orta: "Orta", iyi: "İyi", yuksek: "Yüksek" }[customer.financial_status as string] || customer.financial_status : null },
@@ -232,6 +238,15 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
           {/* Communications */}
           {activeApp && <CommunicationPanel customerId={customer.id} applicationId={activeApp.id} initialComms={communications ?? []} />}
+
+          <CustomerPrivacyPanel
+            customerId={customer.id}
+            notices={privacyNotices ?? []}
+            deliveries={privacyDeliveries ?? []}
+            consents={customerConsents ?? []}
+            requests={dataRequests ?? []}
+            isAdmin={isAdmin}
+          />
 
           {/* Visa History */}
           <VisaHistoryPanel customerId={customer.id} initialHistory={visaHistory ?? []} />

@@ -7,6 +7,7 @@ import { readSheet } from "read-excel-file/browser";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { maskPassport, maskPhone } from "@/lib/masking";
 
 interface ParsedRow {
   first_name: string;
@@ -226,9 +227,9 @@ export default function ImportCustomers() {
                     <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                       <td className={`px-4 py-3 ${!row.first_name ? 'text-red-500 italic' : 'text-slate-700 dark:text-slate-300'}`}>{row.first_name || 'Eksik'}</td>
                       <td className={`px-4 py-3 ${!row.last_name ? 'text-red-500 italic' : 'text-slate-700 dark:text-slate-300'}`}>{row.last_name || 'Eksik'}</td>
-                      <td className={`px-4 py-3 ${!row.phone ? 'text-red-500 italic' : 'text-slate-700 dark:text-slate-300'}`}>{row.phone || 'Eksik'}</td>
+                      <td className={`px-4 py-3 ${!row.phone ? 'text-red-500 italic' : 'text-slate-700 dark:text-slate-300'}`}>{row.phone ? maskPhone(row.phone) : 'Eksik'}</td>
                       <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{row.country || '-'}</td>
-                      <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{row.passport_no || '-'}</td>
+                      <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{row.passport_no ? maskPassport(row.passport_no) : '-'}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -16,6 +16,8 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 - **Müşteri Deneyimi**: Kanonik başvuru bilgileri, renkli etiketler, hızlı iletişim/not eylemleri ve birleşik müşteri timeline'ı.
 - **Yönetilebilir İletişim**: WhatsApp/e-posta şablonları, değişkenli mesaj hazırlama, iletişim durumları ve audit izi.
 - **Kontrollü Müşteri Portalı**: Süreli bağlantı yenileme/iptal akışı ile başvuru, evrak, randevu, ödeme ve geçmiş özeti.
+- **KVKK ve Veri Yaşam Döngüsü**: Sürümlü aydınlatma/rıza kanıtı, ilgili kişi talepleri, veri paketi, saklama kilidi, Storage temizliği ve kontrollü anonimleştirme.
+- **Kişisel Veri Maskeleme**: Liste, arama ve özet ekranlarında telefon, e-posta ve pasaport bilgilerinin sınırlı gösterimi.
 - **Operasyon Dashboard'u**: Aylık başvuru/onay/red/gelir metrikleri ile süresi dolan veya altı ay içinde bitecek pasaport uyarıları.
 - **Yedekleme ve Dışa Aktarma**: Tam sistem yedeğini JSON olarak indirebilme, müşteri verilerini CSV olarak dışa aktarabilme.
 
@@ -103,7 +105,7 @@ Faz 3 alt aşama takibi:
 - **Faz 3.3 — Tamamlandı:** 3.3.1–3.3.7 bitti; görevler, kişisel bildirimler, otomatik hatırlatmalar, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_3_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.4 — Tamamlandı:** 3.4.1–3.4.6 bitti; süreç panosu, başvuru profil alanları, etiketler, dashboard metrikleri, hızlı eylemler, timeline, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_4_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.5 — Tamamlandı:** 3.5.1–3.5.6 bitti; yönetilebilir iletişim, durum/audit kaydı, kontrollü portal, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_5_IMPLEMENTATION_REPORT.md`)
-- **Faz 3.6 — Bekliyor:** KVKK ve veri yaşam döngüsü
+- **Faz 3.6 — Devam ediyor:** 3.6.1–3.6.5 bitti; kalite kapıları, production migration ve canlı doğrulama sürüyor (`docs/PHASE_3_6_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.7 — Bekliyor:** izleme ve iş sürekliliği
 - **Faz 3.8 — Bekliyor:** son kalite ve kullanıcı kabulü
 

@@ -1,21 +1,24 @@
 "use client"
 import { useState } from "react";
-import { Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database, MessagesSquare } from "lucide-react";
+import { Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database, MessagesSquare, ScrollText } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import AuditLog from "@/components/AuditLog";
 import BackupPanel from "@/components/BackupPanel";
 import type { Tables, TablesUpdate } from "@/types/database";
 import MessageTemplatesSettings from "@/components/MessageTemplatesSettings";
+import PrivacyNoticeSettings from "@/components/PrivacyNoticeSettings";
+import PrivacyLifecycleSettings from "@/components/PrivacyLifecycleSettings";
 
 const TABS = [
   { id: "company", label: "Şirket Bilgileri", icon: Building2 },
   { id: "messages", label: "Mesaj Şablonları", icon: MessagesSquare },
+  { id: "privacy", label: "KVKK Metinleri", icon: ScrollText },
   { id: "security", label: "Güvenlik", icon: Shield },
   { id: "audit", label: "Sistem Log", icon: ClipboardList },
   { id: "backup", label: "Veri Yedekleme", icon: Database },
 ];
 
-export default function SettingsClient({ company, messageTemplates }: { company: Tables<'tenants'>; messageTemplates: Tables<'message_templates'>[] }) {
+export default function SettingsClient({ company, messageTemplates, privacyNotices, privacySettings }: { company: Tables<'tenants'>; messageTemplates: Tables<'message_templates'>[]; privacyNotices: Tables<'privacy_notice_versions'>[]; privacySettings: Tables<'privacy_settings'> }) {
   const supabase = createSupabaseBrowserClient();
   const [activeTab, setActiveTab] = useState("company");
   const [saving, setSaving] = useState(false);
@@ -236,13 +239,17 @@ export default function SettingsClient({ company, messageTemplates }: { company:
           <MessageTemplatesSettings initialTemplates={messageTemplates} />
         )}
 
+        {activeTab === "privacy" && (
+          <div className="space-y-5"><PrivacyLifecycleSettings settings={privacySettings} /><PrivacyNoticeSettings initialNotices={privacyNotices} /></div>
+        )}
+
         {/* Backup Tab */}
         {activeTab === "backup" && (
           <BackupPanel />
         )}
 
         {/* Save Button */}
-        {activeTab !== "audit" && activeTab !== "backup" && activeTab !== "messages" && (
+        {activeTab !== "audit" && activeTab !== "backup" && activeTab !== "messages" && activeTab !== "privacy" && (
           <div className="flex justify-end pt-2">
           <button
             onClick={handleSave}

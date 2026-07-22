@@ -129,6 +129,34 @@ describe("security regression guards", () => {
     assert.doesNotMatch(communicationPanel, /\.from\(["']communications["']\)\s*\.insert/i);
     assert.doesNotMatch(portalShare, /\.from\(["']customers["']\)\s*\.update/i);
   });
+
+  it("keeps privacy lifecycle operations admin-controlled and backup-safe", async () => {
+    const [foundation, lifecycle, restore, backupRoute, exportRoute, documentRoute, anonymizeRoute] = await Promise.all([
+      readFile(path.join(projectRoot, "supabase/migrations/202607220010_phase36_privacy_foundation.sql"), "utf8"),
+      readFile(path.join(projectRoot, "supabase/migrations/202607220011_phase36_data_lifecycle.sql"), "utf8"),
+      readFile(path.join(projectRoot, "supabase/migrations/202607220012_phase36_privacy_backup.sql"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/backup/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/privacy/customers/[id]/export/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/privacy/customers/[id]/documents/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/privacy/customers/[id]/anonymize/route.ts"), "utf8"),
+    ]);
+
+    assert.match(foundation, /REVOKE INSERT, UPDATE, DELETE ON public\.customer_consents FROM authenticated/i);
+    assert.match(lifecycle, /approved_privacy_request_required/);
+    assert.match(lifecycle, /archive_grace_period_required/);
+    assert.match(lifecycle, /customer_retention_hold_active/);
+    assert.match(lifecycle, /storage_cleanup_required/);
+    assert.match(lifecycle, /anonymized_at IS NOT NULL/);
+    assert.match(lifecycle, /make_interval\(days => grace_days\)/);
+    assert.match(exportRoute, /requireAdmin\(\)/);
+    assert.match(documentRoute, /list_archived_customer_privacy_v1/);
+    assert.match(documentRoute, /requireAdmin\(\)/);
+    assert.match(anonymizeRoute, /requireAdmin\(\)/);
+    for (const table of ["privacy_settings", "privacy_notice_versions", "customer_privacy_notices", "customer_consents", "data_subject_requests"]) {
+      assert.match(backupRoute, new RegExp(`"${table}"`));
+      assert.match(restore, new RegExp(`public\\.${table}`));
+    }
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {
