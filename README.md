@@ -11,6 +11,7 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 - **Rol Bazlı Yetkilendirme**: Yönetici (Admin) ve Danışman erişim yetkileri. Danışmanlar sadece kendi müşterilerini görebilirken yöneticiler tüm sistemi görebilir.
 - **Müşteri Portalı (Extranet)**: Müşterilerin kendilerine özel güvenli (token tabanlı) link üzerinden başvuru süreçlerini canlı takip edebilmeleri.
 - **Audit Log (Sistem Logu)**: Hangi personelin hangi müşteri üzerinde ne zaman değişiklik yaptığının detaylı kaydı.
+- **Görev ve Gerçek Bildirimler**: Personel bazlı manuel görevler; randevu, geciken evrak, bekleyen ödeme ve hareketsiz başvuru hatırlatmaları; kişiye özel okundu durumu.
 - **Yedekleme ve Dışa Aktarma**: Tam sistem yedeğini JSON olarak indirebilme, müşteri verilerini CSV olarak dışa aktarabilme.
 
 ## Teknoloji Yığını
@@ -94,7 +95,7 @@ Faz 3 alt aşama takibi:
 - **Faz 3.1 — Tamamlandı:** production hazırlığı, güvenli migration ve yayın doğrulaması
 - **Faz 3.2 — Tamamlandı:** tek şirket arayüzü, şema temizliği ve production doğrulaması
 - **Acil Paket H2 — Tamamlandı:** müşteri soft delete, Arşiv, kontrollü kalıcı silme ve production doğrulaması (`docs/H2_CUSTOMER_ARCHIVE_REPORT.md`)
-- **Faz 3.3 — Bekliyor:** görev ve gerçek bildirim sistemi
+- **Faz 3.3 — Production geçişi bekliyor:** 3.3.1–3.3.6 bitti; görevler, kişisel bildirimler, otomatik hatırlatmalar ve yerel regresyonlar tamamlandı (`docs/PHASE_3_3_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.4 — Bekliyor:** başvuru süreç panosu
 - **Faz 3.5 — Bekliyor:** müşteri iletişimi ve portal
 - **Faz 3.6 — Bekliyor:** KVKK ve veri yaşam döngüsü

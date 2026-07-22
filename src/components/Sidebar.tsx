@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Calendar, Settings, LogOut, Globe, BarChart3, UserCog } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, Settings, LogOut, Globe, BarChart3, UserCog, ListTodo } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import type { CurrentStaffProfile } from "@/types/staff-profile";
 
@@ -26,6 +26,7 @@ export default function Sidebar({
     { href: "/customers", icon: Users, label: "Müşteriler" },
     { href: "/countries", icon: Globe, label: "Ülke & Evraklar" },
     { href: "/appointments", icon: Calendar, label: "Randevular" },
+    { href: "/tasks", icon: ListTodo, label: "Görevler" },
   ];
 
   if (userRole === "Yönetici") {

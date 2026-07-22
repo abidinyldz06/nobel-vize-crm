@@ -524,6 +524,83 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          customer_id: string | null
+          href: string | null
+          id: string
+          idempotency_key: string | null
+          is_read: boolean
+          message: string | null
+          read_at: string | null
+          recipient_staff_id: string
+          task_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          href?: string | null
+          id?: string
+          idempotency_key?: string | null
+          is_read?: boolean
+          message?: string | null
+          read_at?: string | null
+          recipient_staff_id: string
+          task_id?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          href?: string | null
+          id?: string
+          idempotency_key?: string | null
+          is_read?: boolean
+          message?: string | null
+          read_at?: string | null
+          recipient_staff_id?: string
+          task_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_application_fk"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_customer_fk"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_recipient_staff_fk"
+            columns: ["recipient_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_task_fk"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -600,6 +677,95 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      tasks: {
+        Row: {
+          application_id: string | null
+          assigned_staff_id: string
+          completed_at: string | null
+          created_at: string
+          created_by_staff_id: string | null
+          customer_id: string | null
+          description: string | null
+          due_at: string
+          id: string
+          idempotency_key: string | null
+          priority: string
+          source_id: string | null
+          source_type: string
+          status: string
+          task_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_id?: string | null
+          assigned_staff_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by_staff_id?: string | null
+          customer_id?: string | null
+          description?: string | null
+          due_at: string
+          id?: string
+          idempotency_key?: string | null
+          priority?: string
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          task_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string | null
+          assigned_staff_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by_staff_id?: string | null
+          customer_id?: string | null
+          description?: string | null
+          due_at?: string
+          id?: string
+          idempotency_key?: string | null
+          priority?: string
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          task_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_application_fk"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_assigned_staff_fk"
+            columns: ["assigned_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_created_by_staff_fk"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_customer_fk"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tenants: {
         Row: {
@@ -764,6 +930,7 @@ export type Database = {
         Args: { p_payload: Json }
         Returns: Json
       }
+      create_task_v1: { Args: { p_payload: Json }; Returns: string }
       current_staff_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       list_archived_customers_v1: {
@@ -779,6 +946,11 @@ export type Database = {
           purge_eligible: boolean
         }[]
       }
+      mark_all_notifications_read_v1: { Args: never; Returns: number }
+      mark_notification_read_v1: {
+        Args: { p_notification_id: string }
+        Returns: boolean
+      }
       purge_deleted_customers_v1: {
         Args: { p_customer_ids: string[] }
         Returns: number
@@ -788,7 +960,12 @@ export type Database = {
         Args: { p_customer_ids: string[] }
         Returns: number
       }
+      set_task_status_v1: {
+        Args: { p_status: string; p_task_id: string }
+        Returns: boolean
+      }
       storage_document_id: { Args: { object_name: string }; Returns: string }
+      sync_operational_tasks_v1: { Args: never; Returns: number }
       update_application_status_v1: {
         Args: {
           p_action?: string

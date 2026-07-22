@@ -69,6 +69,23 @@ describe("security regression guards", () => {
     assert.match(migration, /IF NOT public\.is_admin\(\) THEN/);
     assert.match(migration, /Müşteri silindi:/);
   });
+
+  it("keeps tasks and notification reads behind recipient-scoped workflows", async () => {
+    const [taskRoute, notificationRoute, migration] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/tasks/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/notifications/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "supabase/migrations/202607220002_phase3_tasks_notifications.sql"), "utf8"),
+    ]);
+
+    assert.match(taskRoute, /create_task_v1/);
+    assert.match(taskRoute, /set_task_status_v1/);
+    assert.match(notificationRoute, /mark_notification_read_v1/);
+    assert.match(notificationRoute, /mark_all_notifications_read_v1/);
+    assert.doesNotMatch(notificationRoute, /\.from\(['"]activity_log['"]\)/);
+    assert.match(migration, /recipient_staff_id = public\.current_staff_id\(\)/);
+    assert.match(migration, /task_assignee_customer_mismatch/);
+    assert.match(migration, /REVOKE INSERT, UPDATE, DELETE ON TABLE public\.tasks, public\.notifications FROM authenticated/);
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {

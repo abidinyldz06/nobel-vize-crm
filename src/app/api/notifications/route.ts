@@ -10,11 +10,14 @@ export async function GET() {
     return authorizationErrorResponse(error);
   }
   
+  const { error: syncError } = await supabase.rpc('sync_operational_tasks_v1');
+  if (syncError) console.error('Notification task sync failed:', syncError.message);
+
   const { data: notifications, error } = await supabase
-    .from('activity_log')
-    .select('id, action, type, performed_by, created_at, application_id, customer_id, is_read')
+    .from('notifications')
+    .select('id, title, message, type, href, created_at, application_id, customer_id, task_id, is_read, read_at')
     .order('created_at', { ascending: false })
-    .limit(10);
+    .limit(20);
     
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -36,23 +39,14 @@ export async function PATCH(request: Request) {
   
   if (id) {
     const { error } = await supabase
-      .from('activity_log')
-      .update({ is_read: true })
-      .eq('id', id);
+      .rpc('mark_notification_read_v1', { p_notification_id: id });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   } else if (all === 'true') {
     const { error } = await supabase
-      .from('activity_log')
-      .update({ is_read: true })
-      .eq('is_read', false);
+      .rpc('mark_all_notifications_read_v1');
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   } else {
-    // Default fallback to update all (for backward compatibility if needed)
-    const { error } = await supabase
-      .from('activity_log')
-      .update({ is_read: true })
-      .eq('is_read', false);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Bildirim kimliği veya all=true gereklidir.' }, { status: 400 });
   }
   
   return NextResponse.json({ success: true });

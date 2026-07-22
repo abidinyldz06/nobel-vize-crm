@@ -1,18 +1,21 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, Clock, UserPlus, FileText, CreditCard, Calendar, Activity } from "lucide-react";
+import { Bell, Check, Clock, FileText, CreditCard, Calendar, Activity, ListTodo } from "lucide-react";
 import Link from "next/link";
 
 interface Notification {
   id: string;
-  action: string;
+  title: string;
+  message: string | null;
   type: string;
-  performed_by: string;
+  href: string | null;
   created_at: string;
   application_id: string | null;
   customer_id: string | null;
+  task_id: string | null;
   is_read: boolean;
+  read_at: string | null;
 }
 
 export default function NotificationCenter() {
@@ -74,22 +77,22 @@ export default function NotificationCenter() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'customer': return <UserPlus className="w-4 h-4 text-blue-500" />;
       case 'document': return <FileText className="w-4 h-4 text-amber-500" />;
       case 'payment': return <CreditCard className="w-4 h-4 text-emerald-500" />;
       case 'appointment': return <Calendar className="w-4 h-4 text-purple-500" />;
-      case 'status': return <Activity className="w-4 h-4 text-indigo-500" />;
+      case 'inactivity': return <Activity className="w-4 h-4 text-indigo-500" />;
+      case 'manual': return <ListTodo className="w-4 h-4 text-blue-500" />;
       default: return <Bell className="w-4 h-4 text-slate-500" />;
     }
   };
 
   const getBgColor = (type: string) => {
     switch (type) {
-      case 'customer': return 'bg-blue-500/10 border-blue-500/20';
       case 'document': return 'bg-amber-500/10 border-amber-500/20';
       case 'payment': return 'bg-emerald-500/10 border-emerald-500/20';
       case 'appointment': return 'bg-purple-500/10 border-purple-500/20';
-      case 'status': return 'bg-indigo-500/10 border-indigo-500/20';
+      case 'inactivity': return 'bg-indigo-500/10 border-indigo-500/20';
+      case 'manual': return 'bg-blue-500/10 border-blue-500/20';
       default: return 'bg-slate-500/10 border-slate-500/20';
     }
   };
@@ -112,6 +115,8 @@ export default function NotificationCenter() {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        type="button"
+        aria-label="Bildirimleri aç"
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-xl bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#1a2232] transition-all"
       >
@@ -152,7 +157,7 @@ export default function NotificationCenter() {
                 {notifications.map((n) => (
                   <Link
                     key={n.id}
-                    href={n.customer_id ? `/customers/${n.customer_id}` : "#"}
+                    href={n.href || (n.customer_id ? `/customers/${n.customer_id}` : "/tasks")}
                     onClick={() => {
                       setIsOpen(false);
                       if (!n.is_read) handleMarkAsRead(n.id);
@@ -165,17 +170,13 @@ export default function NotificationCenter() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={`text-xs ${!n.is_read ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-700 dark:text-slate-300'}`}>
-                          {n.action}
+                          {n.title}
                         </p>
+                        {n.message && <p className="mt-0.5 line-clamp-2 text-[10px] text-slate-500">{n.message}</p>}
                         <div className="flex items-center gap-2 mt-1">
                           <p className="text-[10px] text-slate-500 flex items-center gap-1">
                             <Clock className="w-3 h-3" /> {timeAgo(n.created_at)}
                           </p>
-                          {n.performed_by && (
-                            <p className="text-[10px] text-slate-400 truncate">
-                              • {n.performed_by}
-                            </p>
-                          )}
                         </div>
                       </div>
                       {!n.is_read && (
@@ -188,8 +189,8 @@ export default function NotificationCenter() {
             )}
           </div>
           <div className="px-4 py-2 border-t border-slate-100 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a] text-center">
-            <Link href="/dashboard" onClick={() => setIsOpen(false)} className="text-[10px] font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-              Tüm Aktiviteleri Gör
+            <Link href="/tasks" onClick={() => setIsOpen(false)} className="text-[10px] font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+              Tüm Görevleri Gör
             </Link>
           </div>
         </div>

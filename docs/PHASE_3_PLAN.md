@@ -74,12 +74,18 @@ veri kaybı riski nedeniyle Faz 3.3'ten önce uygulanır.
 
 ### Faz 3.3 — Görev ve gerçek bildirim sistemi
 
-Durum: **Bekliyor**
+Durum: **Uygulama ve yerel doğrulama tamamlandı — production geçişi bekliyor**
 
-- Personel bazlı görevler ve bildirimler
-- Randevu, eksik evrak, ödeme ve hareketsizlik hatırlatmaları
-- Bugün, geciken ve yaklaşan işler ekranı
-- Tekrarlı otomatik görevleri engelleyen idempotency kuralları
+- [x] **3.3.1 bitti:** personel bazlı görev ve alıcı bazlı gerçek bildirim veri modeli
+- [x] **3.3.2 bitti:** görev oluşturma, durum güncelleme ve kişisel okundu RPC'leri
+- [x] **3.3.3 bitti:** randevu, eksik evrak, ödeme ve hareketsizlik görev üreticileri
+- [x] **3.3.4 bitti:** Bugün, Geciken, Yaklaşan ve Tamamlanan görev ekranı
+- [x] **3.3.5 bitti:** otomatik görevler için idempotency ve atanan personel erişim kuralları
+- [x] **3.3.6 bitti:** backup/restore kapsamı, pgTAP, güvenlik ve Playwright regresyonları
+- [ ] **3.3.7:** GitHub kalite kapıları, production migration, yayın ve smoke doğrulaması
+
+Ayrıntılı uygulama ve doğrulama kaydı:
+`docs/PHASE_3_3_IMPLEMENTATION_REPORT.md`.
 
 ### Faz 3.4 — Başvuru süreç panosu
 
