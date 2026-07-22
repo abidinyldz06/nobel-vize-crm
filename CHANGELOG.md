@@ -23,6 +23,7 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
 - Mesaj değişkenleri için birim testleri ve iletişim/portal güvenlik regresyonları eklendi.
 - Şablon, iletişim ve portal yaşam döngüsü pgTAP kapsamına alındı.
 - Şablon yönetiminden portal iptaline uzanan oturumlu Playwright senaryosu eklendi.
+- Faz 3.5 migration'ları, Vercel production yayını ve canlı kullanıcı akışı doğrulandı.
 
 ## [Unreleased] — Faz 3.4 Başvuru ve Müşteri Operasyonu
 

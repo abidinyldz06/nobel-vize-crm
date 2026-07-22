@@ -103,14 +103,14 @@ Ayrıntılı uygulama ve doğrulama kaydı:
 
 ### Faz 3.5 — Müşteri iletişimi ve portal
 
-Durum: **Devam ediyor — yerel uygulama ve doğrulama tamamlandı**
+Durum: **Tamamlandı — 22 Temmuz 2026**
 
 - [x] **3.5.1 bitti:** admin tarafından yönetilen WhatsApp ve e-posta şablonları
 - [x] **3.5.2 bitti:** ortak mesaj hazırlayıcı ve kontrollü değişken çözümleme
 - [x] **3.5.3 bitti:** atomik iletişim kaydı, gönderim/başarısızlık durumu ve audit izi
 - [x] **3.5.4 bitti:** süreli portal bağlantısı yenileme, devre dışı bırakma ve yeniden açma
 - [x] **3.5.5 bitti:** portal başvuru, evrak, randevu, ödeme, geçmiş ve şirket iletişim özeti
-- [ ] **3.5.6 devam ediyor:** GitHub kalite kapıları, production migration, yayın ve canlı doğrulama
+- [x] **3.5.6 bitti:** GitHub kalite kapıları, production migration, yayın ve canlı doğrulama
 
 Not: WhatsApp ve e-posta işlemleri kullanıcının cihazındaki ilgili uygulamayı
 açar. Harici bir gönderim sağlayıcısı bağlı olmadığı için sistem teslimatı

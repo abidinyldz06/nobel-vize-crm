@@ -102,7 +102,7 @@ Faz 3 alt aşama takibi:
 - **Acil Paket H2 — Tamamlandı:** müşteri soft delete, Arşiv, kontrollü kalıcı silme ve production doğrulaması (`docs/H2_CUSTOMER_ARCHIVE_REPORT.md`)
 - **Faz 3.3 — Tamamlandı:** 3.3.1–3.3.7 bitti; görevler, kişisel bildirimler, otomatik hatırlatmalar, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_3_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.4 — Tamamlandı:** 3.4.1–3.4.6 bitti; süreç panosu, başvuru profil alanları, etiketler, dashboard metrikleri, hızlı eylemler, timeline, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_4_IMPLEMENTATION_REPORT.md`)
-- **Faz 3.5 — Devam ediyor:** 3.5.1–3.5.5 bitti; yönetilebilir iletişim, durum/audit kaydı ve kontrollü portal tamamlandı, production doğrulaması sürüyor (`docs/PHASE_3_5_IMPLEMENTATION_REPORT.md`)
+- **Faz 3.5 — Tamamlandı:** 3.5.1–3.5.6 bitti; yönetilebilir iletişim, durum/audit kaydı, kontrollü portal, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_5_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.6 — Bekliyor:** KVKK ve veri yaşam döngüsü
 - **Faz 3.7 — Bekliyor:** izleme ve iş sürekliliği
 - **Faz 3.8 — Bekliyor:** son kalite ve kullanıcı kabulü
