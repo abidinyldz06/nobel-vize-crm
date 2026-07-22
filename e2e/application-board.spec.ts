@@ -13,6 +13,7 @@ const passportExpiry = new Date(Date.now() + 90 * 86_400_000).toISOString().slic
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const isProductionSmoke = Boolean(process.env.PLAYWRIGHT_BASE_URL);
 
 if (!supabaseUrl || !serviceRoleKey) {
   throw new Error('Authenticated E2E tests require local Supabase environment variables.');
@@ -126,8 +127,13 @@ test('staff moves an application through an allowed audited transition', async (
   await page.getByLabel('Şifre').fill(testPassword);
   await page.getByRole('button', { name: 'Giriş Yap' }).click();
   await expect(page).toHaveURL('/dashboard');
-  await expect(page.getByText('Bu Ay Başvuru').locator('..')).toContainText('1');
-  await expect(page.getByText('Bu Ay Gelir').locator('..')).toContainText('₺3.456');
+  if (isProductionSmoke) {
+    await expect(page.getByText('Bu Ay Başvuru').locator('..')).toBeVisible();
+    await expect(page.getByText('Bu Ay Gelir').locator('..')).toBeVisible();
+  } else {
+    await expect(page.getByText('Bu Ay Başvuru').locator('..')).toContainText('1');
+    await expect(page.getByText('Bu Ay Gelir').locator('..')).toContainText('₺3.456');
+  }
   await expect(page.getByTestId('passport-warning-card')).toContainText(customerName);
   await expect(page.getByTestId('passport-warning-card')).toContainText('6 ay içinde bitiyor');
 

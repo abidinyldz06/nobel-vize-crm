@@ -8,7 +8,7 @@ export async function loginAction(formData: FormData) {
   const password = formData.get("password") as string
 
   if (!email || !password) {
-    return { error: "E-posta ve şifre gereklidir." }
+    return { success: false, error: "E-posta ve şifre gereklidir." }
   }
 
   const supabase = await createSupabaseServerClient()
@@ -19,7 +19,7 @@ export async function loginAction(formData: FormData) {
   })
 
   if (error || !authData.user) {
-    return { error: "E-posta veya şifre hatalı. Lütfen tekrar deneyin." }
+    return { success: false, error: "E-posta veya şifre hatalı. Lütfen tekrar deneyin." }
   }
 
   // Check if staff record exists
@@ -30,14 +30,16 @@ export async function loginAction(formData: FormData) {
     // ele geçirme riski doğurur. İlk admin kontrollü kurulumda oluşturulur;
     // sonraki personeller yalnızca admin davetiyle sisteme katılır.
     await supabase.auth.signOut()
-    return { error: "Hesabınız personel kaydıyla eşleştirilmemiş. Lütfen yöneticinizle iletişime geçin." }
+    return { success: false, error: "Hesabınız personel kaydıyla eşleştirilmemiş. Lütfen yöneticinizle iletişime geçin." }
   } else if (!staffRecord.is_active) {
     await supabase.auth.signOut()
-    return { error: "Hesabınız pasif duruma alınmış." }
+    return { success: false, error: "Hesabınız pasif duruma alınmış." }
   }
 
-  revalidatePath("/", "layout")
-  redirect("/dashboard")
+  // Production'da Server Action redirect'i hedef sayfayı aynı POST içinde
+  // render edebilir. Yeni oturum çerezinin okunacağı ayrı bir tarayıcı isteği
+  // başlatmak için başarılı sonucu istemciye döndürürüz.
+  return { success: true, error: null }
 }
 
 export async function logoutAction() {
