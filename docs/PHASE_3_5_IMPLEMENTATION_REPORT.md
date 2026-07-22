@@ -1,7 +1,7 @@
 # Faz 3.5 — Müşteri İletişimi ve Portal Uygulama Raporu
 
 Tarih: 22 Temmuz 2026  
-Durum: Yerel uygulama ve doğrulama tamamlandı; production yayını bekliyor
+Durum: Tamamlandı; production migration ve canlı yayın doğrulandı
 
 ## Amaç
 
@@ -53,7 +53,7 @@ müşterinin portalda gördüğü operasyon özetini iyileştirmek.
 - Sabit iletişim bilgileri kaldırıldı; şirket adı, e-posta ve telefon ayarlardan okunuyor.
 - Geçerli portal erişimleri son erişim zamanını güncelliyor.
 
-## 3.5.6 devam ediyor — Yayın ve doğrulama
+## 3.5.6 bitti — Yayın ve doğrulama
 
 Yerel doğrulama sonuçları:
 
@@ -66,13 +66,20 @@ Yerel doğrulama sonuçları:
 - pgTAP: 148/148 geçti
 - Playwright: 9/9 geçti
 
-Production öncesi kalan işler:
+Production doğrulama sonuçları:
 
-1. GitHub kalite kapılarını çalıştırmak ve değişiklikleri `main` dalına almak.
-2. Güncel şifreli production yedeğini oluşturup geri açılabilirliğini doğrulamak.
-3. `202607220008` ve `202607220009` migration'larını kontrollü uygulamak.
-4. Vercel production yayınını ve canlı Faz 3.5 kullanıcı akışını doğrulamak.
-5. Veri sayımlarını ve migration hizasını tekrar kontrol edip raporu kapatmak.
+- GitHub PR #19 uygulama, veritabanı, tarayıcı ve Vercel kalite kapıları geçti.
+- Migration öncesinde public/auth/storage şeması ve verisi, roller ile Storage
+  nesnelerini içeren şifreli yedek oluşturuldu; şifre çözme ve arşiv listeleme
+  kontrolü geçti.
+- Dry-run yalnız `202607220008` ve `202607220009` migration'larını gösterdi.
+- İki migration production'a uygulandı ve yerel/uzak migration zinciri hizalandı.
+- Production veritabanı lint kontrolü 0 bulgu ile geçti.
+- Mevcut 9 müşteri, 3 personel ve 7 başvuru korundu; 11 sistem şablonu doğrulandı.
+- Vercel `main` yayını başarıyla tamamlandı.
+- `https://abidinyildiz.com` üzerinde şablon yönetimi, mesaj hazırlama/durum,
+  portal özeti ve portal erişimini kapatma akışı Playwright ile geçti.
+- Canlı test verileri temizlendikten sonra production sayımları tekrar doğrulandı.
 
 ## Güvenlik kararları
 
