@@ -3,7 +3,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET search_path TO public, extensions;
 
-SELECT plan(117);
+SELECT plan(118);
 
 SELECT has_table('public', 'country_visa_rules', 'canonical visa rules table exists');
 SELECT has_function('public', 'create_customer_application_v1', ARRAY['jsonb'], 'atomic customer workflow exists');
@@ -28,6 +28,23 @@ SELECT has_column('public', 'applications', 'occupation', 'applications store oc
 SELECT has_column('public', 'applications', 'with_children', 'applications store child status');
 SELECT has_column('public', 'applications', 'nationality', 'applications store nationality');
 SELECT has_function('public', 'restore_backup_v2', ARRAY['jsonb'], 'atomic restore exists');
+SELECT results_eq(
+  $$
+    SELECT count(*)::BIGINT
+    FROM pg_constraint
+    WHERE contype = 'f'
+      AND conrelid = 'public.applications'::regclass
+      AND confrelid = 'public.customers'::regclass
+      AND conkey = ARRAY[
+        (SELECT attnum::SMALLINT
+         FROM pg_attribute
+         WHERE attrelid = 'public.applications'::regclass
+           AND attname = 'customer_id')
+      ]::SMALLINT[]
+  $$,
+  $$ VALUES (1::BIGINT) $$,
+  'applications expose one unambiguous customer relationship'
+);
 SELECT ok(to_regclass('public.uq_staff_user_id') IS NOT NULL, 'staff auth user uniqueness is enforced');
 SELECT ok(to_regclass('public.uq_country_visa_rules_match') IS NOT NULL, 'visa rule match uniqueness is enforced');
 SELECT ok(to_regclass('public.tenants_single_company_idx') IS NOT NULL, 'single company row uniqueness is enforced');

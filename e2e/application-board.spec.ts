@@ -126,7 +126,7 @@ test('staff moves an application through an allowed audited transition', async (
   await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
   await page.getByLabel('Şifre').fill(testPassword);
   await page.getByRole('button', { name: 'Giriş Yap' }).click();
-  await expect(page).toHaveURL('/dashboard');
+  await expect(page).toHaveURL('/dashboard', { timeout: isProductionSmoke ? 30_000 : 5_000 });
   if (isProductionSmoke) {
     await expect(page.getByText('Bu Ay Başvuru').locator('..')).toBeVisible();
     await expect(page.getByText('Bu Ay Gelir').locator('..')).toBeVisible();
