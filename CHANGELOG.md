@@ -23,6 +23,10 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
 
 - KVKK yaşam döngüsü için pgTAP, birim, güvenlik regresyonu ve oturumlu Playwright senaryoları eklendi.
 - Otomatik silme varsayılan olarak kapalı tutuldu; bu sürümde arka plan silme görevi etkinleştirilmedi.
+- GitHub application, database, browser ve Vercel kalite kapıları başarıyla tamamlandı.
+- Production öncesi veritabanı ve Storage birlikte şifreli yedeklendi; geri açma doğrulaması yapıldı.
+- Faz 3.6 migration'ları production'a uygulandı; ana veri sayıları korunarak canlı KVKK yaşam döngüsü doğrulandı.
+- Eksik production Google Form webhook secret'ı yenilenip Sensitive Environment olarak tanımlandı; imzasız isteklerin 401 ile reddi doğrulandı.
 
 ## [Unreleased] — Faz 3.5 Müşteri İletişimi ve Portal
 

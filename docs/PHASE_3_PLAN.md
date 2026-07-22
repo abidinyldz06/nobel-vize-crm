@@ -121,14 +121,14 @@ Ayrıntılı uygulama ve doğrulama kaydı:
 
 ### Faz 3.6 — KVKK ve veri yaşam döngüsü
 
-Durum: **Devam ediyor — 22 Temmuz 2026**
+Durum: **Tamamlandı — 22 Temmuz 2026**
 
 - [x] **3.6.1 bitti:** sürümlü aydınlatma metni ve müşteriye teslim/teyit kanıtı
 - [x] **3.6.2 bitti:** aydınlatmadan ayrı, karar geçmişini koruyan açık rıza kayıtları
 - [x] **3.6.3 bitti:** ilgili kişi talepleri, admin veri paketi ve audit izi
 - [x] **3.6.4 bitti:** yapılandırılabilir saklama politikası, saklama kilidi ve kontrollü anonimleştirme
 - [x] **3.6.5 bitti:** veritabanı/Storage ortak yaşam döngüsü, kişisel veri maskeleme ve privacy-aware backup/restore
-- [ ] **3.6.6 devam ediyor:** tam kalite kapıları, GitHub incelemesi, production migration, yayın ve canlı doğrulama
+- [x] **3.6.6 bitti:** tam kalite kapıları, GitHub incelemesi, şifreli yedek, production migration, yayın ve canlı doğrulama
 
 Otomatik yaşam döngüsü seçeneği bu sürümde yalnız yapılandırma olarak saklanır;
 arka planda kendiliğinden silme çalıştırılmaz. Kalıcı silme, onaylı talep,
