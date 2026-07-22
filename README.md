@@ -14,6 +14,8 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 - **Görev ve Gerçek Bildirimler**: Personel bazlı manuel görevler; randevu, geciken evrak, bekleyen ödeme ve hareketsiz başvuru hatırlatmaları; kişiye özel okundu durumu.
 - **Başvuru Süreç Panosu**: Kontrollü durum geçişleri, personel/ülke/tarih/gecikme filtreleri ve atomik audit kaydı.
 - **Müşteri Deneyimi**: Kanonik başvuru bilgileri, renkli etiketler, hızlı iletişim/not eylemleri ve birleşik müşteri timeline'ı.
+- **Yönetilebilir İletişim**: WhatsApp/e-posta şablonları, değişkenli mesaj hazırlama, iletişim durumları ve audit izi.
+- **Kontrollü Müşteri Portalı**: Süreli bağlantı yenileme/iptal akışı ile başvuru, evrak, randevu, ödeme ve geçmiş özeti.
 - **Operasyon Dashboard'u**: Aylık başvuru/onay/red/gelir metrikleri ile süresi dolan veya altı ay içinde bitecek pasaport uyarıları.
 - **Yedekleme ve Dışa Aktarma**: Tam sistem yedeğini JSON olarak indirebilme, müşteri verilerini CSV olarak dışa aktarabilme.
 
@@ -100,7 +102,7 @@ Faz 3 alt aşama takibi:
 - **Acil Paket H2 — Tamamlandı:** müşteri soft delete, Arşiv, kontrollü kalıcı silme ve production doğrulaması (`docs/H2_CUSTOMER_ARCHIVE_REPORT.md`)
 - **Faz 3.3 — Tamamlandı:** 3.3.1–3.3.7 bitti; görevler, kişisel bildirimler, otomatik hatırlatmalar, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_3_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.4 — Tamamlandı:** 3.4.1–3.4.6 bitti; süreç panosu, başvuru profil alanları, etiketler, dashboard metrikleri, hızlı eylemler, timeline, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_4_IMPLEMENTATION_REPORT.md`)
-- **Faz 3.5 — Bekliyor:** müşteri iletişimi ve portal
+- **Faz 3.5 — Devam ediyor:** 3.5.1–3.5.5 bitti; yönetilebilir iletişim, durum/audit kaydı ve kontrollü portal tamamlandı, production doğrulaması sürüyor (`docs/PHASE_3_5_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.6 — Bekliyor:** KVKK ve veri yaşam döngüsü
 - **Faz 3.7 — Bekliyor:** izleme ve iş sürekliliği
 - **Faz 3.8 — Bekliyor:** son kalite ve kullanıcı kabulü

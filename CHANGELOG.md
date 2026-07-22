@@ -2,6 +2,28 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 3.5 Müşteri İletişimi ve Portal
+
+### İletişim
+
+- Admin tarafından yönetilen WhatsApp ve e-posta şablonları eklendi.
+- Kontrollü değişkenlerle çalışan ortak mesaj hazırlayıcı eklendi.
+- İletişim kayıtlarına hazırlanmış, gönderilmiş ve başarısız durumları ile hata nedeni eklendi.
+- İletişim yazmaları atomik, yetki kontrollü ve audit kayıtlı RPC akışlarına taşındı.
+- Harici sağlayıcı bulunmadığında teslimat iddiasında bulunmayan manuel doğrulama akışı eklendi.
+
+### Müşteri portalı
+
+- Portal bağlantılarına son kullanma, etkinlik ve son erişim takibi eklendi.
+- Portal token yenileme, erişimi kapatma ve yeniden açma kontrolleri eklendi.
+- Portal başvuru geçmişi ve şirket ayarlarından gelen iletişim bilgileriyle genişletildi.
+
+### Kalite
+
+- Mesaj değişkenleri için birim testleri ve iletişim/portal güvenlik regresyonları eklendi.
+- Şablon, iletişim ve portal yaşam döngüsü pgTAP kapsamına alındı.
+- Şablon yönetiminden portal iptaline uzanan oturumlu Playwright senaryosu eklendi.
+
 ## [Unreleased] — Faz 3.4 Başvuru ve Müşteri Operasyonu
 
 ### Başvuru yönetimi

@@ -117,6 +117,18 @@ describe("security regression guards", () => {
     assert.match(migration, /INSERT INTO public\.customer_tags/);
     assert.match(migration, /backup_tags_required_for_customer_tags/);
   });
+
+  it("keeps communication and portal mutations behind controlled workflows", async () => {
+    const migration = await readFile(path.join(projectRoot, "supabase/migrations/202607220008_phase35_communication_portal.sql"), "utf8");
+    const communicationPanel = await readFile(path.join(projectRoot, "src/components/CommunicationPanel.tsx"), "utf8");
+    const portalShare = await readFile(path.join(projectRoot, "src/components/PortalShareButton.tsx"), "utf8");
+
+    assert.match(migration, /REVOKE INSERT, UPDATE, DELETE ON TABLE public\.communications FROM authenticated/i);
+    assert.match(migration, /CREATE OR REPLACE FUNCTION public\.record_communication_v1/i);
+    assert.match(migration, /CREATE OR REPLACE FUNCTION public\.rotate_customer_portal_token_v1/i);
+    assert.doesNotMatch(communicationPanel, /\.from\(["']communications["']\)\s*\.insert/i);
+    assert.doesNotMatch(portalShare, /\.from\(["']customers["']\)\s*\.update/i);
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {
