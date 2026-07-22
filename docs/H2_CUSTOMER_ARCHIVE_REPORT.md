@@ -4,7 +4,7 @@ Tarih: 22 Temmuz 2026
 
 Dal: `hotfix/h2-customer-soft-delete`
 
-Durum: Yerel geliştirme ve doğrulama tamamlandı; production yayını bekliyor
+Durum: Tamamlandı; production migration ve yayın doğrulandı
 
 ## Sonuç
 
@@ -66,13 +66,26 @@ sabitlendi. Production bağımlılık audit'i sıfır bulguyla geçmektedir.
 | Production dependency audit | Geçti, 0 bulgu |
 | Next.js production build | Geçti |
 
-## Production yayın ve geri dönüş
+## Production yayın sonucu
 
-Production'a geçişten önce güncel şifreli mantıksal yedek alınır ve mevcut
-müşteri kayıtlarında silinme durumu ön kontrolü yapılır. Migration, GitHub kalite
-kapıları geçip değişiklik `main` dalına alındıktan sonra `CRM` Supabase projesine
-uygulanır. Ardından aktif müşteri sayısı, admin Arşiv ekranı, danışman erişimi,
-audit ve arşivle–geri yükle smoke akışı doğrulanır.
+- PR #11 bütün application, database, browser ve Vercel kalite kapılarından
+  geçerek `main` dalına alındı.
+- Migration `202607220001_customer_soft_delete.sql` doğru `CRM`
+  (`zrxdwnshegihakqfszfh`) projesine uygulandı.
+- Migration öncesinde güncel public şema/veri, rol ve Storage kopyasını içeren
+  AES-256 şifreli yedek repo dışında oluşturulup bağımsız açma kontrolünden
+  geçirildi.
+- Canlıda 9 toplam ve 9 aktif müşteri korundu; arşiv kayıt, tutarsız silinme
+  durumu ve müşteri hard-delete politikası sayıları sıfırdır.
+- Dört arşiv RPC'si ve doğrulanmış silinme durumu constraint'i canlıda aktiftir.
+- Admin personel bağlantısı ve Arşiv listeleme RPC'si doğrulandı; danışman
+  arşivleme denemesi `admin_required` ile reddedildi.
+- Remote veritabanı lint'i sıfır bulguyla geçti.
+- Vercel production yayını `Ready` durumunda ve `abidinyildiz.com` alias'ına
+  bağlıdır. Giriş, korumalı sayfa yönlendirmesi, geçersiz portal ve HTTP
+  güvenlik başlıkları smoke kontrolleri geçti.
+
+## Geri dönüş yaklaşımı
 
 Migration geri alınırken yeni kolonları hemen düşürmek yerine önce uygulama eski
 sürüme döndürülür ve tüm arşiv kayıtları kontrollü biçimde aktif hale getirilir.
