@@ -93,7 +93,7 @@ Faz 3 alt aşama takibi:
 
 - **Faz 3.1 — Tamamlandı:** production hazırlığı, güvenli migration ve yayın doğrulaması
 - **Faz 3.2 — Tamamlandı:** tek şirket arayüzü, şema temizliği ve production doğrulaması
-- **Acil Paket H2 — Yerel doğrulama tamamlandı:** müşteri soft delete, Arşiv ve kontrollü kalıcı silme; production yayını bekliyor (`docs/H2_CUSTOMER_ARCHIVE_REPORT.md`)
+- **Acil Paket H2 — Tamamlandı:** müşteri soft delete, Arşiv, kontrollü kalıcı silme ve production doğrulaması (`docs/H2_CUSTOMER_ARCHIVE_REPORT.md`)
 - **Faz 3.3 — Bekliyor:** görev ve gerçek bildirim sistemi
 - **Faz 3.4 — Bekliyor:** başvuru süreç panosu
 - **Faz 3.5 — Bekliyor:** müşteri iletişimi ve portal

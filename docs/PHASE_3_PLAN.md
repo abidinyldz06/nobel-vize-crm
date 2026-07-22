@@ -58,7 +58,7 @@ Durum: **Tamamlandı — 21 Temmuz 2026**
 
 ### Acil Paket H2 — Müşteri veri güvenliği ve arşiv
 
-Durum: **Devam ediyor — 22 Temmuz 2026**
+Durum: **Tamamlandı — 22 Temmuz 2026**
 
 Bu paket Faz 3 numaralandırmasını değiştirmez. Mevcut hard delete davranışının
 veri kaybı riski nedeniyle Faz 3.3'ten önce uygulanır.
@@ -70,7 +70,7 @@ veri kaybı riski nedeniyle Faz 3.3'ten önce uygulanır.
 - [x] Admin Arşiv ekranı
 - [x] 30 günü geçen kayıtlar için kontrollü manuel kalıcı silme
 - [x] pgTAP, uygulama ve Playwright regresyonları
-- [ ] Production migration ve yayın doğrulaması
+- [x] Production migration ve yayın doğrulaması
 
 ### Faz 3.3 — Görev ve gerçek bildirim sistemi
 
