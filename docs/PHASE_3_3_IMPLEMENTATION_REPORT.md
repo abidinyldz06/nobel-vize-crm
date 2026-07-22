@@ -2,7 +2,7 @@
 
 Tarih: 22 Temmuz 2026
 Dal: `phase-3.3/tasks-notifications`
-Durum: **Uygulama ve yerel doğrulama tamamlandı — production geçişi bekliyor**
+Durum: **Tamamlandı — production migration ve yayın doğrulandı**
 
 ## Aşama durumu
 
@@ -20,8 +20,8 @@ Durum: **Uygulama ve yerel doğrulama tamamlandı — production geçişi bekliy
 - **3.3.6 bitti:** görev ve bildirimler yedekleme/geri yükleme kapsamına alındı;
   eski Faz 2 yedekleriyle geriye uyumluluk korundu; pgTAP, güvenlik ve Playwright
   regresyonları eklendi.
-- **3.3.7 bekliyor:** GitHub kalite kapıları, production migration, Vercel yayını
-  ve production smoke doğrulaması.
+- **3.3.7 bitti:** GitHub kalite kapıları, production migration, Vercel yayını
+  ve production smoke doğrulaması tamamlandı.
 
 ## Önceki bildirim yapısındaki sorun ve çözüm
 
@@ -58,16 +58,36 @@ okundu RPC'leri de yalnız o alıcının kaydını değiştirmesini sağlar.
 | Faz 3.3 görev/bildirim Playwright testi | Geçti, 1/1 |
 | Tüm Playwright paketi | Geçti, 7/7 |
 
-## Production kabul ölçütleri
+## Production sonucu
 
-Faz 3.3 ancak aşağıdaki maddeler tamamlanınca bütünüyle `Tamamlandı` olarak
-işaretlenecektir:
+| Kontrol | Sonuç |
+|---|---|
+| PR #13 application kalite kapısı | Geçti |
+| PR #13 database kalite kapısı | Geçti |
+| PR #13 browser kalite kapısı | Geçti |
+| Vercel Preview ve Production | Ready |
+| Production migration geçmişi | Geçti, yerel/remote 11/11 |
+| Production veritabanı lint | Geçti, 0 bulgu |
+| Production görev ve bildirim tabloları | Mevcut |
+| Anonim `/api/tasks` ve `/api/notifications` | Beklenen 401 |
+| Production giriş–görev–bildirim–tamamlama Playwright akışı | Geçti, 1/1 |
+| Geçici Auth/personel/test görevi temizliği | Geçti |
 
-- GitHub application, database ve browser kontrolleri geçmeli.
-- Migration öncesi production yedeği ve şema/veri ön kontrolü alınmalı.
-- `202607220002_phase3_tasks_notifications.sql` doğru CRM Supabase projesine
-  uygulanmalı ve migration kaydı doğrulanmalı.
-- `tasks` ve `notifications` RLS/policy/RPC yapısı production'da doğrulanmalı.
-- Vercel production yayını `Ready` olmalı.
-- `abidinyildiz.com` üzerinde giriş, görev ekranı ve bildirim merkezi smoke
-  kontrolü geçmeli.
+Migration öncesinde public şema/veri, roller ve `documents` Storage nesnelerini
+içeren repo dışı AES-256 şifreli yedek oluşturuldu; dosya izni `600` olarak
+ayarlandı ve bağımsız açma testi geçti. Anahtar macOS Keychain içinde
+`nobel-vize-crm-phase33-backup-20260722` servisiyle saklanıyor.
+
+`202607220002_phase3_tasks_notifications.sql` yalnız doğru `CRM`
+(`zrxdwnshegihakqfszfh`) projesine uygulandı. Migration sonrası 9 müşteri ve 3
+personel korunmuştur. İlk canlı görev senkronizasyonu mevcut operasyon
+kayıtlarından 17 idempotent görev ve bunlara ait 17 kişisel bildirim üretmiştir;
+geçici test Auth kullanıcıları ve test personeli tamamen temizlenmiştir.
+
+Vercel production dağıtımı `Ready` durumundadır ve `abidinyildiz.com` alias'ına
+bağlıdır. Ana sayfa, korumalı görev rotası, anonim API reddi ve oturumlu
+giriş–görev oluşturma–bildirim okuma–görev tamamlama akışları canlıda
+doğrulanmıştır.
+
+Bu kanıtlarla **Faz 3.3 tamamlandı**. Sonraki ana çalışma paketi Faz 3.4 başvuru
+süreç panosu ve müşteri başvuru bilgileridir.
