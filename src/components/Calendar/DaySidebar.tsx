@@ -4,6 +4,7 @@ import { tr } from "date-fns/locale";
 import { X, Clock, MapPin, User, Globe, CalendarPlus, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import type { CalendarAppointment } from "@/types/calendar";
+import { maskPhone } from "@/lib/masking";
 
 export default function DaySidebar({ 
   selectedDate, 
@@ -105,7 +106,7 @@ export default function DaySidebar({
                           <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                             {app.customers?.first_name} {app.customers?.last_name}
                           </p>
-                          <p className="text-[11px] text-slate-500">{app.customers?.phone}</p>
+                          <p className="text-[11px] text-slate-500">{app.customers?.phone ? maskPhone(app.customers.phone) : "—"}</p>
                         </div>
                       </div>
 

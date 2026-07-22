@@ -3,7 +3,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET search_path TO public, extensions;
 
-SELECT plan(148);
+SELECT plan(196);
 
 SELECT has_table('public', 'country_visa_rules', 'canonical visa rules table exists');
 SELECT has_function('public', 'create_customer_application_v1', ARRAY['jsonb'], 'atomic customer workflow exists');
@@ -50,6 +50,34 @@ SELECT ok(NOT has_table_privilege('authenticated', 'public.communications', 'UPD
 SELECT ok(has_function_privilege('authenticated', 'public.record_communication_v1(jsonb)', 'EXECUTE'), 'staff can execute controlled communication workflow');
 SELECT ok(NOT has_function_privilege('anon', 'public.record_communication_v1(jsonb)', 'EXECUTE'), 'anon cannot record communications');
 SELECT ok(has_function_privilege('authenticated', 'public.rotate_customer_portal_token_v1(uuid,integer)', 'EXECUTE'), 'staff can rotate an accessible portal link');
+SELECT has_table('public', 'privacy_notice_versions', 'versioned privacy notice table exists');
+SELECT has_table('public', 'customer_privacy_notices', 'customer privacy notice delivery table exists');
+SELECT has_table('public', 'customer_consents', 'customer consent decision history exists');
+SELECT has_function('public', 'upsert_privacy_notice_v1', ARRAY['uuid', 'jsonb'], 'admin privacy notice workflow exists');
+SELECT has_function('public', 'record_customer_privacy_notice_v1', ARRAY['jsonb'], 'privacy notice delivery workflow exists');
+SELECT has_function('public', 'record_customer_consent_v1', ARRAY['jsonb'], 'customer consent workflow exists');
+SELECT ok(NOT has_table_privilege('authenticated', 'public.privacy_notice_versions', 'INSERT'), 'direct privacy notice inserts are revoked');
+SELECT ok(NOT has_table_privilege('authenticated', 'public.customer_privacy_notices', 'INSERT'), 'direct privacy delivery inserts are revoked');
+SELECT ok(NOT has_table_privilege('authenticated', 'public.customer_consents', 'INSERT'), 'direct consent inserts are revoked');
+SELECT ok(has_function_privilege('authenticated', 'public.record_customer_consent_v1(jsonb)', 'EXECUTE'), 'staff can execute controlled consent workflow');
+SELECT ok(NOT has_function_privilege('anon', 'public.upsert_privacy_notice_v1(uuid,jsonb)', 'EXECUTE'), 'anon cannot manage privacy notices');
+SELECT ok(NOT has_function_privilege('anon', 'public.record_customer_privacy_notice_v1(jsonb)', 'EXECUTE'), 'anon cannot record privacy delivery');
+SELECT ok(NOT has_function_privilege('anon', 'public.record_customer_consent_v1(jsonb)', 'EXECUTE'), 'anon cannot record consent decisions');
+SELECT has_table('public', 'privacy_settings', 'privacy lifecycle settings exist');
+SELECT has_table('public', 'data_subject_requests', 'data subject request registry exists');
+SELECT has_column('public', 'customers', 'anonymized_at', 'customers record anonymization time');
+SELECT has_column('public', 'customers', 'retention_hold_until', 'customers support retention holds');
+SELECT has_column('public', 'documents', 'storage_deleted_at', 'document metadata records storage deletion');
+SELECT has_function('public', 'create_data_subject_request_v1', ARRAY['jsonb'], 'data subject request workflow exists');
+SELECT has_function('public', 'set_data_subject_request_status_v1', ARRAY['uuid', 'text', 'text'], 'data request status workflow exists');
+SELECT has_function('public', 'update_privacy_settings_v1', ARRAY['jsonb'], 'privacy settings workflow exists');
+SELECT has_function('public', 'set_customer_retention_hold_v1', ARRAY['uuid', 'timestamp with time zone', 'text'], 'retention hold workflow exists');
+SELECT has_function('public', 'mark_customer_documents_deleted_v1', ARRAY['uuid', 'uuid[]'], 'storage cleanup finalization workflow exists');
+SELECT has_function('public', 'anonymize_customer_v1', ARRAY['uuid', 'uuid'], 'controlled anonymization workflow exists');
+SELECT has_function('public', 'record_customer_export_v1', ARRAY['uuid'], 'customer export audit workflow exists');
+SELECT has_function('public', 'list_archived_customer_privacy_v1', ARRAY[]::TEXT[], 'archived privacy candidate workflow exists');
+SELECT ok(NOT has_table_privilege('authenticated', 'public.data_subject_requests', 'INSERT'), 'direct data subject request inserts are revoked');
+SELECT ok(NOT has_function_privilege('anon', 'public.create_data_subject_request_v1(jsonb)', 'EXECUTE'), 'anon cannot create data subject requests');
 SELECT results_eq(
   $$
     SELECT count(*)::BIGINT
@@ -274,6 +302,88 @@ SELECT results_eq(
   $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE performed_by_staff_id = '10000000-0000-0000-0000-000000000001' AND action LIKE 'Yeni başvuru oluşturuldu:%' $$,
   $$ VALUES (1::BIGINT) $$,
   'activity actor is stored as a staff foreign key'
+);
+
+SELECT lives_ok(
+  $$
+    SELECT public.upsert_privacy_notice_v1(
+      '71000000-0000-0000-0000-000000000001',
+      '{"version":"2026.1","title":"Test Aydınlatma Metni","content":"Test amaçlı sürümlü aydınlatma içeriği.","effective_at":"2026-01-01T00:00:00Z","is_active":true}'::JSONB
+    )
+  $$,
+  'admin creates an active privacy notice version'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.privacy_notice_versions WHERE version = '2026.1' AND is_active = true $$,
+  $$ VALUES (1::BIGINT) $$,
+  'privacy notice version is stored'
+);
+SELECT lives_ok(
+  $$
+    SELECT public.record_customer_privacy_notice_v1(jsonb_build_object(
+      'customer_id', (SELECT id FROM public.customers WHERE email = 'ayse@example.com'),
+      'notice_version_id', '71000000-0000-0000-0000-000000000001',
+      'delivery_method', 'email',
+      'delivered_at', now(),
+      'acknowledged_at', now(),
+      'evidence_note', 'E-posta teyidi alındı'
+    ))
+  $$,
+  'staff records privacy notice delivery and acknowledgement'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.customer_privacy_notices WHERE delivery_method = 'email' AND acknowledged_at IS NOT NULL $$,
+  $$ VALUES (1::BIGINT) $$,
+  'privacy delivery evidence is stored'
+);
+SELECT throws_ok(
+  $$
+    SELECT public.upsert_privacy_notice_v1(
+      '71000000-0000-0000-0000-000000000001',
+      '{"version":"2026.1","title":"Test Aydınlatma Metni","content":"Teslimden sonra değiştirilmemelidir.","effective_at":"2026-01-01T00:00:00Z","is_active":true}'::JSONB
+    )
+  $$,
+  '22023',
+  'delivered_privacy_notice_immutable',
+  'a delivered privacy notice version is immutable'
+);
+SELECT lives_ok(
+  $$
+    SELECT public.record_customer_consent_v1(jsonb_build_object(
+      'customer_id', (SELECT id FROM public.customers WHERE email = 'ayse@example.com'),
+      'consent_type', 'marketing',
+      'decision', 'granted',
+      'source', 'email',
+      'notice_version_id', '71000000-0000-0000-0000-000000000001'
+    ))
+  $$,
+  'staff records an explicit consent decision'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.customer_consents WHERE consent_type = 'marketing' AND decision = 'granted' $$,
+  $$ VALUES (1::BIGINT) $$,
+  'granted consent decision is stored as history'
+);
+SELECT lives_ok(
+  $$
+    SELECT public.record_customer_consent_v1(jsonb_build_object(
+      'customer_id', (SELECT id FROM public.customers WHERE email = 'ayse@example.com'),
+      'consent_type', 'marketing',
+      'decision', 'withdrawn',
+      'source', 'telefon',
+      'decision_at', now() + interval '1 second'
+    ))
+  $$,
+  'staff appends consent withdrawal without overwriting history'
+);
+SELECT results_eq(
+  $$ SELECT decision FROM public.customer_consents WHERE consent_type = 'marketing' ORDER BY decision_at DESC, created_at DESC LIMIT 1 $$,
+  $$ VALUES ('withdrawn'::TEXT) $$,
+  'latest consent decision reflects withdrawal'
+);
+SELECT ok(
+  (SELECT count(*) FROM public.activity_log WHERE type = 'privacy') >= 4,
+  'privacy workflows write audit entries'
 );
 
 SELECT lives_ok(
@@ -576,6 +686,30 @@ SELECT throws_ok(
   'admin_required',
   'consultant cannot archive customers'
 );
+SELECT throws_ok(
+  $$
+    SELECT public.upsert_privacy_notice_v1(
+      '71000000-0000-0000-0000-000000000002',
+      '{"version":"2026.2","title":"Yetkisiz Metin","content":"Yetkisiz kayıt denemesi","effective_at":"2026-01-01T00:00:00Z","is_active":true}'::JSONB
+    )
+  $$,
+  '42501',
+  'admin_required',
+  'consultant cannot manage privacy notice versions'
+);
+SELECT throws_ok(
+  $$
+    SELECT public.record_customer_consent_v1(jsonb_build_object(
+      'customer_id', (SELECT id FROM public.customers WHERE email = 'ayse@example.com'),
+      'consent_type', 'marketing',
+      'decision', 'granted',
+      'source', 'telefon'
+    ))
+  $$,
+  '42501',
+  'customer_access_denied',
+  'consultant cannot record consent for another staff member customer'
+);
 
 RESET ROLE;
 UPDATE public.applications
@@ -756,6 +890,20 @@ VALUES (
   'purge@example.com',
   '10000000-0000-0000-0000-000000000001'
 );
+CREATE TEMP TABLE phase36_anonymization_request AS
+SELECT public.create_data_subject_request_v1('{"customer_id":"50000000-0000-0000-0000-000000000002","request_type":"anonymization","requested_via":"email","notes":"Kimlik doğrulandı"}'::JSONB) AS id;
+SELECT ok((SELECT id IS NOT NULL FROM phase36_anonymization_request), 'admin records an anonymization request while the customer is active');
+SELECT results_eq(
+  $$
+    SELECT public.set_data_subject_request_status_v1(
+      (SELECT id FROM phase36_anonymization_request),
+      'approved',
+      'Anonimleştirme onaylandı'
+    )
+  $$,
+  $$ VALUES (true) $$,
+  'admin approves the anonymization request'
+);
 SELECT results_eq(
   $$ SELECT public.archive_customers_v1(ARRAY['50000000-0000-0000-0000-000000000002']::UUID[]) $$,
   $$ VALUES (1) $$,
@@ -784,11 +932,31 @@ SELECT set_config(
 SET LOCAL ROLE authenticated;
 SELECT results_eq(
   $$ SELECT public.purge_deleted_customers_v1(ARRAY['50000000-0000-0000-0000-000000000002']::UUID[]) $$,
-  $$ VALUES (1) $$,
-  'admin permanently deletes an archive record after 30 days'
+  $$ VALUES (0) $$,
+  'non-anonymized archive record cannot be permanently deleted after 30 days'
 );
 SELECT results_eq(
-  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE customer_id IS NULL AND action = 'Müşteri kalıcı silindi: Kalıcı Silme — Test Admin' $$,
+  $$
+    SELECT public.anonymize_customer_v1(
+      '50000000-0000-0000-0000-000000000002',
+      (SELECT id FROM phase36_anonymization_request)
+    )
+  $$,
+  $$ VALUES (true) $$,
+  'admin anonymizes an approved archive record after the grace period'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.list_archived_customers_v1() WHERE id = '50000000-0000-0000-0000-000000000002' AND email IS NULL AND phone IS NULL AND purge_eligible = true $$,
+  $$ VALUES (1::BIGINT) $$,
+  'anonymization removes direct contact data and unlocks controlled purge'
+);
+SELECT results_eq(
+  $$ SELECT public.purge_deleted_customers_v1(ARRAY['50000000-0000-0000-0000-000000000002']::UUID[]) $$,
+  $$ VALUES (1) $$,
+  'admin permanently deletes an anonymized archive record after 30 days'
+);
+SELECT results_eq(
+  $$ SELECT count(*)::BIGINT FROM public.activity_log WHERE customer_id IS NULL AND action = 'Anonim müşteri kaydı kalıcı silindi — Test Admin' $$,
   $$ VALUES (1::BIGINT) $$,
   'permanent delete leaves a non-cascading audit entry'
 );
@@ -803,11 +971,16 @@ SELECT jsonb_build_object(
   'tables', jsonb_build_object(
     'tenants', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.tenants row),
     'staff', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.staff row),
+    'privacy_settings', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.privacy_settings row),
+    'privacy_notice_versions', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.privacy_notice_versions row),
     'message_templates', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.message_templates row),
     'tags', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.tags row),
     'countries', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.countries row),
     'country_visa_rules', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.country_visa_rules row),
     'customers', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.customers row),
+    'customer_privacy_notices', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.customer_privacy_notices row),
+    'customer_consents', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.customer_consents row),
+    'data_subject_requests', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.data_subject_requests row),
     'customer_tags', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.customer_tags row),
     'applications', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.applications row),
     'documents', (SELECT COALESCE(jsonb_agg(to_jsonb(row)), '[]'::JSONB) FROM public.documents row),
@@ -850,10 +1023,15 @@ SELECT ok(
   (SELECT count(*) FROM public.message_templates) > 0,
   'full v2 restore preserves message templates'
 );
+SELECT ok((SELECT count(*) FROM public.privacy_settings) > 0, 'full v2 restore preserves privacy settings');
+SELECT ok((SELECT count(*) FROM public.privacy_notice_versions) > 0, 'full v2 restore preserves privacy notice versions');
+SELECT ok((SELECT count(*) FROM public.customer_consents) > 0, 'full v2 restore preserves consent history');
 SELECT lives_ok(
   $$
     SELECT public.restore_backup_v2(
       payload #- '{tables,tasks}' #- '{tables,notifications}' #- '{tables,tags}' #- '{tables,customer_tags}'
+        #- '{tables,privacy_settings}' #- '{tables,privacy_notice_versions}' #- '{tables,customer_privacy_notices}'
+        #- '{tables,customer_consents}' #- '{tables,data_subject_requests}'
     )
     FROM phase1_backup_payload
   $$,

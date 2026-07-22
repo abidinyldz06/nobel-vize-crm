@@ -370,6 +370,125 @@ export type Database = {
           },
         ]
       }
+      customer_consents: {
+        Row: {
+          consent_type: string
+          created_at: string
+          customer_id: string
+          decision: string
+          decision_at: string
+          evidence_note: string | null
+          id: string
+          notice_version_id: string | null
+          recorded_by_staff_id: string | null
+          source: string
+        }
+        Insert: {
+          consent_type: string
+          created_at?: string
+          customer_id: string
+          decision: string
+          decision_at?: string
+          evidence_note?: string | null
+          id?: string
+          notice_version_id?: string | null
+          recorded_by_staff_id?: string | null
+          source: string
+        }
+        Update: {
+          consent_type?: string
+          created_at?: string
+          customer_id?: string
+          decision?: string
+          decision_at?: string
+          evidence_note?: string | null
+          id?: string
+          notice_version_id?: string | null
+          recorded_by_staff_id?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_consents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_consents_notice_version_id_fkey"
+            columns: ["notice_version_id"]
+            isOneToOne: false
+            referencedRelation: "privacy_notice_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_consents_recorded_by_staff_id_fkey"
+            columns: ["recorded_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_privacy_notices: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          customer_id: string
+          delivered_at: string
+          delivery_method: string
+          evidence_note: string | null
+          id: string
+          notice_version_id: string
+          recorded_by_staff_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          customer_id: string
+          delivered_at?: string
+          delivery_method: string
+          evidence_note?: string | null
+          id?: string
+          notice_version_id: string
+          recorded_by_staff_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          customer_id?: string
+          delivered_at?: string
+          delivery_method?: string
+          evidence_note?: string | null
+          id?: string
+          notice_version_id?: string
+          recorded_by_staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_privacy_notices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_privacy_notices_notice_version_id_fkey"
+            columns: ["notice_version_id"]
+            isOneToOne: false
+            referencedRelation: "privacy_notice_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_privacy_notices_recorded_by_staff_id_fkey"
+            columns: ["recorded_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_tags: {
         Row: {
           created_at: string
@@ -415,6 +534,8 @@ export type Database = {
       }
       customers: {
         Row: {
+          anonymized_at: string | null
+          anonymized_by_staff_id: string | null
           assigned_staff_id: string | null
           created_at: string
           deleted_at: string | null
@@ -435,9 +556,13 @@ export type Database = {
           portal_token: string | null
           portal_token_expires_at: string | null
           profile_score: number
+          retention_hold_reason: string | null
+          retention_hold_until: string | null
           updated_at: string
         }
         Insert: {
+          anonymized_at?: string | null
+          anonymized_by_staff_id?: string | null
           assigned_staff_id?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -458,9 +583,13 @@ export type Database = {
           portal_token?: string | null
           portal_token_expires_at?: string | null
           profile_score?: number
+          retention_hold_reason?: string | null
+          retention_hold_until?: string | null
           updated_at?: string
         }
         Update: {
+          anonymized_at?: string | null
+          anonymized_by_staff_id?: string | null
           assigned_staff_id?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -481,12 +610,94 @@ export type Database = {
           portal_token?: string | null
           portal_token_expires_at?: string | null
           profile_score?: number
+          retention_hold_reason?: string | null
+          retention_hold_until?: string | null
           updated_at?: string
         }
         Relationships: [
           {
+            foreignKeyName: "customers_anonymized_by_staff_id_fkey"
+            columns: ["anonymized_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "customers_assigned_staff_fk"
             columns: ["assigned_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_subject_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by_staff_id: string | null
+          customer_id: string
+          due_at: string | null
+          handled_by_staff_id: string | null
+          id: string
+          notes: string | null
+          request_type: string
+          requested_at: string
+          requested_via: string
+          resolution_note: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by_staff_id?: string | null
+          customer_id: string
+          due_at?: string | null
+          handled_by_staff_id?: string | null
+          id?: string
+          notes?: string | null
+          request_type: string
+          requested_at?: string
+          requested_via: string
+          resolution_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by_staff_id?: string | null
+          customer_id?: string
+          due_at?: string | null
+          handled_by_staff_id?: string | null
+          id?: string
+          notes?: string | null
+          request_type?: string
+          requested_at?: string
+          requested_via?: string
+          resolution_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_subject_requests_created_by_staff_id_fkey"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_subject_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_subject_requests_handled_by_staff_id_fkey"
+            columns: ["handled_by_staff_id"]
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
@@ -505,6 +716,7 @@ export type Database = {
           is_required: boolean
           requested_at: string
           status: string
+          storage_deleted_at: string | null
           updated_at: string
         }
         Insert: {
@@ -518,6 +730,7 @@ export type Database = {
           is_required?: boolean
           requested_at?: string
           status?: string
+          storage_deleted_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -531,6 +744,7 @@ export type Database = {
           is_required?: boolean
           requested_at?: string
           status?: string
+          storage_deleted_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -787,6 +1001,91 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      privacy_notice_versions: {
+        Row: {
+          content: string
+          created_at: string
+          created_by_staff_id: string | null
+          effective_at: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          effective_at: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          effective_at?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_notice_versions_created_by_staff_id_fkey"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      privacy_settings: {
+        Row: {
+          archive_grace_days: number
+          automatic_actions_enabled: boolean
+          created_at: string
+          customer_retention_days: number | null
+          document_retention_days: number | null
+          id: string
+          updated_at: string
+          updated_by_staff_id: string | null
+        }
+        Insert: {
+          archive_grace_days?: number
+          automatic_actions_enabled?: boolean
+          created_at?: string
+          customer_retention_days?: number | null
+          document_retention_days?: number | null
+          id: string
+          updated_at?: string
+          updated_by_staff_id?: string | null
+        }
+        Update: {
+          archive_grace_days?: number
+          automatic_actions_enabled?: boolean
+          created_at?: string
+          customer_retention_days?: number | null
+          document_retention_days?: number | null
+          id?: string
+          updated_at?: string
+          updated_by_staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_settings_updated_by_staff_id_fkey"
+            columns: ["updated_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -1081,6 +1380,10 @@ export type Database = {
         Args: { p_content: string; p_customer_id: string }
         Returns: string
       }
+      anonymize_customer_v1: {
+        Args: { p_customer_id: string; p_request_id: string }
+        Returns: boolean
+      }
       application_status_transition_allowed: {
         Args: { p_from: string; p_to: string }
         Returns: boolean
@@ -1113,9 +1416,25 @@ export type Database = {
         Args: { p_payload: Json }
         Returns: Json
       }
+      create_data_subject_request_v1: {
+        Args: { p_payload: Json }
+        Returns: string
+      }
       create_task_v1: { Args: { p_payload: Json }; Returns: string }
       current_staff_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      list_archived_customer_privacy_v1: {
+        Args: never
+        Returns: {
+          anonymized_at: string
+          customer_id: string
+          grace_eligible: boolean
+          request_id: string
+          request_status: string
+          retention_hold_active: boolean
+          storage_file_count: number
+        }[]
+      }
       list_archived_customers_v1: {
         Args: never
         Returns: {
@@ -1130,6 +1449,10 @@ export type Database = {
         }[]
       }
       mark_all_notifications_read_v1: { Args: never; Returns: number }
+      mark_customer_documents_deleted_v1: {
+        Args: { p_customer_id: string; p_document_ids: string[] }
+        Returns: number
+      }
       mark_notification_read_v1: {
         Args: { p_notification_id: string }
         Returns: boolean
@@ -1139,6 +1462,15 @@ export type Database = {
         Returns: number
       }
       record_communication_v1: { Args: { p_payload: Json }; Returns: string }
+      record_customer_consent_v1: { Args: { p_payload: Json }; Returns: string }
+      record_customer_export_v1: {
+        Args: { p_customer_id: string }
+        Returns: boolean
+      }
+      record_customer_privacy_notice_v1: {
+        Args: { p_payload: Json }
+        Returns: string
+      }
       restore_backup_v2: { Args: { p_backup: Json }; Returns: Json }
       restore_customers_v1: {
         Args: { p_customer_ids: string[] }
@@ -1169,9 +1501,21 @@ export type Database = {
         Args: { p_customer_id: string; p_enabled: boolean }
         Returns: Json
       }
+      set_customer_retention_hold_v1: {
+        Args: { p_customer_id: string; p_hold_until: string; p_reason: string }
+        Returns: boolean
+      }
       set_customer_tags_v1: {
         Args: { p_customer_id: string; p_tag_ids: string[] }
         Returns: number
+      }
+      set_data_subject_request_status_v1: {
+        Args: {
+          p_request_id: string
+          p_resolution_note?: string
+          p_status: string
+        }
+        Returns: boolean
       }
       set_task_status_v1: {
         Args: { p_status: string; p_task_id: string }
@@ -1196,8 +1540,16 @@ export type Database = {
         }
         Returns: Json
       }
+      update_privacy_settings_v1: {
+        Args: { p_payload: Json }
+        Returns: boolean
+      }
       upsert_message_template_v1: {
         Args: { p_payload: Json; p_template_id: string }
+        Returns: string
+      }
+      upsert_privacy_notice_v1: {
+        Args: { p_notice_id: string; p_payload: Json }
         Returns: string
       }
     }

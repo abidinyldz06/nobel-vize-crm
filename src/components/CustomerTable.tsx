@@ -7,6 +7,7 @@ import type { LucideIcon } from "lucide-react";
 import CustomerActionMenu from "./CustomerActionMenu";
 import { toast } from "sonner";
 import CustomerQuickActions from "./CustomerQuickActions";
+import { maskEmail, maskPhone } from "@/lib/masking";
 
 type Customer = {
   id: string;
@@ -371,8 +372,8 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                     </td>
                     <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
                       <div>
-                        <p className="text-slate-700 dark:text-slate-300">{customer.phone || '-'}</p>
-                        <p className="text-[11px] text-slate-500">{customer.email || '-'}</p>
+                        <p className="text-slate-700 dark:text-slate-300">{customer.phone ? maskPhone(customer.phone) : '-'}</p>
+                        <p className="text-[11px] text-slate-500">{customer.email ? maskEmail(customer.email) : '-'}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -463,8 +464,8 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                     </div>
 
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-                      <p className="flex items-center gap-1.5"><Search className="w-3 h-3" /> {customer.phone || 'Tel yok'}</p>
-                      <p className="flex items-center gap-1.5"><FileText className="w-3 h-3" /> {customer.email || 'E-posta yok'}</p>
+                      <p className="flex items-center gap-1.5"><Search className="w-3 h-3" /> {customer.phone ? maskPhone(customer.phone) : 'Tel yok'}</p>
+                      <p className="flex items-center gap-1.5"><FileText className="w-3 h-3" /> {customer.email ? maskEmail(customer.email) : 'E-posta yok'}</p>
                     </div>
 
                     <div className="mt-2">

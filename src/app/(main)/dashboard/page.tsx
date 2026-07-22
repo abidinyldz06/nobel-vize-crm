@@ -5,6 +5,7 @@ import OverdueDocuments from "@/components/OverdueDocuments";
 import DashboardCharts from "@/components/DashboardCharts";
 import { sumPayments } from "@/lib/report-metrics";
 import { passportExpiryState, summarizeMonthlyDashboard } from "@/lib/dashboard-metrics";
+import { maskPassport } from "@/lib/masking";
 import type { Tables } from "@/types/database";
 
 export const revalidate = 0;
@@ -227,7 +228,7 @@ export default async function Dashboard() {
                 <Link key={customer.id} href={`/customers/${customer.id}`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-white/[0.02]">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{customer.first_name} {customer.last_name}</p>
-                    <p className="text-[10px] text-slate-500">{customer.passport_no || 'Pasaport no yok'}</p>
+                    <p className="text-[10px] text-slate-500">{customer.passport_no ? maskPassport(customer.passport_no) : 'Pasaport no yok'}</p>
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${state.expired ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'}`}>
                     {state.expired ? 'Süresi dolmuş' : `${state.days} gün kaldı`}

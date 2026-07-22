@@ -2,6 +2,28 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 3.6 KVKK ve Veri Yaşam Döngüsü
+
+### KVKK kayıtları
+
+- Admin tarafından sürümlenen aydınlatma metinleri ile müşteriye teslim ve teyit kanıtı eklendi.
+- Aydınlatma kaydından ayrı tutulan açık rıza verme, reddetme ve geri çekme geçmişi eklendi.
+- Erişim, dışa aktarma, düzeltme, kısıtlama, silme ve anonimleştirme talepleri için takip akışı eklendi.
+- Admin kontrollü müşteri veri paketi ve privacy audit kaydı eklendi.
+
+### Veri yaşam döngüsü
+
+- Saklama süreleri, arşiv bekleme süresi ve müşteri bazlı saklama kilidi eklendi.
+- Storage dosyaları temizlenmeden anonimleştirmeyi engelleyen kontrollü işlem zinciri eklendi.
+- Kalıcı silme; onaylı talep, bekleme süresi ve anonimleştirme koşullarına bağlandı.
+- KVKK tabloları sürümlü JSON yedek ve atomik geri yükleme kapsamına alındı.
+- Telefon, e-posta ve pasaport bilgileri liste, arama ve özet ekranlarında maskelendi.
+
+### Kalite
+
+- KVKK yaşam döngüsü için pgTAP, birim, güvenlik regresyonu ve oturumlu Playwright senaryoları eklendi.
+- Otomatik silme varsayılan olarak kapalı tutuldu; bu sürümde arka plan silme görevi etkinleştirilmedi.
+
 ## [Unreleased] — Faz 3.5 Müşteri İletişimi ve Portal
 
 ### İletişim
