@@ -19,7 +19,7 @@ export default async function CustomersPage() {
   const query = supabase
     .from('customers')
     .select(`
-      id, first_name, last_name, phone, email, created_at, profile_score, assigned_staff_id,
+      id, first_name, last_name, phone, email, created_at, assigned_staff_id,
       applications (id, country, status, created_at),
       customer_tags (tag:tags (id, name, color))
     `)

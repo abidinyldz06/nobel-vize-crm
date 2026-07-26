@@ -1,4 +1,4 @@
-import { BarChart3, TrendingUp, ArrowUpRight, Users, FileCheck, Globe, Banknote, Wallet, CreditCard, Percent, UserCog, Calendar } from "lucide-react";
+import { BarChart3, ArrowUpRight, Users, FileCheck, Globe, Banknote, Wallet, CreditCard, Percent, UserCog, Calendar } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import ReportFilters from "@/components/ReportFilters";
 import StaffPerformance from "@/components/StaffPerformance";
@@ -415,39 +415,34 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           )}
         </div>
 
-        {/* Profile Score Analysis */}
+        {/* Real document status */}
         <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] p-6 rounded-2xl shadow-lg">
           <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-emerald-500" /> Profil Skoru & Onay Analizi
+            <FileCheck className="w-4 h-4 text-emerald-500" /> Seçili Dönem Evrak Durumu
           </h3>
-          <div className="space-y-3">
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] hover:border-emerald-500/30 transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-sm shrink-0">85+</div>
-              <div>
-                <p className="font-semibold text-sm text-slate-900 dark:text-slate-200">Yüksek Profil</p>
-                <p className="text-xs text-slate-500 mt-0.5">Onay Oranı: %98 (Güçlü dosya)</p>
-              </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+              <p className="text-2xl font-bold text-emerald-500">{completedDocs}</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Tamamlanan evrak</p>
             </div>
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] hover:border-amber-500/30 transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 font-bold text-sm shrink-0">50-84</div>
-              <div>
-                <p className="font-semibold text-sm text-slate-900 dark:text-slate-200">Orta Profil</p>
-                <p className="text-xs text-slate-500 mt-0.5">Onay Oranı: %76 (Ek evraklarla desteklenmeli)</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] hover:border-red-500/30 transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400 font-bold text-sm shrink-0">0-49</div>
-              <div>
-                <p className="font-semibold text-sm text-slate-900 dark:text-slate-200">Riskli Profil</p>
-                <p className="text-xs text-slate-500 mt-0.5">Onay Oranı: %34 (Sponsor veya ek belge şart)</p>
-              </div>
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+              <p className="text-2xl font-bold text-amber-500">{pendingDocs}</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Bekleyen evrak</p>
             </div>
           </div>
-
-          <div className="mt-5 p-4 rounded-xl bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937]">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Evrak durumu: <span className="text-amber-400 font-medium">{pendingDocs} bekliyor</span>,&nbsp;
-              <span className="text-emerald-400 font-medium">{completedDocs} tamamlandı</span>
+          <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4 dark:border-[#1f2937] dark:bg-[#060d1a]">
+            <div className="mb-2 flex items-center justify-between text-xs">
+              <span className="font-medium text-slate-600 dark:text-slate-300">Tamamlanma oranı</span>
+              <span className="font-bold text-emerald-500">%{docCompletionRate}</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-[#1f2937]">
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-all duration-700"
+                style={{ width: `${docCompletionRate}%` }}
+              />
+            </div>
+            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+              Seçili dönemde oluşturulan toplam {totalDocs} evrakın gerçek durumundan hesaplanır.
             </p>
           </div>
         </div>

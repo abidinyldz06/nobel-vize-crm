@@ -31,18 +31,6 @@ export async function updateCustomer(formData: FormData) {
   const passportExpiry = formData.get('passportExpiry') as string
   const passportIssuingCountry = formData.get('passportIssuingCountry') as string || 'Türkiye'
 
-  // Profil skoru otomatik hesapla
-  let profileScore = 30 // base
-  if (email) profileScore += 10
-  if (phone) profileScore += 10
-  if (financialStatus === 'iyi') profileScore += 15
-  if (financialStatus === 'yuksek') profileScore += 25
-  if (financialStatus === 'orta') profileScore += 10
-  if (monthlyIncome && monthlyIncome > 20000) profileScore += 10
-  if (monthlyIncome && monthlyIncome > 50000) profileScore += 10
-  // Max 100
-  profileScore = Math.min(100, profileScore)
-
   const { error } = await supabase.rpc('update_customer_application_v1', {
     p_customer_id: id,
     p_application_id: applicationId,
@@ -54,7 +42,6 @@ export async function updateCustomer(formData: FormData) {
       financial_status: financialStatus || 'orta',
       monthly_income: monthlyIncome,
       notes: notes || null,
-      profile_score: profileScore,
       passport_no: passportNo || null,
       passport_expiry: passportExpiry || null,
       passport_issuing_country: passportIssuingCountry,

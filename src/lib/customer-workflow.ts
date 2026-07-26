@@ -6,7 +6,6 @@ export interface CustomerApplicationPayload {
   last_name: string;
   phone?: string | null;
   email?: string | null;
-  profile_score?: number;
   passport_no?: string | null;
   passport_expiry?: string | null;
   passport_issuing_country?: string | null;

@@ -30,53 +30,6 @@ export default function DocumentItem({ doc }: { doc: Tables<'documents'> }) {
         performed_by: user?.email || "Danışman"
       }]);
 
-      // Profil skorunu otomatik güncelle — tamamlanan evrak sayısına göre
-      if (doc.application_id) {
-        const { data: allDocs } = await supabase
-          .from('documents')
-          .select('id, status')
-          .eq('application_id', doc.application_id);
-
-        if (allDocs) {
-          const total = allDocs.length;
-          const completed = allDocs.filter((document) => document.id === doc.id ? newStatus === 'onaylandi' : document.status === 'onaylandi').length;
-          const docProgress = total > 0 ? Math.round((completed / total) * 40) : 0; // evraklar max 40 puan
-
-          // customer_id al
-          const { data: app } = await supabase
-            .from('applications')
-            .select('customer_id')
-            .eq('id', doc.application_id)
-            .single();
-
-          if (app) {
-            // Mevcut base skoru al
-            const { data: customer } = await supabase
-              .from('customers')
-              .select('profile_score, email, phone, financial_status')
-              .eq('id', app.customer_id)
-              .eq('is_deleted', false)
-              .single();
-
-            if (customer) {
-              let base = 30;
-              if (customer.email) base += 10;
-              if (customer.phone) base += 10;
-              if (customer.financial_status === 'iyi') base += 10;
-              if (customer.financial_status === 'yuksek') base += 15;
-              const newScore = Math.min(100, base + docProgress);
-
-              await supabase
-                .from('customers')
-                .update({ profile_score: newScore })
-                .eq('id', app.customer_id)
-                .eq('is_deleted', false);
-            }
-          }
-        }
-
-      }
-
       router.refresh();
     }
     setLoading(false);

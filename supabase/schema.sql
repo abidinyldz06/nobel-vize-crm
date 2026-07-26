@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS customers (
   last_name TEXT NOT NULL,
   phone TEXT,
   email TEXT,
-  profile_score INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

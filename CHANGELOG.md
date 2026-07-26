@@ -2,6 +2,30 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 4.1 Müşteri Puanlamasının Kaldırılması
+
+### Değiştirildi
+
+- Sabit kurallı `profile_score` hesabı müşteri oluşturma, düzenleme, import,
+  Google Form webhook ve evrak onay akışlarından kaldırıldı.
+- Müşteri liste, kart, detay ve CSV çıktılarındaki puan göstergeleri ile
+  "AI Profil Analizi" arayüzleri kaldırıldı.
+- Gerçek veriye dayanmayan `%98`, `%76` ve `%34` profil raporu yerine seçili
+  dönemin gerçek evrak tamamlanma metrikleri gösterilmeye başlandı.
+- Teknik evrak kuralı eşleştirmesi müşteri değerlendirmesi üretmediğini açıkça
+  gösterecek biçimde yeniden adlandırıldı.
+
+### Veritabanı ve kalite
+
+- `customers.profile_score` kolonu ile doğrulama constraint'i yeni migration
+  üzerinden kaldırıldı; müşteri oluşturma, güncelleme ve anonimleştirme
+  RPC'leri yeni şemaya uyarlandı.
+- Üretilen TypeScript tipleri ve şema anlık görüntüleri yenilendi.
+- Eski v2 yedeklerdeki fazladan `profile_score` alanının güvenle yok sayıldığı
+  pgTAP ve restore tatbikatıyla doğrulandı.
+- Kaynak kodda skor davranışının yeniden eklenmesini engelleyen release gate
+  regresyonu eklendi.
+
 ## [Unreleased] — Faz 4.0 Plan ve İş Listesi
 
 ### Planlandı

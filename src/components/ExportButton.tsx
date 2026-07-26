@@ -10,13 +10,12 @@ type ExportCustomer = {
   created_at: string;
   country?: string | null;
   status?: string | null;
-  profile_score: number | null;
 };
 
 export default function ExportButton({ data }: { data: ExportCustomer[] }) {
   const handleExport = () => {
     // CSV Header
-    const headers = ["ID", "Ad", "Soyad", "Telefon", "E-posta", "Kayıt Tarihi", "Ülke", "Durum", "Profil Skoru"];
+    const headers = ["ID", "Ad", "Soyad", "Telefon", "E-posta", "Kayıt Tarihi", "Ülke", "Durum"];
     
     // Map data
     const rows = data.map(c => [
@@ -27,8 +26,7 @@ export default function ExportButton({ data }: { data: ExportCustomer[] }) {
       c.email || '',
       new Date(c.created_at).toLocaleDateString('tr-TR'),
       c.country || '',
-      c.status || '',
-      c.profile_score || ''
+      c.status || ''
     ]);
 
     // Construct CSV String

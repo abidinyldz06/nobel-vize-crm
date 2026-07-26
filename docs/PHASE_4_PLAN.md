@@ -2,7 +2,7 @@
 
 Tarih: 26 Temmuz 2026
 
-Durum: Faz 4.0 tamamlandı; Faz 4.1 uygulaması başlamadı.
+Durum: Faz 4.1 release adayı tamamlandı; production kapanışı bekliyor.
 
 Ön koşul: Faz 3.8 production kapanışı tamamlandı (`3a4d66c`).
 
@@ -86,15 +86,15 @@ Kapsam dışı:
 
 Kabul kriterleri:
 
-- [ ] Uygulamada "AI Profil Analizi", "Profil Skoru" veya müşteri `/100`
+- [x] Uygulamada "AI Profil Analizi", "Profil Skoru" veya müşteri `/100`
       göstergesi kalmaz.
-- [ ] Kaynak kodda `profile_score` okuma/yazma yolu kalmaz.
-- [ ] Yeni kurulum ve upgrade migration zinciri başarıyla çalışır.
-- [ ] Eski v2 yedek girdilerindeki fazladan skor alanı geri yüklemeyi bozmaz
+- [x] Kaynak kodda `profile_score` okuma/yazma yolu kalmaz.
+- [x] Yeni kurulum ve upgrade migration zinciri başarıyla çalışır.
+- [x] Eski v2 yedek girdilerindeki fazladan skor alanı geri yüklemeyi bozmaz
       veya açık bir sürüm dönüşümüyle güvenle yok sayılır.
-- [ ] Raporlar yalnız veritabanındaki gerçek sonuç ve operasyon verilerini
+- [x] Raporlar yalnız veritabanındaki gerçek sonuç ve operasyon verilerini
       gösterir.
-- [ ] Lint, typecheck, birim, güvenlik, pgTAP, Playwright ve build kapıları
+- [x] Lint, typecheck, birim, güvenlik, pgTAP, Playwright ve build kapıları
       başarılıdır.
 
 ### 4.2 — Zamanlanmış operasyon sistemi

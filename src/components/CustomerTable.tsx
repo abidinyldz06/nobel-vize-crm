@@ -16,7 +16,6 @@ type Customer = {
   phone: string | null;
   email: string | null;
   created_at: string;
-  profile_score: number | null;
   country?: string | null;
   status?: string | null;
   latest_application_id?: string | null;
@@ -367,17 +366,6 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                               ))}
                             </div>
                           )}
-                          {customer.profile_score != null && (
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <div className="w-10 h-1 bg-slate-200 dark:bg-[#1f2937] rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full ${customer.profile_score >= 70 ? 'bg-emerald-500' : customer.profile_score >= 40 ? 'bg-amber-500' : 'bg-red-500'}`}
-                                  style={{ width: `${customer.profile_score}%` }}
-                                />
-                              </div>
-                              <span className="text-[9px] text-slate-600">{customer.profile_score}p</span>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </td>
@@ -484,18 +472,6 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                       <CustomerQuickActions customerId={customer.id} firstName={customer.first_name} phone={customer.phone} email={customer.email} />
                     </div>
 
-                    {customer.profile_score != null && (
-                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-[#1a2232]">
-                        <span className="text-[10px] text-slate-500">Skor:</span>
-                        <div className="w-16 h-1.5 bg-slate-200 dark:bg-[#1f2937] rounded-full overflow-hidden flex-1 max-w-[100px]">
-                          <div
-                            className={`h-full rounded-full ${customer.profile_score >= 70 ? 'bg-emerald-500' : customer.profile_score >= 40 ? 'bg-amber-500' : 'bg-red-500'}`}
-                            style={{ width: `${customer.profile_score}%` }}
-                          />
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{customer.profile_score}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
