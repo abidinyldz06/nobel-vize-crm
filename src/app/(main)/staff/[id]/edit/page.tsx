@@ -1,13 +1,13 @@
-import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { updateStaff } from "@/app/actions/staff";
 import { Edit2, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { requireAdminPage } from "@/lib/page-auth";
 
 export const revalidate = 0;
 
 export default async function EditStaffPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await requireAdminPage();
   const { data: member } = await supabase.from('staff').select('*').eq('id', id).single();
 
   if (!member) return <div className="p-6 text-slate-500 dark:text-slate-400">Personel bulunamadı.</div>;

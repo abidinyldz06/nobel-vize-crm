@@ -25,19 +25,22 @@ export default function Sidebar({
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/customers", icon: Users, label: "Müşteriler" },
     { href: "/applications", icon: Columns3, label: "Başvurular" },
-    { href: "/countries", icon: Globe, label: "Ülke & Evraklar" },
     { href: "/appointments", icon: Calendar, label: "Randevular" },
     { href: "/tasks", icon: ListTodo, label: "Görevler" },
   ];
 
   if (userRole === "Yönetici") {
-    baseLinks.push({ href: "/staff", icon: UserCog, label: "Personel" });
+    baseLinks.push(
+      { href: "/countries", icon: Globe, label: "Ülke & Evraklar" },
+      { href: "/staff", icon: UserCog, label: "Personel" },
+    );
   }
 
-  baseLinks.push(
-    { href: "/reports", icon: BarChart3, label: "Raporlar" },
-    { href: "/settings", icon: Settings, label: "Ayarlar" }
-  );
+  baseLinks.push({ href: "/reports", icon: BarChart3, label: "Raporlar" });
+
+  if (userRole === "Yönetici") {
+    baseLinks.push({ href: "/settings", icon: Settings, label: "Ayarlar" });
+  }
 
   const links = baseLinks;
 

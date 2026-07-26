@@ -1,14 +1,14 @@
-import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { ArrowLeft, Users, FileCheck, Banknote, Calendar } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Tables } from "@/types/database";
+import { requireAdminPage } from "@/lib/page-auth";
 
 export const revalidate = 0;
 
 export default async function StaffPerformanceDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await requireAdminPage();
 
   const { data: staff } = await supabase
     .from('staff')

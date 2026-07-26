@@ -1,8 +1,11 @@
 import { createStaff } from "@/app/actions/staff";
 import { Users, Save, ArrowLeft, Shield, User } from "lucide-react";
 import Link from "next/link";
+import { requireAdminPage } from "@/lib/page-auth";
 
-export default function NewStaffPage() {
+export default async function NewStaffPage() {
+  await requireAdminPage();
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#060d1a] p-6">
       <div className="max-w-2xl mx-auto">
