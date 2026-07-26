@@ -1,120 +1,150 @@
 # Nobel Vize CRM — Teknik İnceleme ve Yol Haritası
 
-Son inceleme: 20 Temmuz 2026
-İncelenen başlangıç sürümü: `36ea267`
+Son inceleme: 26 Temmuz 2026
+
+İncelenen production sürümü: `3a4d66c`
 
 ## Amaç
 
-Bu belge, Nobel Vize CRM'in güvenli ve sürdürülebilir biçimde geliştirilmesi için yaşayan teknik kayıt ve faz planıdır. Her faz ayrı bir dalda uygulanır; değişiklikler üretim derlemesi, statik analiz ve ilgili testlerden geçmeden ana dala gönderilmez.
+Bu belge Nobel Vize CRM'in yaşayan teknik durum kaydıdır. Ayrıntılı uygulama
+kapsamı ilgili faz planlarında, tamamlanma kanıtı ise uygulama ve production
+kapanış raporlarında tutulur. Değişiklikler kalite, güvenlik, yedek ve yayın
+kapılarından geçmeden production'a gönderilmez.
 
-## Mevcut ürün kapsamı
+## Güncel ürün ve mimari kararı
 
-Uygulama müşteri, vize başvurusu, evrak, randevu, ödeme, personel, iletişim, raporlama ve müşteri portalı akışlarını kapsıyor. Akıllı evrak kuralları ve vize alanına özgü veri modeli ürünün güçlü farklılaştırıcılarıdır.
+Uygulama Nobel Vize için tek şirketli iç CRM'dir. Müşteri, başvuru, evrak,
+randevu, ödeme, görev, bildirim, personel, iletişim, müşteri portalı, KVKK,
+raporlama, yedek ve operasyonel izleme akışlarını kapsar.
 
-## Öncelikli bulgular
+SaaS/tenant, abonelik, plan, kota, faturalandırma, white-label ve subdomain
+özellikleri ertelenmiştir. İkinci bağımsız şirket, self-service ücretli
+onboarding veya tenant bazlı sözleşme ihtiyacı doğmadan bu karar yeniden
+açılmaz.
 
-### P0 — Kritik güvenlik
-
-- Portal migration'ı `customers`, `applications`, `documents` ve `payments` tablolarının tamamını anonim okumaya açıyor. Portal erişimi token doğrulayan sunucu katmanına taşınmalı ve anonim politikalar kaldırılmalı.
-- Bazı eski SQL dosyaları temel tablolarda RLS'yi tamamen kapatıyor. Canlı şema envanteri alınmalı ve tek migration kaynağı oluşturulmalı.
-- Evrak storage bucket'ı public kuruluyor. Private bucket ve yetkili/süreli erişim kullanılmalı.
-- Google Form webhook'u imza ve tekrar saldırısı koruması olmadan service-role istemcisi kullanıyor.
-- Personel hesapları ortak `123456` şifresiyle oluşturuluyor. Davet bağlantısı akışına geçilmeli.
-- Bazı ekranlarda personel kaydı bulunamadığında kullanıcı admin kabul ediliyor. Yetkilendirme her zaman kapalı varsayımla çalışmalı.
-- `/api` yolları proxy kapsamı dışında; bazı endpoint'lerde açık oturum veya admin kontrolü eksik.
-
-### P1 — Veri modeli ve bütünlük
-
-- `visa_requirements`, `country_visa_requirements` ve `country_visa_rules` referansları aynı kod tabanında birlikte bulunuyor.
-- Güncel `country_visa_rules` tablosunu kuran sürümlü migration depoda yok.
-- `activity_log.performed_by` bazı şemalarda UUID, bazı kod yollarında e-posta veya isim olarak kullanılıyor.
-- Müşteri, başvuru, evrak ve log oluşturma akışları transaction kullanmıyor; kısmi kayıt bırakabilir.
-- Yedekleme eski tablo listesini kullanıyor ve restore işlemi transaction olmadan önce mevcut veriyi siliyor.
-
-### P2 — İşlevsel doğruluk
-
-- Dashboard aktif başvuru sayısını yalnızca son beş kayıt üzerinden hesaplıyor.
-- Yıllık rapor, altı aylık filtre uygulanmış veri kümesinden türetiliyor.
-- Arama endpoint'i eski/nonexistent `visa_requirements` tablosuna başvuruyor.
-- Webhook ve import akışları yeni akıllı evrak kurallarıyla aynı modeli kullanmıyor.
-
-### P3 — Kod kalitesi ve operasyon
-
-- Üretim derlemesi başarılı olmakla birlikte başlangıç incelemesinde ESLint 156 hata ve 40 uyarı bildirdi.
-- `npm run lint`, Next.js 16'da kaldırılmış `next lint` komutunu kullanıyor.
-- Otomatik test ve GitHub Actions kalite kapısı bulunmuyor.
-- `xlsx` bağımlılığı için yüksek önem dereceli güvenlik bildirimleri bulunuyor.
-- README Next.js 14 yazarken proje Next.js 16 kullanıyor.
-
-## Faz planı
+## Tamamlanan teknik temel
 
 ### Faz 0 — Güvenlik ve veri koruma
 
-- [x] Merkezi kullanıcı/personel/admin yetki yardımcıları
-- [x] Fail-closed rol kontrolleri
-- [x] API route kimlik ve rol kontrolleri
-- [x] İmzalı ve zaman damgalı Google Form webhook'u
-- [x] Personel davet akışı; ortak şifrenin kaldırılması
-- [x] Portalın yalnızca sunucu üzerinden erişmesi
-- [x] Anonim portal politikalarını kaldıran migration (staging/canlı uygulaması bekliyor)
-- [x] Storage bucket'ı private yapan migration (staging/canlı uygulaması bekliyor)
-- [x] Recursion oluşturmayan admin/danışman RLS politikaları (staging/canlı uygulaması bekliyor)
-- [x] Otomatik ilk-admin bootstrap davranışının kaldırılması
-- [x] Tehlikeli restore akışının korumaya alınması
-- [x] Temel güvenlik başlıkları ve ortam değişkeni dokümantasyonu
-- [ ] Canlı Supabase şema ve politika envanteri
-- [ ] Migration'ın staging uygulaması ve rol/portal/evrak regresyon testi
-- [ ] Güvenlik paketinin canlıya kontrollü alınması
+- fail-closed personel/admin yetkilendirmesi;
+- API ve sayfa rol kontrolleri;
+- imzalı ve tekrar saldırısı korumalı Google Form webhook'u;
+- sunucu tarafı müşteri portalı;
+- private evrak Storage bucket'ı;
+- recursion oluşturmayan rol bazlı RLS;
+- güvenli personel davet akışı;
+- korumalı restore ve temel güvenlik başlıkları.
+
+Production uygulama ayrıntıları `docs/PHASE_0_DEPLOYMENT_RUNBOOK.md`
+dosyasındadır.
 
 ### Faz 1 — Veritabanı standardizasyonu
 
-- [ ] Canlı şema envanteri ve yedek (betikler hazır ve yerelde doğrulandı; uzak uygulama bekliyor)
-- [x] Supabase CLI migration zinciri
-- [x] Tek ülke/vize kuralı modeli
-- [x] Foreign key, check ve indekslerin standardizasyonu
-- [x] Kritik iş akışları için transaction/RPC
-- [x] Sürümlü ve atomik backup/restore
-- [x] Tek kiracılı mimari karar kaydı; SaaS `tenant_id` izolasyonu Faz 3 ürün kararına bağlandı
+- sürümlü Supabase migration zinciri;
+- kanonik ülke/vize kuralı modeli;
+- foreign key, check ve indeks standardizasyonu;
+- kritik müşteri/başvuru işlemlerinde atomik RPC;
+- sürümlü ve atomik backup/restore;
+- pgTAP tabanlı şema ve iş akışı kontrolleri.
 
-Faz 1 uygulama ve test kanıtları `docs/PHASE_1_IMPLEMENTATION_REPORT.md`, staging
-ve production adımları `docs/PHASE_1_DEPLOYMENT_RUNBOOK.md` içindedir.
+Kanıtlar `docs/PHASE_1_IMPLEMENTATION_REPORT.md` dosyasındadır.
 
 ### Faz 2 — Stabilizasyon ve kalite
 
-- [x] Dashboard ve rapor hesaplarının düzeltilmesi
-- [x] Supabase üretimli TypeScript tipleri
-- [x] ESLint borcunun temizlenmesi
-- [x] Unit ve entegrasyon testleri
-- [x] Playwright ile temel kullanıcı akışları
-- [x] GitHub Actions build/lint/test/audit kapıları
-- [x] Güvensiz XLSX bağımlılığının değiştirilmesi
+- dashboard ve rapor hesap düzeltmeleri;
+- Supabase üretimli TypeScript tipleri;
+- lint borcunun kapatılması;
+- birim, güvenlik ve Playwright testleri;
+- GitHub Actions application/database/browser kalite kapıları;
+- production dependency audit;
+- güvensiz XLSX bağımlılığının kaldırılması.
 
-Faz 2 kapsamı, doğrulama matrisi ve kalan riskler
-`docs/PHASE_2_IMPLEMENTATION_REPORT.md` içindedir.
+Kanıtlar `docs/PHASE_2_IMPLEMENTATION_REPORT.md` dosyasındadır.
 
-### Faz 3 — İç CRM ürünleştirme ve operasyon
+### Faz 3 — İç CRM ürünleştirme ve production kapanışı
 
-- [x] Ürün kararı: Nobel Vize için tek şirketli iç CRM; SaaS ertelendi
-- [x] Faz 3.1 — Production hazırlığı ve yayın engelleri (tamamlandı 21 Temmuz 2026)
-- [x] Faz 3.2 — Tek şirket arayüz temizliği (tamamlandı 21 Temmuz 2026)
-- [x] Faz 3.3 — Görev ve gerçek bildirim sistemi (tamamlandı 22 Temmuz 2026)
-- [x] Faz 3.4 — Başvuru süreç panosu (tamamlandı 22 Temmuz 2026)
-- [x] Faz 3.5 — Müşteri iletişimi ve portal (tamamlandı 22 Temmuz 2026)
-- [x] Faz 3.6 — KVKK ve veri yaşam döngüsü (tamamlandı 22 Temmuz 2026)
-- [x] Faz 3.7 — İzleme ve iş sürekliliği (tamamlandı 26 Temmuz 2026)
-- [x] Faz 3.8 — Son kalite ve kullanıcı kabulü (tamamlandı 26 Temmuz 2026)
+- görev, kişisel bildirim ve operasyon hatırlatmaları;
+- başvuru süreç panosu ve kanonik profil alanları;
+- müşteri etiketleri, hızlı eylemler ve birleşik timeline;
+- yönetilebilir iletişim ve kontrollü müşteri portalı;
+- KVKK kayıtları ve kontrollü veri yaşam döngüsü;
+- request ID, güvenli yapılandırılmış log, health/readiness ve operasyon uyarıları;
+- doğrulanmış yedek geçmişi ve izole restore tatbikatı;
+- rol izolasyonu, kritik/kenar akış, responsive, erişilebilirlik, performans,
+  migration, RLS ve production kabul kapıları.
 
-Faz 3 ayrıntılı kapsamı ve aşama durumları `docs/PHASE_3_PLAN.md` içindedir.
-Tenant, abonelik, plan, kota, white-label ve subdomain geliştirmeleri bu fazın
-kapsamı dışındadır.
+Faz 3.1–3.8 tamamlanma durumu `docs/PHASE_3_PLAN.md`; son production kapanışı
+`docs/PHASE_3_8_RELEASE_AND_CLOSURE.md` dosyasındadır.
+
+## Güncel öncelikler
+
+### P0 — Yanıltıcı müşteri puanlaması
+
+`profile_score` sabit kurallarla hesaplanmakta, arayüzde yapay zekâ analizi
+olarak sunulmakta ve raporda gerçek veriye dayanmayan onay yüzdeleriyle
+ilişkilendirilmektedir. Faz 4.1 bu sistemi arayüz, uygulama mantığı,
+veritabanı, rapor, dışa aktarma ve testlerden kaldıracaktır.
+
+### P1 — Zamanlanmış operasyon ve iş sürekliliği
+
+- Operasyon görev senkronizasyonu bugün görev API'sinin çağrılmasına bağlıdır;
+  kullanıcı etkileşiminden bağımsız cron çalışması gerekir.
+- Uygulama yedeği Storage envanterini içerir, private belge binary'lerini
+  içermez; tam otomatik ve repo dışı yedekleme gerekir.
+- Otomatik KVKK uygulaması varsayılan olarak kapalıdır; dry-run ve yönetici
+  onaylı güvenli zamanlayıcı gerekir.
+
+### P1 — Hesap ve iletişim güvenilirliği
+
+- Admin/personel hesapları için MFA, giriş sınırlaması ve oturum yönetimi
+  planlanmıştır.
+- WhatsApp/e-posta akışı harici uygulama açıp teslim durumunu manuel izler;
+  sağlayıcı kararı sonrası kuyruk, webhook ve retry destekli gerçek gönderim
+  gerekir.
+
+### P2 — CRM operasyon verimliliği
+
+- lead yaşam döngüsü, kaynak/kampanya, mükerrer kayıt ve SLA takibi;
+- takvim dışa aktarma/entegrasyon ve randevu çakışma yönetimi;
+- sabit tahmin kullanmayan gelişmiş sonuç, tahsilat, SLA ve iş yükü raporları.
+
+### P3 — Sürdürülebilir bakım
+
+- uyumlu patch/minor bağımlılık güncellemeleri;
+- Dependabot ve zamanlanmış production dependency audit;
+- mevcut Next lint eklentisi uyumlu olmadan ESLint 10'a geçilmemesi;
+- TypeScript ve Node tiplerinde ana sürüm geçişlerinin ayrı uyumluluk
+  çalışmasına bağlanması.
+
+## Faz 4
+
+Faz 4'ün sıralı kapsamı:
+
+1. 4.0 — Plan, kabul kriterleri ve GitHub iş listesi
+2. 4.1 — Yanıltıcı müşteri puanlamasının kaldırılması
+3. 4.2 — Zamanlanmış operasyon sistemi
+4. 4.3 — Otomatik, şifreli ve repo dışı DB/Storage yedeği
+5. 4.4 — Hesap ve giriş güvenliğinin güçlendirilmesi
+6. 4.5 — Sağlayıcı destekli gerçek bildirim ve iletişim
+7. 4.6 — Kontrollü KVKK yaşam döngüsü otomasyonu
+8. 4.7 — Lead ve müşteri operasyonlarının geliştirilmesi
+9. 4.8 — Takvim entegrasyonu ve gelişmiş gerçek raporlar
+10. 4.9 — Bakım, kabul ve production kapanışı
+
+Ayrıntılı kapsam, kapsam dışı maddeler, bağımlılıklar ve kabul kriterleri
+`docs/PHASE_4_PLAN.md` dosyasındadır.
 
 ## Yayın kontrol listesi
 
 Her değişiklik paketi için aşağıdakiler tamamlanmadan push/PR yapılmaz:
 
 1. Değişiklik kapsamı ve diff gözden geçirilir.
-2. `npm run build` başarılıdır.
-3. Lint ve ilgili testler başarılıdır veya mevcut teknik borç açıkça belgelenmiştir.
-4. Güvenlik açısından yeni secret, veri erişimi ve yetki yolları kontrol edilir.
-5. Veritabanı migration'ı varsa geri dönüş ve staging uygulama adımları yazılır.
-6. Commit mesajı ve sürüm notu değişikliğin gerçek kapsamını yansıtır.
+2. İlgili lint, typecheck, birim ve güvenlik testleri başarılıdır.
+3. Production bağımlılık ağında yüksek/kritik açık bulunmaz.
+4. Veritabanı değişikliğinde temiz reset, üretilen tip diff'i, schema lint,
+   pgTAP, yedek, dry-run, staging ve geri dönüş adımları tamamlanır.
+5. Kritik kullanıcı akışları Playwright ile doğrulanır.
+6. Production build başarılıdır.
+7. Commit, changelog, README ve issue kayıtları gerçek kapsamı yansıtır.
+8. Canlı doğrulama veri değiştirmeyen kontrollerle yapılır; mutating akışlar
+   izole release adayında test edilir.
