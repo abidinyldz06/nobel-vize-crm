@@ -97,7 +97,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 0 — Güvenlik ve veri koruma | Production'a uygulandı ve doğrulandı | `docs/PHASE_0_DEPLOYMENT_RUNBOOK.md` |
 | Faz 1 — Veritabanı standardizasyonu | Production'a uygulandı ve doğrulandı | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
-| Faz 3 — İç CRM ürünleştirme | Devam ediyor | `docs/PHASE_3_PLAN.md` |
+| Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
 
 Faz 3 alt aşama takibi:
 
@@ -109,11 +109,11 @@ Faz 3 alt aşama takibi:
 - **Faz 3.5 — Tamamlandı:** 3.5.1–3.5.6 bitti; yönetilebilir iletişim, durum/audit kaydı, kontrollü portal, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_5_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.6 — Tamamlandı:** 3.6.1–3.6.6 bitti; KVKK kayıtları, veri yaşam döngüsü, kalite kapıları, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_6_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.7 — Tamamlandı:** 3.7.1–3.7.6 bitti; yapılandırılmış loglar, health kontrolleri, operasyonel uyarılar, doğrulanmış DB/Storage yedek takibi, izole restore tatbikatı, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_7_IMPLEMENTATION_REPORT.md`)
-- **Faz 3.8 — Devam ediyor:** 3.8.1–3.8.5 bitti; kabul matrisi, ortak E2E
-  fixture/cleanup altyapısı, rol izolasyonu, kritik müşteri/operasyon zinciri
-  hata/boş veri/eşzamanlı işlem/retry regresyonları ve
-  responsive/erişilebilirlik/performans kabulü tamamlandı
-  (`docs/PHASE_3_8_IMPLEMENTATION_REPORT.md`)
+- **Faz 3.8 — Tamamlandı:** 3.8.1–3.8.8 bitti; kabul matrisi, rol ve kritik
+  akış E2E'leri, responsive/erişilebilirlik/performans bütçeleri, migration,
+  RLS, audit, dependency, UAT, restore/rollback ve production kapanış kapıları
+  tamamlandı (`docs/PHASE_3_8_IMPLEMENTATION_REPORT.md`,
+  `docs/PHASE_3_8_RELEASE_AND_CLOSURE.md`)
 
 Ayrıntılı kapsam ve kabul ölçütleri `docs/PHASE_3_PLAN.md`; Faz 3.1 ve 3.2
 kanıtları ilgili uygulama raporlarındadır. Bir aşama

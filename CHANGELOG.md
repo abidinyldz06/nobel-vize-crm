@@ -18,6 +18,10 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   değişimi, tekrar deneme idempotency'si ve iki kez cleanup kontrolleri.
 - 390px mobil ve 1440px masaüstü taşma kabulü, WCAG 2 A/AA axe taraması,
   klavye/landmark senaryoları ve dashboard performans bütçeleri.
+- Tek komutta uygulama, temiz migration, DB tipi, pgTAP, restore ve tam
+  Playwright doğrulaması yapan release adayı kapısı.
+- Liveness, readiness ve login rotalarını veri değiştirmeden doğrulayan
+  production kapanış komutu.
 
 ### Düzeltildi
 
@@ -32,6 +36,8 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   azaltma tercihi ve dar ekran müşteri filtre yerleşimi iyileştirildi.
 - Tema ve mobil menü kontrolleri hydration tamamlanana kadar kararlı erişilebilir
   ad ve etkileşim durumu kullanacak şekilde düzenlendi.
+- ESLint/Next lint zincirinde doğrudan düzeltilebilen `js-yaml` ve
+  `brace-expansion` sürümleri güncellendi.
 
 ### Güvenlik
 
@@ -43,12 +49,22 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   danışman atama yetkileri regresyon kapsamına alındı.
 - Eşzamanlı aynı başvuru durum geçişinin yalnız bir kez uygulanıp tek audit
   üretmesi regresyon kapsamına alındı.
+- Anonim/PUBLIC rollerinin tüm `public` tablo ve fonksiyon yetkileri kaldırıldı;
+  gelecekteki nesneler için güvenli default privilege tanımlandı.
+- Aktif personelin `staff.user_id` Auth bağlantısını kaybetmesi doğrulanmış
+  constraint ile engellendi.
+- Tüm public tabloların RLS, SECURITY DEFINER search path, audit actor ve
+  anonim yetki envanteri pgTAP kapanış testine bağlandı.
 
 ### CI
 
 - Ağ erişimi olmayan GitHub runner kapanışında PostHog timeout'u ile başarılı
   DB lint sonucunu kırmaması için Supabase CLI telemetrisi kalite işlerinde
   açıkça kapatıldı.
+- Production dependency audit isimlendirilmiş ve bloklayıcı
+  `audit:production` kapısında ortaklaştırıldı.
+- Faz 3.8 release/rollback/production doğrulama rehberi ve bilinen sınırlamalar
+  yayımlandı; Faz 3.1–3.8 kapanışı tamamlandı.
 
 ## [Unreleased] — Faz 3.7 İzleme ve İş Sürekliliği
 

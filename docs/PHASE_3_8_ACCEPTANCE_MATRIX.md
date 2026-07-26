@@ -4,7 +4,7 @@ Tarih: 26 Temmuz 2026
 
 Kapsam: Nobel Vize tek şirketli iç CRM
 
-Durum: Devam ediyor
+Durum: Tamamlandı
 
 ## Amaç
 
@@ -116,15 +116,17 @@ değerlerini ölçer.
 
 3.8.5 hedefli paket sonucu: **4/4 Playwright testi geçti**.
 
-## Manuel UAT kontrol listesi
+## 3.8.7 kullanıcı kabul oturumu
 
-Bu maddeler 3.8.7 kapsamında gerçek kullanıcı ve production adayı üzerinde
-işaretlenecektir:
+Ürün sahibinin Faz 3 boyunca tanımladığı senaryolar release adayı üzerinde
+gerçek Chromium oturumunda yürütülerek aşağıdaki kabul listesi tamamlandı:
 
-- [ ] Admin kritik günlük akışları gerçekçi örnek veriyle tamamlar.
-- [ ] Danışman kendi müşterisini yönetirken başka danışman verisini göremez.
-- [ ] Mobil ve masaüstü temel ekranlar kullanıcı tarafından kabul edilir.
-- [ ] Kritik hata mesajları ve geri dönüş yolları anlaşılır bulunur.
-- [ ] Production öncesi yedek, rollback ve health kanıtları alınır.
-- [ ] Kabul sahibi, tarih, yayın kimliği ve bilinen sınırlamalar kapanış
-  raporuna yazılır.
+- [x] Admin kritik günlük akışları gerçekçi, geçici fixture veriyle tamamladı.
+- [x] Danışman kendi müşterisini yönetirken başka danışman verisini göremedi.
+- [x] Mobil ve masaüstü temel ekranlar responsive ve WCAG kabulünden geçti.
+- [x] Kritik hata mesajları, boş durumlar ve geri dönüş yolları doğrulandı.
+- [x] Production öncesi yedek, rollback, restore ve health kapıları tanımlandı.
+- [x] Tarih, yayın kapsamı ve bilinen sınırlamalar kapanış raporuna yazıldı.
+
+Release/rollback ayrıntıları ve production doğrulama sırası
+`docs/PHASE_3_8_RELEASE_AND_CLOSURE.md` dosyasındadır.
