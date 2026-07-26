@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { requireAdmin } from "@/lib/authz";
+import {
+  errorCodeFrom,
+  observedRoute,
+  requestIdFrom,
+  structuredLog,
+} from "@/lib/observability";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+async function exportCustomerData(request: Request, { params }: { params: Promise<{ id: string }> }) {
   let supabase;
   try {
     ({ supabase } = await requireAdmin());
@@ -74,7 +80,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       },
     });
   } catch (error) {
-    console.error("Customer privacy export failed:", error);
+    structuredLog("error", "privacy.customer_export.failed", {
+      requestId: requestIdFrom(request),
+      operation: "privacy.customer_export",
+      errorCode: errorCodeFrom(error),
+    });
     return NextResponse.json({ error: "Müşteri veri paketi oluşturulamadı." }, { status: 500 });
   }
 }
+
+export const GET = observedRoute("privacy.customer_export", exportCustomerData);

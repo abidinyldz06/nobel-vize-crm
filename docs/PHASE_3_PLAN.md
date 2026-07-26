@@ -140,12 +140,17 @@ Ayrıntılı uygulama ve doğrulama kaydı:
 
 ### Faz 3.7 — İzleme ve iş sürekliliği
 
-Durum: **Bekliyor**
+Durum: **Uygulama ve yerel doğrulama tamamlandı — production bekliyor**
 
-- Yapılandırılmış log ve request kimliği
-- Sağlık kontrolü, hata izleme ve uyarılar
-- Veritabanı ile Storage yedekleme takibi
-- Geri yükleme tatbikatı ve olay müdahale rehberi
+- [x] **3.7.1 bitti:** kişisel veri içermeyen yapılandırılmış loglar ve uçtan uca request kimliği
+- [x] **3.7.2 bitti:** minimal liveness ile aggregate DB/private Storage readiness kontrolleri
+- [x] **3.7.3 bitti:** tekrarları birleştiren operasyonel olaylar, admin bildirimleri ve kapatma akışı
+- [x] **3.7.4 bitti:** SHA-256 doğrulamalı veritabanı yedeği, recursive Storage envanteri ve eski yedek uyarısı
+- [x] **3.7.5 bitti:** rollback'li izole geri yükleme tatbikatı ve olay müdahale/kurtarma rehberi
+- [ ] **3.7.6:** tam kalite kapıları, GitHub incelemesi, şifreli production DB + Storage yedeği, migration, yayın ve canlı doğrulama
+
+Ayrıntılı uygulama ve doğrulama kaydı:
+`docs/PHASE_3_7_IMPLEMENTATION_REPORT.md`.
 
 ### Faz 3.8 — Son kalite ve kullanıcı kabulü
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireStaff } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { runCustomerApplicationWorkflow } from "@/lib/customer-workflow";
+import { observedRoute } from "@/lib/observability";
 
 interface ImportRow {
   first_name: string;
@@ -18,7 +19,7 @@ interface ExistingCustomer {
   email: string | null;
 }
 
-export async function POST(req: Request) {
+async function importCustomers(req: Request) {
   let context;
   try {
     context = await requireStaff();
@@ -135,3 +136,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json(results);
 }
+
+export const POST = observedRoute("customers.import", importCustomers);

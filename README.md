@@ -17,9 +17,10 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 - **Yönetilebilir İletişim**: WhatsApp/e-posta şablonları, değişkenli mesaj hazırlama, iletişim durumları ve audit izi.
 - **Kontrollü Müşteri Portalı**: Süreli bağlantı yenileme/iptal akışı ile başvuru, evrak, randevu, ödeme ve geçmiş özeti.
 - **KVKK ve Veri Yaşam Döngüsü**: Sürümlü aydınlatma/rıza kanıtı, ilgili kişi talepleri, veri paketi, saklama kilidi, Storage temizliği ve kontrollü anonimleştirme.
+- **İzleme ve İş Sürekliliği**: Request ID ile yapılandırılmış güvenli loglar, liveness/readiness kontrolleri, admin operasyon uyarıları, doğrulanmış yedek geçmişi ve izole geri yükleme tatbikatı.
 - **Kişisel Veri Maskeleme**: Liste, arama ve özet ekranlarında telefon, e-posta ve pasaport bilgilerinin sınırlı gösterimi.
 - **Operasyon Dashboard'u**: Aylık başvuru/onay/red/gelir metrikleri ile süresi dolan veya altı ay içinde bitecek pasaport uyarıları.
-- **Yedekleme ve Dışa Aktarma**: Tam sistem yedeğini JSON olarak indirebilme, müşteri verilerini CSV olarak dışa aktarabilme.
+- **Yedekleme ve Dışa Aktarma**: SHA-256 ile doğrulanan sürümlü veritabanı JSON yedeği, private Storage envanteri ve müşteri verilerini CSV olarak dışa aktarabilme. Storage belge binary'leri continuity paketinde ayrıca saklanır.
 
 ## Teknoloji Yığını
 
@@ -73,6 +74,7 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
+npm run restore:drill
 
 # Yerel Supabase çalışırken; ilk kullanımda `npx playwright install chromium`
 npm run test:e2e:local
@@ -106,7 +108,7 @@ Faz 3 alt aşama takibi:
 - **Faz 3.4 — Tamamlandı:** 3.4.1–3.4.6 bitti; süreç panosu, başvuru profil alanları, etiketler, dashboard metrikleri, hızlı eylemler, timeline, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_4_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.5 — Tamamlandı:** 3.5.1–3.5.6 bitti; yönetilebilir iletişim, durum/audit kaydı, kontrollü portal, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_5_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.6 — Tamamlandı:** 3.6.1–3.6.6 bitti; KVKK kayıtları, veri yaşam döngüsü, kalite kapıları, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_6_IMPLEMENTATION_REPORT.md`)
-- **Faz 3.7 — Bekliyor:** izleme ve iş sürekliliği
+- **Faz 3.7 — Uygulama tamamlandı, production bekliyor:** 3.7.1–3.7.5 bitti; yapılandırılmış loglar, health kontrolleri, operasyonel uyarılar, doğrulanmış DB/Storage yedek takibi ve izole restore tatbikatı tamamlandı (`docs/PHASE_3_7_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.8 — Bekliyor:** son kalite ve kullanıcı kabulü
 
 Ayrıntılı kapsam ve kabul ölçütleri `docs/PHASE_3_PLAN.md`; Faz 3.1 ve 3.2

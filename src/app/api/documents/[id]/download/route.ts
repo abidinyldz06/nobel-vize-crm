@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireStaff } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
+import { observedRoute } from "@/lib/observability";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
 function extractStoragePath(value: string) {
@@ -17,7 +18,7 @@ function extractStoragePath(value: string) {
   }
 }
 
-export async function GET(
+async function downloadDocument(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -55,3 +56,5 @@ export async function GET(
 
   return NextResponse.redirect(data.signedUrl);
 }
+
+export const GET = observedRoute("documents.download", downloadDocument);

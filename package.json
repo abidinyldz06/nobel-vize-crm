@@ -19,6 +19,7 @@
     "db:reset": "supabase db reset",
     "db:lint": "supabase db lint --schema public --level warning",
     "db:test": "supabase test db",
+    "restore:drill": "sh scripts/run-isolated-restore-drill.sh",
     "quality": "npm run lint && npm run typecheck && npm test && npm audit --omit=dev --audit-level=high && npm run build"
   },
   "dependencies": {
@@ -40,8 +41,8 @@
     "tailwind-merge": "^3.6.0"
   },
   "overrides": {
+    "postcss": "8.5.23",
     "next": {
-      "postcss": "8.5.15",
       "sharp": "0.35.3"
     }
   },

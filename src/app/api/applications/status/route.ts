@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { requireStaff } from "@/lib/authz";
 import { APPLICATION_STATUS_META, isApplicationStatus } from "@/lib/application-status";
+import { observedRoute } from "@/lib/observability";
 
-export async function PATCH(request: Request) {
+async function updateApplicationStatus(request: Request) {
   let context;
   try {
     context = await requireStaff();
@@ -47,3 +48,5 @@ export async function PATCH(request: Request) {
 
   return NextResponse.json({ application: data });
 }
+
+export const PATCH = observedRoute("applications.update_status", updateApplicationStatus);

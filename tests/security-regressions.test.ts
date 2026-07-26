@@ -15,6 +15,54 @@ async function collectSqlFiles(directory: string): Promise<string[]> {
   return nested.flat();
 }
 describe("security regression guards", () => {
+  it("keeps public readiness responses free of dependency and secret details", async () => {
+    const route = await readFile(
+      path.join(projectRoot, "src/app/api/health/ready/route.ts"),
+      "utf8",
+    );
+    assert.doesNotMatch(route, /result\.checks/);
+    assert.doesNotMatch(route, /result\.errorCodes(?!\[0\])/);
+    assert.doesNotMatch(route, /SUPABASE_SERVICE_ROLE_KEY|GOOGLE_FORM_WEBHOOK_SECRET/);
+  });
+
+  it("keeps operational events admin-only and free of caller supplied summaries", async () => {
+    const migration = await readFile(
+      path.join(projectRoot, "supabase/migrations/202607260001_phase37_operational_events.sql"),
+      "utf8",
+    );
+    assert.match(migration, /CREATE POLICY operational_events_admin_read/);
+    assert.match(migration, /USING \(public\.is_admin\(\)\)/);
+    assert.match(migration, /REVOKE INSERT, UPDATE, DELETE ON TABLE public\.operational_events FROM authenticated/);
+    assert.doesNotMatch(migration, /p_summary/i);
+    assert.match(migration, /notifications\.task_sync\.failed/);
+  });
+
+  it("tracks backup integrity without claiming Storage binaries are in JSON", async () => {
+    const [route, panel, migration] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/backup/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/components/BackupPanel.tsx"), "utf8"),
+      readFile(path.join(projectRoot, "supabase/migrations/202607260002_phase37_backup_runs.sql"), "utf8"),
+    ]);
+    assert.match(route, /X-Backup-SHA256/);
+    assert.match(route, /verify_backup_run_v1/);
+    assert.match(route, /included: false/);
+    assert.match(panel, /Storage binary/);
+    assert.match(migration, /CREATE POLICY backup_runs_admin_read/);
+    assert.match(migration, /REVOKE INSERT, UPDATE, DELETE ON TABLE public\.backup_runs FROM authenticated/);
+  });
+
+  it("keeps restore drills local, transactional and rollback-only", async () => {
+    const drill = await readFile(
+      path.join(projectRoot, "scripts/run-isolated-restore-drill.sh"),
+      "utf8",
+    );
+    assert.match(drill, /127\.0\.0\.1:54322\/postgres/);
+    assert.match(drill, /BEGIN;/);
+    assert.match(drill, /ROLLBACK;/);
+    assert.match(drill, /RESTORE_DRILL_OK/);
+    assert.doesNotMatch(drill, /--linked|db push|production/i);
+  });
+
   it("does not ship SQL that disables RLS or exposes all portal rows", async () => {
     const sqlFiles = await collectSqlFiles(path.join(projectRoot, "supabase"));
 

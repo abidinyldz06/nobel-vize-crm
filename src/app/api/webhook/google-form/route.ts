@@ -3,6 +3,13 @@ import {
   CustomerWorkflowError,
   runCustomerApplicationWorkflow,
 } from '@/lib/customer-workflow';
+import {
+  errorCodeFrom,
+  observedRoute,
+  requestIdFrom,
+  structuredLog,
+} from '@/lib/observability';
+import { recordOperationalEvent } from '@/lib/operational-events';
 import { createSupabaseAdminClient } from '@/lib/supabase-admin';
 import { verifySignedWebhook } from '@/lib/webhook-security';
 
@@ -39,7 +46,7 @@ function workflowHttpStatus(error: CustomerWorkflowError): number {
 }
 
 // POST /api/webhook/google-form
-export async function POST(request: Request) {
+async function receiveGoogleFormWebhook(request: Request) {
   let webhookEventId: string | null = null;
   try {
     const verification = await verifySignedWebhook(request);
@@ -179,12 +186,27 @@ export async function POST(request: Request) {
       applicationId: result.application_id,
     }, { status: 201 });
   } catch (error: unknown) {
-    console.error('Webhook Error:', error);
+    structuredLog('error', 'webhook.google_form.failed', {
+      requestId: requestIdFrom(request),
+      operation: 'webhook.google_form',
+      errorCode: errorCodeFrom(error),
+    });
 
     const responseStatus = error instanceof CustomerWorkflowError
       ? workflowHttpStatus(error)
       : 500;
     const eventStatus = responseStatus < 500 ? 'rejected' : 'failed';
+
+    if (responseStatus >= 500) {
+      await recordOperationalEvent({
+        eventKey: 'webhook.google_form.failed',
+        severity: 'error',
+        source: 'api',
+        requestId: requestIdFrom(request),
+        route: '/api/webhook/google-form',
+        errorCode: errorCodeFrom(error),
+      });
+    }
 
     if (webhookEventId) {
       try {
@@ -193,7 +215,11 @@ export async function POST(request: Request) {
           .update({ status: eventStatus })
           .eq('event_id', webhookEventId);
       } catch (eventError) {
-        console.error('Webhook event status update failed:', eventError);
+        structuredLog('error', 'webhook.event_status_update.failed', {
+          requestId: requestIdFrom(request),
+          operation: 'webhook.event_status_update',
+          errorCode: errorCodeFrom(eventError),
+        });
       }
     }
 
@@ -205,3 +231,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, message }, { status: responseStatus });
   }
 }
+
+export const POST = observedRoute("webhook.google_form", receiveGoogleFormWebhook);

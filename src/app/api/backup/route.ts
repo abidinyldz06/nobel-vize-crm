@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { requireAdmin } from "@/lib/authz";
+import {
+  errorCodeFrom,
+  isRequestId,
+  observedRoute,
+  requestIdFrom,
+  structuredLog,
+} from "@/lib/observability";
+import { recordOperationalEvent } from "@/lib/operational-events";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import type { Json } from "@/types/database";
 
@@ -62,17 +70,30 @@ const TABLE_ORDER_COLUMNS: Record<BackupTable, string> = {
 
 const MAX_BACKUP_BYTES = 25 * 1024 * 1024;
 const PAGE_SIZE = 1000;
+const STORAGE_PAGE_SIZE = 100;
+const MAX_STORAGE_OBJECTS = 10_000;
 
 interface BackupV2 {
   format: "nobel-vize-crm-backup";
   version: "2.0";
+  backup_run_id?: string;
   exported_at: string;
   schema: "phase1";
   storage: {
     included: false;
+    bucket: "documents";
+    object_count: number;
+    total_bytes: number;
+    manifest: StorageManifestItem[];
     note: string;
   };
   tables: Record<string, unknown[]>;
+}
+
+interface StorageManifestItem {
+  path: string;
+  size: number;
+  updated_at: string | null;
 }
 
 const OPTIONAL_V2_TABLES = new Set<BackupTable>([
@@ -98,6 +119,53 @@ function isBackupV2(value: unknown): value is BackupV2 {
     && TABLES_ORDER.every(table => tables[table] === undefined || Array.isArray(tables[table]));
 }
 
+async function sha256Hex(value: string) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function storageObjectSize(metadata: unknown) {
+  if (!metadata || typeof metadata !== "object" || !("size" in metadata)) return 0;
+  const size = Number(metadata.size);
+  return Number.isFinite(size) && size >= 0 ? size : 0;
+}
+
+async function exportStorageManifest(prefix = "", depth = 0): Promise<StorageManifestItem[]> {
+  if (depth > 20) throw Object.assign(new Error("storage_manifest_depth"), { code: "storage_manifest_depth" });
+
+  const admin = createSupabaseAdminClient();
+  const records: StorageManifestItem[] = [];
+  for (let offset = 0; ; offset += STORAGE_PAGE_SIZE) {
+    const { data, error } = await admin.storage
+      .from("documents")
+      .list(prefix, {
+        limit: STORAGE_PAGE_SIZE,
+        offset,
+        sortBy: { column: "name", order: "asc" },
+      });
+    if (error) throw error;
+
+    const page = data ?? [];
+    for (const item of page) {
+      const path = prefix ? `${prefix}/${item.name}` : item.name;
+      if (!item.id) {
+        records.push(...await exportStorageManifest(path, depth + 1));
+      } else {
+        records.push({
+          path,
+          size: storageObjectSize(item.metadata),
+          updated_at: item.updated_at ?? null,
+        });
+      }
+      if (records.length > MAX_STORAGE_OBJECTS) {
+        throw Object.assign(new Error("storage_manifest_limit"), { code: "storage_manifest_limit" });
+      }
+    }
+    if (page.length < STORAGE_PAGE_SIZE) break;
+  }
+  return records;
+}
+
 async function exportTable(table: BackupTable): Promise<unknown[]> {
   const supabase = createSupabaseAdminClient();
   const records: unknown[] = [];
@@ -118,45 +186,103 @@ async function exportTable(table: BackupTable): Promise<unknown[]> {
   return records;
 }
 
-export async function GET() {
+async function exportBackup(request: Request) {
+  let supabase;
   try {
-    await requireAdmin();
+    ({ supabase } = await requireAdmin());
   } catch (error) {
     return authorizationErrorResponse(error);
   }
 
+  let backupRunId: string | null = null;
   try {
-    const tableEntries = await Promise.all(
-      TABLES_ORDER.map(async table => [table, await exportTable(table)] as const),
-    );
+    const exportedAt = new Date();
+    const artifactLabel = `nobel-vize-backup-v2-${exportedAt.toISOString().replace(/[:.]/g, "-")}.json`;
+    const { data: startedRunId, error: startError } = await supabase.rpc("start_backup_run_v1", {
+      p_backup_kind: "full",
+      p_trigger_type: "manual",
+      p_artifact_label: artifactLabel,
+    });
+    if (startError || !startedRunId) throw startError ?? new Error("backup_run_not_started");
+    backupRunId = startedRunId;
+
+    const [tableEntries, storageManifest] = await Promise.all([
+      Promise.all(TABLES_ORDER.map(async table => [table, await exportTable(table)] as const)),
+      exportStorageManifest(),
+    ]);
+    const tables = Object.fromEntries(tableEntries) as Record<string, unknown[]>;
+    const storageBytes = storageManifest.reduce((total, item) => total + item.size, 0);
 
     const backup: BackupV2 = {
       format: "nobel-vize-crm-backup",
       version: "2.0",
-      exported_at: new Date().toISOString(),
+      backup_run_id: backupRunId,
+      exported_at: exportedAt.toISOString(),
       schema: "phase1",
       storage: {
         included: false,
-        note: "Belge metadata kayitlari dahildir; storage dosya binary'leri ayri yedeklenmelidir.",
+        bucket: "documents",
+        object_count: storageManifest.length,
+        total_bytes: storageBytes,
+        manifest: storageManifest,
+        note: "Storage envanteri dahildir; dosya binary'leri bu JSON yedegine dahil degildir.",
       },
-      tables: Object.fromEntries(tableEntries) as Record<string, unknown[]>,
+      tables,
     };
+    const serializedBackup = JSON.stringify(backup, null, 2);
+    const checksum = await sha256Hex(serializedBackup);
+    const databaseRowCount = Object.values(tables)
+      .reduce((total, rows) => total + rows.length, 0);
+    const { data: completed, error: completeError } = await supabase.rpc(
+      "complete_backup_run_v1",
+      {
+        p_run_id: backupRunId,
+        p_database_table_count: TABLES_ORDER.length,
+        p_database_row_count: databaseRowCount,
+        p_storage_object_count: storageManifest.length,
+        p_storage_bytes: storageBytes,
+        p_checksum_sha256: checksum,
+      },
+    );
+    if (completeError || !completed) throw completeError ?? new Error("backup_run_not_completed");
 
-    return new NextResponse(JSON.stringify(backup, null, 2), {
+    return new NextResponse(serializedBackup, {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Content-Disposition": `attachment; filename="nobel-vize-backup-v2-${new Date().toISOString().split("T")[0]}.json"`,
+        "Content-Disposition": `attachment; filename="${artifactLabel}"`,
         "Cache-Control": "no-store",
+        "X-Backup-Run-Id": backupRunId,
+        "X-Backup-SHA256": checksum,
       },
     });
   } catch (error: unknown) {
-    console.error("Backup export failed:", error);
+    const requestId = requestIdFrom(request);
+    const errorCode = errorCodeFrom(error);
+    if (backupRunId) {
+      await supabase.rpc("fail_backup_run_v1", {
+        p_run_id: backupRunId,
+        p_error_code: errorCode,
+      });
+    }
+    structuredLog("error", "backup.export.failed", {
+      requestId,
+      operation: "backup.export",
+      errorCode,
+    });
+    await recordOperationalEvent({
+      eventKey: "backup.export.failed",
+      severity: "error",
+      source: "backup",
+      requestId,
+      route: "/api/backup",
+      errorCode,
+    });
     return NextResponse.json({ error: "Yedek oluşturulamadı." }, { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
+async function restoreBackup(req: Request) {
   let supabase;
   try {
     ({ supabase } = await requireAdmin());
@@ -202,6 +328,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Yalnızca doğrulanmış v2 yedekleri geri yüklenebilir." }, { status: 400 });
   }
 
+  let integrityVerified = false;
+  if (backupData.backup_run_id !== undefined) {
+    if (!isRequestId(backupData.backup_run_id)) {
+      return NextResponse.json({ error: "Geçersiz yedek çalışma kimliği." }, { status: 400 });
+    }
+    const checksum = await sha256Hex(rawBackup);
+    const { data: verified, error: verifyError } = await supabase.rpc(
+      "verify_backup_run_v1",
+      {
+        p_run_id: backupData.backup_run_id,
+        p_checksum_sha256: checksum,
+      },
+    );
+    if (verifyError || !verified) {
+      return NextResponse.json(
+        { error: "Yedek bütünlük doğrulaması başarısız oldu; dosya değiştirilmiş olabilir." },
+        { status: 409 },
+      );
+    }
+    integrityVerified = true;
+  }
+
   try {
     const { data, error } = await supabase.rpc("restore_backup_v2", {
       p_backup: backupData as unknown as Json,
@@ -211,13 +359,31 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: "Yedek tek transaction içinde başarıyla geri yüklendi.",
+      integrity_verified: integrityVerified,
       result: data,
     });
   } catch (error: unknown) {
-    console.error("Atomic restore failed:", error);
+    const requestId = requestIdFrom(req);
+    const errorCode = errorCodeFrom(error);
+    structuredLog("error", "backup.restore.failed", {
+      requestId,
+      operation: "backup.restore",
+      errorCode,
+    });
+    await recordOperationalEvent({
+      eventKey: "backup.restore.failed",
+      severity: "critical",
+      source: "restore",
+      requestId,
+      route: "/api/backup",
+      errorCode,
+    });
     return NextResponse.json(
       { error: "Geri yükleme başarısız oldu; transaction tamamen geri alındı." },
       { status: 500 },
     );
   }
 }
+
+export const GET = observedRoute("backup.export", exportBackup);
+export const POST = observedRoute("backup.restore", restoreBackup);
