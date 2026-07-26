@@ -2,6 +2,21 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 4.0 Plan ve İş Listesi
+
+### Planlandı
+
+- Faz 4 alt aşamaları, bağımlılıkları, kapsam dışı maddeleri ve ölçülebilir
+  kabul kriterleri ayrı plan belgesinde tanımlandı.
+- Yanıltıcı sabit müşteri profil puanlamasının arayüz, uygulama mantığı,
+  veritabanı ve raporlardan kaldırılması ilk uygulama paketi olarak belirlendi.
+- Zamanlanmış operasyon, otomatik şifreli DB/Storage yedeği, MFA ve giriş
+  güvenliği, sağlayıcı destekli iletişim, kontrollü KVKK otomasyonu, lead
+  yönetimi, takvim ve gerçek raporlar sıralı yol haritasına alındı.
+- Faz 4 milestone'u ve 4.1–4.9 için sıralı GitHub issue kayıtları oluşturuldu.
+- SaaS/tenant, abonelik, paket, kota, white-label ve subdomain geliştirmelerinin
+  Faz 4 kapsamı dışında kalacağı yeniden doğrulandı.
+
 ## [Unreleased] — Faz 3.8 Son Kalite ve Kullanıcı Kabulü
 
 ### Eklendi

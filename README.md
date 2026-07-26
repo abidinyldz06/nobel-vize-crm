@@ -98,6 +98,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 1 — Veritabanı standardizasyonu | Production'a uygulandı ve doğrulandı | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
+| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.0 tamamlandı; 4.1 bekliyor | `docs/PHASE_4_PLAN.md` |
 
 Faz 3 alt aşama takibi:
 
@@ -118,6 +119,13 @@ Faz 3 alt aşama takibi:
 Ayrıntılı kapsam ve kabul ölçütleri `docs/PHASE_3_PLAN.md`; Faz 3.1 ve 3.2
 kanıtları ilgili uygulama raporlarındadır. Bir aşama
 staging/production kanıtı tamamlanmadan `Tamamlandı` olarak işaretlenmez.
+
+Faz 4; yanıltıcı müşteri profil puanlamasının kaldırılmasıyla başlayacak,
+ardından zamanlanmış operasyonlar, otomatik şifreli DB/Storage yedeği, hesap
+güvenliği, sağlayıcı destekli iletişim, kontrollü KVKK otomasyonu, lead
+yönetimi, takvim ve gerçek veriye dayalı raporlamayla devam edecektir.
+Alt aşamalar, bağımlılıklar ve kabul kriterleri `docs/PHASE_4_PLAN.md`
+dosyasındadır. SaaS/tenant ve abonelik özellikleri Faz 4 kapsamında değildir.
 
 ### Production hotfix kayıtları
 
