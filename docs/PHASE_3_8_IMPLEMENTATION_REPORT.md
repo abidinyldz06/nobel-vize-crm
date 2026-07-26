@@ -121,5 +121,10 @@ tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişle
 | Playwright | 18/18 geçti; 3 rol ve 3 kritik/kenar kabul testi |
 | İzole restore tatbikatı | Checksum doğrulandı ve transaction rollback edildi |
 
-GitHub Actions ve inceleme bağlantısı, bu doğrulamalardan sonra oluşturulan pull
-request sonuçlandığında rapora eklenecektir.
+GitHub doğrulaması:
+
+- Pull request: [#26 — Faz 3.8.3-3.8.4 kritik ve kenar akış kabulü](https://github.com/abidinyldz06/nobel-vize-crm/pull/26)
+- Application: geçti
+- Database: geçti
+- Browser: geçti
+- Vercel preview deployment: geçti
