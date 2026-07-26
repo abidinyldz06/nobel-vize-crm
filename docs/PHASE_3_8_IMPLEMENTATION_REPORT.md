@@ -2,9 +2,9 @@
 
 Başlangıç: 26 Temmuz 2026
 
-Durum: Devam ediyor
+Durum: Tamamlandı
 
-Dal: `agent/phase-3-8-responsive-a11y-performance`
+Kapanış dalı: `agent/phase-3-8-closing-quality-release`
 
 ## Kapsam
 
@@ -117,10 +117,40 @@ etkileşim/ad farkı kapatıldı; müşteri filtreleri dar ekranda alt alta akac
 
 Hedefli doğrulama sonucu: **4/4 Playwright testi geçti**.
 
-### 3.8.6–3.8.8
+### 3.8.6 bitti — Migration, RLS, audit ve dependency kapıları
 
-Kalan paketler Faz 3 planındaki sırayla yürütülecektir. Bu rapor, her paket
-tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişletilir.
+- Migration sürümlerinin benzersiz ve artan olması Node regresyonuna bağlandı.
+- Tüm public iş tablolarının RLS durumu katalog seviyesinde doğrulandı.
+- RLS'nin engellemediği anonim `TRUNCATE`, `REFERENCES` ve `TRIGGER`
+  yetkileri bulundu ve kapanış migration'ıyla kaldırıldı.
+- PUBLIC/anon fonksiyon çalıştırma yetkileri ve gelecek nesnelerin varsayılan
+  yetkileri kapatıldı.
+- SECURITY DEFINER search path, audit actor trigger'ı ve boş audit alanları
+  pgTAP kapsamına alındı.
+- Aktif personel için Auth bağlantısı zorunlu, `staff.user_id` ilişkisi benzersiz
+  tutuldu.
+- Production dependency audit yerel ve GitHub kalite kapısında bloklayıcıdır.
+
+### 3.8.7 bitti — Kullanıcı kabulü ve kurtarma provası
+
+- Ürün sahibinin tanımladığı kritik senaryolar gerçek Chromium oturumunda tam
+  Playwright paketiyle yürütüldü.
+- Uygulama, temiz migration, DB tipi, pgTAP, restore ve Playwright kabulünü tek
+  komutta çalıştıran `npm run release:verify` eklendi.
+- Restore tatbikatı yalnız yerel DB'yi kabul eder, tüm backup tabloları ve
+  Storage envanterini karşılaştırır ve transactionı geri alır.
+- Production adayı için yedek, dry-run ve uygulama rollback sırası kapanış
+  raporunda sabitlendi.
+
+### 3.8.8 bitti — Production doğrulaması ve Faz 3 kapanışı
+
+- Production migration, GitHub/Vercel kapıları, health/login kontrolü ve
+  güvenlik katalog doğrulaması tek yayın sırasına bağlandı.
+- Veri değiştirmeyen canlı kontrol için `npm run production:verify` eklendi.
+- Storage binary yedeği, dev-only lint advisory, manuel kalıcı silme ve
+  tek-şirket mimarisi bilinen sınırlama olarak kaydedildi.
+- Faz 3.1–3.8 tamamlandı. Ayrıntılı kapanış:
+  `docs/PHASE_3_8_RELEASE_AND_CLOSURE.md`.
 
 ## Tamamlanan paket değişiklikleri
 
@@ -139,6 +169,10 @@ tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişle
 | Responsive | 390px mobil ve 1440px masaüstünde beş kritik ekran |
 | Erişilebilirlik | WCAG 2 A/AA, klavye, landmark, focus ve reduced-motion |
 | Performans | DCL/load/kaynak/transfer/CLS otomatik bütçeleri |
+| DB güvenlik kapanışı | Public/anon yetki sıfırlama, RLS ve güvenli fonksiyonlar |
+| Auth/staff bütünlüğü | Aktif personelde zorunlu ve benzersiz Auth bağlantısı |
+| Release adayı | Tek komut kalite, DB, restore ve tarayıcı doğrulaması |
+| Production kontrolü | Veri değiştirmeyen health, readiness ve login kapısı |
 
 ## Kalite kanıtları
 
@@ -148,14 +182,17 @@ tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişle
 |---|---|
 | ESLint | Geçti |
 | TypeScript | Geçti |
-| Node testleri | 40/40 geçti |
+| Node testleri | 43/43 geçti |
 | Production dependency audit | 0 açık |
 | Next.js production build | Geçti |
 | Temiz migration zinciri | `supabase db reset` geçti |
 | PostgreSQL schema lint | 0 hata |
-| pgTAP | 230/230 geçti |
+| pgTAP | 239/239 geçti |
 | Playwright | 22/22 geçti; 4 yeni responsive/a11y/performance kabul testi |
 | İzole restore tatbikatı | Checksum doğrulandı ve transaction rollback edildi |
+
+Kapanış release adayı yerel doğrulamasında aynı matris tek
+`npm run release:verify` komutuyla tekrar çalıştırıldı.
 
 GitHub doğrulaması:
 

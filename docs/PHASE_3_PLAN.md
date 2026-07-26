@@ -154,7 +154,7 @@ Ayrıntılı uygulama ve doğrulama kaydı:
 
 ### Faz 3.8 — Son kalite ve kullanıcı kabulü
 
-Durum: **Devam ediyor — 26 Temmuz 2026**
+Durum: **Tamamlandı — 26 Temmuz 2026**
 
 - [x] **3.8.1 bitti:** admin/danışman/pasif/bağlantısız/anonim kabul matrisi,
   ortak Auth-Supabase E2E fixture altyapısı ve doğrulanan cleanup
@@ -166,15 +166,16 @@ Durum: **Devam ediyor — 26 Temmuz 2026**
   iki kez çalıştırılarak doğrulanan fixture temizliği regresyonları
 - [x] **3.8.5 bitti:** 390px mobil ve 1440px masaüstü responsive kabulü,
   WCAG 2 A/AA taraması, klavye/landmark akışı ve ölçülebilir performans bütçeleri
-- [ ] **3.8.6:** migration, RLS, audit, build ve dependency güvenlik kapıları
-- [ ] **3.8.7:** kullanıcı kabul oturumu, production adayı, yedek ve geri dönüş
+- [x] **3.8.6 bitti:** migration, RLS, audit, build ve dependency güvenlik kapıları
+- [x] **3.8.7 bitti:** kullanıcı kabul oturumu, production adayı, yedek ve geri dönüş
   provası
-- [ ] **3.8.8:** production yayın doğrulaması, bilinen sınırlamalar ve Faz 3
+- [x] **3.8.8 bitti:** production yayın doğrulaması, bilinen sınırlamalar ve Faz 3
   kapanış raporu
 
 Kabul matrisi ve devam eden uygulama kanıtları:
 `docs/PHASE_3_8_ACCEPTANCE_MATRIX.md` ve
-`docs/PHASE_3_8_IMPLEMENTATION_REPORT.md`.
+`docs/PHASE_3_8_IMPLEMENTATION_REPORT.md`. Release, rollback ve kapanış kaydı:
+`docs/PHASE_3_8_RELEASE_AND_CLOSURE.md`.
 
 ## Faz 3 dışı
 
