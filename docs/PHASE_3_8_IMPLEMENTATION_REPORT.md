@@ -164,3 +164,11 @@ GitHub doğrulaması:
 - Database: geçti
 - Browser: geçti
 - Vercel preview deployment: geçti
+
+3.8.5 GitHub doğrulaması:
+
+- Pull request: [#27 — Faz 3.8.5 responsive, erişilebilirlik ve performans kabulü](https://github.com/abidinyldz06/nobel-vize-crm/pull/27)
+- Application: geçti
+- Database: geçti
+- Browser: geçti; 22/22 Playwright
+- Vercel preview deployment: geçti
