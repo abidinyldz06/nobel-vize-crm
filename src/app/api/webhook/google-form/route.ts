@@ -157,7 +157,6 @@ async function receiveGoogleFormWebhook(request: Request) {
       last_name: lastName.trim(),
       phone: normalizedPhone,
       email: normalizedEmail,
-      profile_score: 30,
       passport_no: passportNo?.trim() || null,
       passport_expiry: passportExpiry || null,
       passport_issuing_country: passportIssuingCountry?.trim() || 'Türkiye',

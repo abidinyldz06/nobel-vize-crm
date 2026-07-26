@@ -49,29 +49,27 @@ export default function SmartDocumentSelector({
       .map(rule => ({ ...rule, parsedDocuments: parseDocuments(rule.documents) }));
     if (countryRules.length === 0) return null;
 
-    // Scoring system to find the most specific rule
-    // Exact match = 10 points
-    // Null match = 1 point
-    // Mismatch = -100 points
+    // Müşteri değerlendirmesi yapmadan en özgül evrak kuralını seç.
+    // Tam eşleşme daha özgül, null alan genel, uyumsuz alan geçersizdir.
     let bestRule: SmartRule | null = null;
-    let maxScore = -1;
+    let highestSpecificity = -1;
 
     for (const rule of countryRules) {
-      let score = 0;
+      let specificity = 0;
       const checkField = (ruleVal: unknown, stateVal: string) => {
-        if (ruleVal === null) return 1; // Generic matches anything, low points
-        if (stateVal && String(ruleVal) === stateVal) return 10; // Exact match, high points
-        return -100; // Mismatch
+        if (ruleVal === null) return 1;
+        if (stateVal && String(ruleVal) === stateVal) return 10;
+        return -100;
       };
 
-      score += checkField(rule.travel_method, travelMethod);
-      score += checkField(rule.accommodation, accommodation);
-      score += checkField(rule.occupation, occupation);
-      score += checkField(rule.with_children, withChildren);
-      score += checkField(rule.nationality, nationality);
+      specificity += checkField(rule.travel_method, travelMethod);
+      specificity += checkField(rule.accommodation, accommodation);
+      specificity += checkField(rule.occupation, occupation);
+      specificity += checkField(rule.with_children, withChildren);
+      specificity += checkField(rule.nationality, nationality);
 
-      if (score >= 0 && score > maxScore) {
-        maxScore = score;
+      if (specificity >= 0 && specificity > highestSpecificity) {
+        highestSpecificity = specificity;
         bestRule = rule;
       }
     }

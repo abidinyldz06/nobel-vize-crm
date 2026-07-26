@@ -78,12 +78,12 @@ Faz 3.1–3.8 tamamlanma durumu `docs/PHASE_3_PLAN.md`; son production kapanış
 
 ## Güncel öncelikler
 
-### P0 — Yanıltıcı müşteri puanlaması
+### Kapatıldı — Yanıltıcı müşteri puanlaması
 
-`profile_score` sabit kurallarla hesaplanmakta, arayüzde yapay zekâ analizi
-olarak sunulmakta ve raporda gerçek veriye dayanmayan onay yüzdeleriyle
-ilişkilendirilmektedir. Faz 4.1 bu sistemi arayüz, uygulama mantığı,
-veritabanı, rapor, dışa aktarma ve testlerden kaldıracaktır.
+Faz 4.1 ile `profile_score`; arayüz, uygulama mantığı, veritabanı, rapor ve
+dışa aktarma akışlarından kaldırıldı. Gerçek başvuru sonuçları ile evrak
+metrikleri korunurken sabit başarı yüzdeleri kaldırıldı. Eski yedek girdileri
+yeni şemada güvenle yok sayılır.
 
 ### P1 — Zamanlanmış operasyon ve iş sürekliliği
 
@@ -120,8 +120,8 @@ veritabanı, rapor, dışa aktarma ve testlerden kaldıracaktır.
 
 Faz 4'ün sıralı kapsamı:
 
-1. 4.0 — Plan, kabul kriterleri ve GitHub iş listesi
-2. 4.1 — Yanıltıcı müşteri puanlamasının kaldırılması
+1. 4.0 — Plan, kabul kriterleri ve GitHub iş listesi — tamamlandı
+2. 4.1 — Yanıltıcı müşteri puanlamasının kaldırılması — release adayı tamamlandı
 3. 4.2 — Zamanlanmış operasyon sistemi
 4. 4.3 — Otomatik, şifreli ve repo dışı DB/Storage yedeği
 5. 4.4 — Hesap ve giriş güvenliğinin güçlendirilmesi

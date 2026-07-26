@@ -111,7 +111,6 @@ async function importCustomers(req: Request) {
           last_name: row.last_name.trim(),
           phone: row.phone?.trim() || null,
           email: normalizedEmail,
-          profile_score: 30,
           passport_no: row.passport_no || null,
           country_name: row.country?.trim() || null,
           visa_type: 'turistik',

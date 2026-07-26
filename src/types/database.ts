@@ -630,7 +630,6 @@ export type Database = {
           portal_last_accessed_at: string | null
           portal_token: string | null
           portal_token_expires_at: string | null
-          profile_score: number
           retention_hold_reason: string | null
           retention_hold_until: string | null
           updated_at: string
@@ -657,7 +656,6 @@ export type Database = {
           portal_last_accessed_at?: string | null
           portal_token?: string | null
           portal_token_expires_at?: string | null
-          profile_score?: number
           retention_hold_reason?: string | null
           retention_hold_until?: string | null
           updated_at?: string
@@ -684,7 +682,6 @@ export type Database = {
           portal_last_accessed_at?: string | null
           portal_token?: string | null
           portal_token_expires_at?: string | null
-          profile_score?: number
           retention_hold_reason?: string | null
           retention_hold_until?: string | null
           updated_at?: string

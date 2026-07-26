@@ -65,7 +65,6 @@ CREATE TABLE IF NOT EXISTS customers (
   last_name TEXT NOT NULL,
   phone TEXT,
   email TEXT,
-  profile_score INTEGER DEFAULT 0,
   passport_no TEXT,
   passport_expiry DATE,
   passport_issuing_country TEXT,

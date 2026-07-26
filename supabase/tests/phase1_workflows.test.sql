@@ -588,7 +588,6 @@ SELECT lives_ok(
         'phone', customer.phone,
         'email', customer.email,
         'financial_status', customer.financial_status,
-        'profile_score', customer.profile_score,
         'country_id', '30000000-0000-0000-0000-000000000001',
         'visa_type', 'turistik',
         'status', application.status,

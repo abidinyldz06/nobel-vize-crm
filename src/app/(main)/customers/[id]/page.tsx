@@ -9,7 +9,6 @@ import PaymentsPanel from "@/components/PaymentsPanel";
 import CustomerTimeline from "@/components/CustomerTimeline";
 import CommunicationPanel from "@/components/CommunicationPanel";
 import VisaHistoryPanel from "@/components/VisaHistoryPanel";
-import ProfileAnalysisButton from "@/components/ProfileAnalysisButton";
 import PdfExportButton from "@/components/PdfExportButton";
 import FamilyMembersPanel from "@/components/FamilyMembersPanel";
 import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
@@ -141,7 +140,6 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   portal_access_enabled: customer.portal_access_enabled,
                 }} />
                 <PdfExportButton />
-                <ProfileAnalysisButton customerId={customer.id} currentScore={customer.profile_score || 0} />
                 <Link
                   href={`/customers/${customer.id}/edit`}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-xs font-semibold rounded-lg transition-all shrink-0"
@@ -163,18 +161,6 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
                     #{activeApp.id.split('-')[0].toUpperCase()} · {activeApp.country}
                   </p>
-                )}
-                {/* Profile Score */}
-                {customer.profile_score && (
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <div className="w-16 h-1.5 bg-slate-200 dark:bg-[#1f2937] rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${customer.profile_score >= 80 ? 'bg-emerald-500' : customer.profile_score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
-                        style={{ width: `${customer.profile_score}%` }}
-                      />
-                    </div>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">{customer.profile_score}/100</span>
-                  </div>
                 )}
               </div>
             </div>

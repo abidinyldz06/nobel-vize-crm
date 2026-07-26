@@ -18,10 +18,6 @@ FROM public.staff AS staff
 WHERE staff.user_id IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM auth.users WHERE id = staff.user_id)
 UNION ALL
-SELECT 'invalid_profile_scores', count(*)
-FROM public.customers
-WHERE profile_score IS NULL OR profile_score NOT BETWEEN 0 AND 100
-UNION ALL
 SELECT 'customers_with_missing_staff', count(*)
 FROM public.customers AS customer
 WHERE customer.assigned_staff_id IS NOT NULL
