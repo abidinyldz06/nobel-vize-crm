@@ -55,6 +55,9 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   constraint ile engellendi.
 - Tüm public tabloların RLS, SECURITY DEFINER search path, audit actor ve
   anonim yetki envanteri pgTAP kapanış testine bağlandı.
+- Production doğrulamasında bulunan, migration zinciri dışındaki eski
+  `appointments` tablosunun RLS'i veri silmeden etkinleştirildi ve anonim
+  yetkileri kapatıldı.
 
 ### CI
 

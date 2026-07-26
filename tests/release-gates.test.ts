@@ -24,9 +24,13 @@ describe("phase 3.8 release gates", () => {
   });
 
   it("keeps the closing security migration and database release test together", async () => {
-    const [migration, databaseTest] = await Promise.all([
+    const [migration, legacyDriftMigration, databaseTest] = await Promise.all([
       readFile(
         path.join(migrationsRoot, "202607260003_phase38_security_closure.sql"),
+        "utf8",
+      ),
+      readFile(
+        path.join(migrationsRoot, "202607260004_phase38_legacy_appointments_rls.sql"),
         "utf8",
       ),
       readFile(
@@ -38,6 +42,8 @@ describe("phase 3.8 release gates", () => {
     assert.match(migration, /REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM PUBLIC, anon/);
     assert.match(migration, /REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC, anon/);
     assert.match(migration, /staff_active_requires_auth_link/);
+    assert.match(legacyDriftMigration, /ALTER TABLE public\.appointments ENABLE ROW LEVEL SECURITY/);
+    assert.match(legacyDriftMigration, /REVOKE ALL PRIVILEGES ON TABLE public\.appointments FROM PUBLIC, anon/);
     assert.match(databaseTest, /every public application table has RLS enabled/);
     assert.match(databaseTest, /audit actor trigger remains attached/);
   });

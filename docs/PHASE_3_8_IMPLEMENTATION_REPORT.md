@@ -146,6 +146,9 @@ Hedefli doğrulama sonucu: **4/4 Playwright testi geçti**.
 
 - Production migration, GitHub/Vercel kapıları, health/login kontrolü ve
   güvenlik katalog doğrulaması tek yayın sırasına bağlandı.
+- Production katalog kontrolünde yerel migration zincirinde bulunmayan eski
+  `appointments` tablosunun RLS'i kapalı yakalandı; uygulamanın bu tabloyu
+  kullanmadığı doğrulanıp veri silmeden RLS ve anonim yetki kapısı uygulandı.
 - Veri değiştirmeyen canlı kontrol için `npm run production:verify` eklendi.
 - Storage binary yedeği, dev-only lint advisory, manuel kalıcı silme ve
   tek-şirket mimarisi bilinen sınırlama olarak kaydedildi.
