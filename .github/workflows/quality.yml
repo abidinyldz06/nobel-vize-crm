@@ -40,6 +40,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Disable Supabase CLI telemetry
+        run: npx supabase telemetry disable
       - run: npm run db:start
       - run: npm run db:reset
       - name: Verify generated database types
@@ -62,6 +64,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Disable Supabase CLI telemetry
+        run: npx supabase telemetry disable
       - run: npm run db:start
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e:local

@@ -109,7 +109,9 @@ Faz 3 alt aşama takibi:
 - **Faz 3.5 — Tamamlandı:** 3.5.1–3.5.6 bitti; yönetilebilir iletişim, durum/audit kaydı, kontrollü portal, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_5_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.6 — Tamamlandı:** 3.6.1–3.6.6 bitti; KVKK kayıtları, veri yaşam döngüsü, kalite kapıları, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_6_IMPLEMENTATION_REPORT.md`)
 - **Faz 3.7 — Tamamlandı:** 3.7.1–3.7.6 bitti; yapılandırılmış loglar, health kontrolleri, operasyonel uyarılar, doğrulanmış DB/Storage yedek takibi, izole restore tatbikatı, production migration ve canlı doğrulama tamamlandı (`docs/PHASE_3_7_IMPLEMENTATION_REPORT.md`)
-- **Faz 3.8 — Bekliyor:** son kalite ve kullanıcı kabulü
+- **Faz 3.8 — Devam ediyor:** 3.8.1–3.8.2 bitti; kabul matrisi, ortak E2E
+  fixture/cleanup altyapısı ve admin-danışman sayfa/API/RLS izolasyonu
+  tamamlandı (`docs/PHASE_3_8_IMPLEMENTATION_REPORT.md`)
 
 Ayrıntılı kapsam ve kabul ölçütleri `docs/PHASE_3_PLAN.md`; Faz 3.1 ve 3.2
 kanıtları ilgili uygulama raporlarındadır. Bir aşama

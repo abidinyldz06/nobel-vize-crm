@@ -2,6 +2,32 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 3.8 Son Kalite ve Kullanıcı Kabulü
+
+### Eklendi
+
+- Admin, danışman, pasif personel, staff bağlantısız Auth hesabı ve anonim
+  kullanıcı için sayfa/API/RLS kabul matrisi.
+- Tekrarlanabilir Auth/personel fixture üretimi, hataları doğrulanan cleanup ve
+  sıfır artık kayıt kontrolü sağlayan ortak Playwright test desteği.
+- İki danışmanın müşteri, başvuru, evrak, not, ödeme, görev ve bildirim
+  izolasyonunu doğrulayan Faz 3.8 rol E2E paketi.
+
+### Güvenlik
+
+- Personel yeni, düzenleme ve performans alt sayfalarına doğrudan URL ile
+  danışman erişimi kapatıldı.
+- Danışman menüsünden admin-only Ülke & Evraklar, Personel ve Ayarlar
+  bağlantıları kaldırıldı.
+- Çapraz müşteri güncelleme, evrak indirme, yedek, toplu arşiv ve toplu
+  danışman atama yetkileri regresyon kapsamına alındı.
+
+### CI
+
+- Ağ erişimi olmayan GitHub runner kapanışında PostHog timeout'u ile başarılı
+  DB lint sonucunu kırmaması için Supabase CLI telemetrisi kalite işlerinde
+  açıkça kapatıldı.
+
 ## [Unreleased] — Faz 3.7 İzleme ve İş Sürekliliği
 
 ### İzleme ve olay yönetimi

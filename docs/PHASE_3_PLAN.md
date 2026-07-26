@@ -154,12 +154,26 @@ Ayrıntılı uygulama ve doğrulama kaydı:
 
 ### Faz 3.8 — Son kalite ve kullanıcı kabulü
 
-Durum: **Bekliyor**
+Durum: **Devam ediyor — 26 Temmuz 2026**
 
-- Admin ve danışman rol regresyonları
-- Kritik kullanıcı akışlarının Playwright kapsamı
-- Migration, RLS, audit, build ve dependency kontrolleri
-- Staging kullanıcı kabulü ve production yayın raporu
+- [x] **3.8.1 bitti:** admin/danışman/pasif/bağlantısız/anonim kabul matrisi,
+  ortak Auth-Supabase E2E fixture altyapısı ve doğrulanan cleanup
+- [x] **3.8.2 bitti:** admin-danışman sayfa, menü, API ve doğrudan RLS rol
+  izolasyonu; iç içe personel URL yetki boşluklarının kapatılması
+- [ ] **3.8.3:** müşteri, başvuru, evrak, ödeme, randevu, görev, iletişim,
+  portal, KVKK ve arşiv kritik kullanıcı akışları
+- [ ] **3.8.4:** hata, boş veri, eşzamanlı işlem, tekrar deneme ve fixture
+  temizliği regresyonları
+- [ ] **3.8.5:** mobil/masaüstü, erişilebilirlik ve performans kabul kontrolleri
+- [ ] **3.8.6:** migration, RLS, audit, build ve dependency güvenlik kapıları
+- [ ] **3.8.7:** kullanıcı kabul oturumu, production adayı, yedek ve geri dönüş
+  provası
+- [ ] **3.8.8:** production yayın doğrulaması, bilinen sınırlamalar ve Faz 3
+  kapanış raporu
+
+Kabul matrisi ve devam eden uygulama kanıtları:
+`docs/PHASE_3_8_ACCEPTANCE_MATRIX.md` ve
+`docs/PHASE_3_8_IMPLEMENTATION_REPORT.md`.
 
 ## Faz 3 dışı
 
