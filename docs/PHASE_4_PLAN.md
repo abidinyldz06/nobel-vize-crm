@@ -2,7 +2,7 @@
 
 Tarih: 26 Temmuz 2026
 
-Durum: Faz 4.1 release adayı tamamlandı; production kapanışı bekliyor.
+Durum: Faz 4.1 tamamlandı; Faz 4.2 bekliyor.
 
 Ön koşul: Faz 3.8 production kapanışı tamamlandı (`3a4d66c`).
 

@@ -2,8 +2,8 @@
 
 Tarih: 26 Temmuz 2026
 
-Durum: Release adayı tamamlandı; production migration ve canlı doğrulama
-bekliyor.
+Durum: Tamamlandı; GitHub kalite kapıları, production migration ve canlı
+doğrulama başarılı.
 
 GitHub kaydı: Faz 4 milestone, issue `#31`
 
@@ -73,3 +73,24 @@ Migration kolonu sildiği için geri dönüş yalnız uygulama rollback'i değil
 Zorunlu geri dönüşte doğrulanmış production yedeğinden `profile_score` kolonu
 ve verisi kontrollü bakım penceresinde geri yüklenir. Eski puanlama arayüzünün
 yeniden yayınlanması ürün kararı olmadan yapılmaz.
+
+## 6. Production kapanış kanıtları
+
+- [PR #41](https://github.com/abidinyldz06/nobel-vize-crm/pull/41) application,
+  database, browser ve Vercel kontrolleri geçtikten sonra squash merge edildi.
+- Birleşen production commit'i `08fc9d1` için Vercel deployment `Ready`
+  durumuna geldi ve `abidinyildiz.com` alan adına bağlandı.
+- Migration dry-run yalnız
+  `202607260005_phase41_remove_profile_score.sql` dosyasını gösterdi.
+- Production öncesi Auth/public/Storage şeması ve verisi ile private belge
+  binary'si repo dışında AES-256-CBC/PBKDF2 ile şifrelendi; parola Keychain'de
+  saklandı, SHA-256 ve bağımsız açma/arşiv listeleme kontrolü başarılı oldu.
+- Migration production'a uygulandı; uzak public şema lint sonucu hatasız ve
+  şema çıktısında `profile_score` ile eski constraint bulunmuyor.
+- Production sonrası 9 müşteri, 3 personel ve 7 başvuru kaydı korundu.
+- Canlı liveness ve readiness `200`, giriş rotası `200` döndü.
+- GitHub issue
+  [#31](https://github.com/abidinyldz06/nobel-vize-crm/issues/31) merge ile
+  kapandı.
+
+Bu kanıtlarla **4.1 BİTTİ**. Sonraki sıralı çalışma paketi Faz 4.2'dir.

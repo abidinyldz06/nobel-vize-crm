@@ -121,7 +121,7 @@ yeni şemada güvenle yok sayılır.
 Faz 4'ün sıralı kapsamı:
 
 1. 4.0 — Plan, kabul kriterleri ve GitHub iş listesi — tamamlandı
-2. 4.1 — Yanıltıcı müşteri puanlamasının kaldırılması — release adayı tamamlandı
+2. 4.1 — Yanıltıcı müşteri puanlamasının kaldırılması — tamamlandı
 3. 4.2 — Zamanlanmış operasyon sistemi
 4. 4.3 — Otomatik, şifreli ve repo dışı DB/Storage yedeği
 5. 4.4 — Hesap ve giriş güvenliğinin güçlendirilmesi
