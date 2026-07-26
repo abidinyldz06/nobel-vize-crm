@@ -1,7 +1,7 @@
 # Faz 3.7 — İzleme ve İş Sürekliliği Uygulama Raporu
 
 Tarih: 26 Temmuz 2026
-Durum: Uygulama ve yerel doğrulama tamamlandı; GitHub ve production doğrulaması bekliyor
+Durum: Tamamlandı; GitHub, production migration ve canlı doğrulama dahil
 
 ## Amaç ve sınırlar
 
@@ -68,7 +68,7 @@ JSON yedeği ve private `documents` bucket içeriği birlikte, repo dışında
 - Olay müdahale rehberi RPO/RTO hedeflerini, SEV seviyelerini, yedekleme
   prosedürünü, production restore kapılarını ve olay kapatma adımlarını içerir.
 
-## 3.7.6 — Kalite ve yayın — Devam ediyor
+## 3.7.6 — Kalite ve yayın — Bitti
 
 Tamamlanan yerel kanıtlar:
 
@@ -81,16 +81,40 @@ Tamamlanan yerel kanıtlar:
 - izole restore tatbikatı: başarılı; 24 tablo ve Storage bütünlüğü doğrulandı
 - Supabase tarafından üretilen TypeScript veritabanı tipiyle repo tipi birebir
   eşleşti
+- production dependency audit: 0 yüksek seviye açık
 - Next.js production build: başarılı
 
-Bekleyen yayın kapıları:
+GitHub ve production kanıtları:
 
-- GitHub pull request kalite kontrolleri
-- production öncesi repo dışı şifreli DB + Storage continuity yedeği
-- production migration dry-run ve kontrollü uygulama
-- Vercel production deployment
-- canlı liveness/readiness, giriş, müşteri görünürlüğü, yedek ve operasyon ekranı
-  doğrulaması
+- [PR #23](https://github.com/abidinyldz06/nobel-vize-crm/pull/23)
+  application, database, browser ve Vercel kontrolleri geçtikten sonra squash
+  merge edildi
+- birleşen `92b5082` commit'i için `main` application, database ve browser kalite
+  işlerinin tamamı başarılı oldu
+- production öncesi auth/public/storage şeması ve verisi, roller ile gerçek
+  private Storage nesnesi repo dışında AES-256-CBC/PBKDF2 ile şifrelendi
+- continuity arşivi ayrı Keychain anahtarıyla bağımsız olarak açıldı; tar ve
+  SHA-256 bütünlüğü doğrulandı, düz metin geçici dosya bırakılmadı
+- dry-run yalnız `202607260001` ve `202607260002` migration'larını gösterdi;
+  ikisi kontrollü biçimde production'a uygulandı
+- yerel ve uzak migration geçmişi tamamen eşleşti; uzak public şema lint sonucu
+  0 hata verdi
+- migration öncesi/sonrası 9 müşteri, 3 personel, 7 başvuru ve 1 private Storage
+  nesnesi korundu; 3 personelin Auth bağlantısının tamamı geçerli kaldı
+- `operational_events` ve `backup_runs` RLS koruması açık, authenticated doğrudan
+  yazma yetkileri kapalı ve `documents` bucket private olarak doğrulandı
+- Vercel production deployment `Ready` durumuna geldi ve
+  `abidinyildiz.com` alan adına bağlandı
+- canlı liveness ve readiness 200 döndü; yanıtlar yalnız minimal aggregate
+  durum ile UUID request ID içerdi
+- geçici admin ile canlı giriş, 9 müşterinin görünürlüğü, Operasyon ekranı,
+  readiness ve SHA-256 doğrulamalı yedek indirme akışı başarıyla tamamlandı
+- production uygulama yedeği 24 veritabanı tablosu ve 1 Storage nesnesi
+  envanteriyle `verified` durumuna geldi; ayrı AES-256 şifreli dosya olarak
+  saklandı ve bağımsız açma/JSON bütünlük kontrolünden geçti
+- geçici production personel ve Auth kullanıcısı temizlendi; final durumda
+  3 personel, 0 test kimliği, 1 doğrulanmış yedek ve 0 açık stale yedek olayı
+  bulundu
 
 ## Migration envanteri
 

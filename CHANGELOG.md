@@ -37,6 +37,14 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   sorgu sonucunu güvenli biçimde yeniden deneyecek şekilde sağlamlaştırıldı.
 - GitHub Actions Node 24 uyumlu action sürümlerine taşındı ve database kalite
   kapısına izole restore tatbikatı eklendi.
+- GitHub application, database, browser ve Vercel kapıları başarıyla tamamlandı.
+- Production öncesi auth/public/storage şema, veri, roller ve private Storage
+  nesnesi repo dışında AES-256 ile şifrelenip bağımsız açma kontrolünden geçirildi.
+- İki Faz 3.7 migration'ı production'a uygulandı; ana veri ve Storage sayıları
+  korunarak uzak migration zinciri ile şema lint kontrolü doğrulandı.
+- Production liveness/readiness, admin girişi, 9 müşterinin görünürlüğü,
+  operasyon ekranı ve 24 tablolu/1 Storage nesneli SHA-256 yedek akışı canlıda
+  doğrulandı; geçici test kimlikleri tamamen temizlendi.
 
 ## [Unreleased] — Faz 3.6 KVKK ve Veri Yaşam Döngüsü
 
