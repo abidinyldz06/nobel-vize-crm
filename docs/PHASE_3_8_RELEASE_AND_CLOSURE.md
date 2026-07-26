@@ -95,7 +95,7 @@ request birleştirilmez. Birleştirme sonrası:
 3. production schema lint hata vermemelidir;
 4. anonim/PUBLIC tablo ve fonksiyon yetkisi sorguları sıfır dönmelidir;
 5. aktif ve Auth bağlantısız personel sayısı sıfır olmalıdır;
-6. aşağıdaki komut liveness, readiness ve login rotasını doğrulamalıdır:
+6. aşağıdaki komut liveness, readiness ve `/` giriş rotasını doğrulamalıdır:
 
 ```sh
 npm run production:verify

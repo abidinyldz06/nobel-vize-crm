@@ -29,9 +29,9 @@ verify_health "/api/health/ready" "ready"
 login_status="$(curl --silent --show-error --location \
   --output /dev/null \
   --write-out '%{http_code}' \
-  "$base_url/login")"
+  "$base_url/")"
 [ "$login_status" = "200" ] || {
-  echo "/login HTTP $login_status döndürdü." >&2
+  echo "/ HTTP $login_status döndürdü." >&2
   exit 1
 }
-echo "PRODUCTION_CHECK_OK endpoint=/login http=200"
+echo "PRODUCTION_CHECK_OK endpoint=/ http=200"
