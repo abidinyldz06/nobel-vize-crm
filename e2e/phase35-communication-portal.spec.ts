@@ -148,12 +148,13 @@ test('admin manages templates, records communication delivery and controls the i
   const popupPromise = page.waitForEvent('popup');
   await composer.getByRole('button', { name: 'Kaydet ve Uygulamada Aç' }).click();
   const popup = await popupPromise;
+  await expect(composer).toBeHidden();
   await popup.close();
 
   await expect.poll(async () => {
-    const result = await admin.from('communications').select('status').eq('customer_id', currentCustomerId).eq('type', 'whatsapp').order('created_at', { ascending: false }).limit(1).single();
+    const result = await admin.from('communications').select('status').eq('customer_id', currentCustomerId).eq('type', 'whatsapp').order('created_at', { ascending: false }).limit(1).maybeSingle();
     if (result.error) throw result.error;
-    return result.data.status;
+    return result.data?.status ?? null;
   }).toBe('hazirlandi');
 
   const preparedCommunication = await admin.from('communications').select('id').eq('customer_id', currentCustomerId).eq('type', 'whatsapp').order('created_at', { ascending: false }).limit(1).single();

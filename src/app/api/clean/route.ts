@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
+import { observedRoute } from "@/lib/observability";
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function listStaff() {
   let supabase;
   try {
     ({ supabase } = await requireAdmin());
@@ -23,3 +24,5 @@ export async function GET() {
 
   return NextResponse.json({ success: true, count: staffList?.length || 0, staff: staffList });
 }
+
+export const GET = observedRoute("admin.staff_list", listStaff);

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireStaff } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
+import { observedRoute } from "@/lib/observability";
 
-export async function GET(request: Request) {
+async function search(request: Request) {
   let supabase;
   try {
     ({ supabase } = await requireStaff());
@@ -64,3 +65,5 @@ export async function GET(request: Request) {
     applications,
   });
 }
+
+export const GET = observedRoute("search.global", search);

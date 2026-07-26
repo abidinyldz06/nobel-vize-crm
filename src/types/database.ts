@@ -183,6 +183,81 @@ export type Database = {
           },
         ]
       }
+      backup_runs: {
+        Row: {
+          artifact_label: string
+          backup_kind: string
+          checksum_sha256: string | null
+          completed_at: string | null
+          created_by_staff_id: string | null
+          database_row_count: number | null
+          database_table_count: number | null
+          error_code: string | null
+          format_version: string
+          id: string
+          started_at: string
+          status: string
+          storage_bytes: number | null
+          storage_object_count: number | null
+          trigger_type: string
+          verified_at: string | null
+          verified_by_staff_id: string | null
+        }
+        Insert: {
+          artifact_label: string
+          backup_kind: string
+          checksum_sha256?: string | null
+          completed_at?: string | null
+          created_by_staff_id?: string | null
+          database_row_count?: number | null
+          database_table_count?: number | null
+          error_code?: string | null
+          format_version?: string
+          id?: string
+          started_at?: string
+          status?: string
+          storage_bytes?: number | null
+          storage_object_count?: number | null
+          trigger_type?: string
+          verified_at?: string | null
+          verified_by_staff_id?: string | null
+        }
+        Update: {
+          artifact_label?: string
+          backup_kind?: string
+          checksum_sha256?: string | null
+          completed_at?: string | null
+          created_by_staff_id?: string | null
+          database_row_count?: number | null
+          database_table_count?: number | null
+          error_code?: string | null
+          format_version?: string
+          id?: string
+          started_at?: string
+          status?: string
+          storage_bytes?: number | null
+          storage_object_count?: number | null
+          trigger_type?: string
+          verified_at?: string | null
+          verified_by_staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backup_runs_created_by_staff_fk"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "backup_runs_verified_by_staff_fk"
+            columns: ["verified_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communications: {
         Row: {
           application_id: string | null
@@ -961,6 +1036,65 @@ export type Database = {
           },
         ]
       }
+      operational_events: {
+        Row: {
+          error_code: string | null
+          event_key: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          occurrence_count: number
+          request_id: string | null
+          resolved_at: string | null
+          resolved_by_staff_id: string | null
+          route: string | null
+          severity: string
+          source: string
+          status: string
+          summary: string
+        }
+        Insert: {
+          error_code?: string | null
+          event_key: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          occurrence_count?: number
+          request_id?: string | null
+          resolved_at?: string | null
+          resolved_by_staff_id?: string | null
+          route?: string | null
+          severity: string
+          source: string
+          status?: string
+          summary: string
+        }
+        Update: {
+          error_code?: string | null
+          event_key?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          occurrence_count?: number
+          request_id?: string | null
+          resolved_at?: string | null
+          resolved_by_staff_id?: string | null
+          route?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operational_events_resolved_by_staff_fk"
+            columns: ["resolved_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -1412,6 +1546,17 @@ export type Database = {
         Args: { target_document_id: string }
         Returns: boolean
       }
+      complete_backup_run_v1: {
+        Args: {
+          p_checksum_sha256: string
+          p_database_row_count: number
+          p_database_table_count: number
+          p_run_id: string
+          p_storage_bytes: number
+          p_storage_object_count: number
+        }
+        Returns: boolean
+      }
       create_customer_application_v1: {
         Args: { p_payload: Json }
         Returns: Json
@@ -1422,6 +1567,10 @@ export type Database = {
       }
       create_task_v1: { Args: { p_payload: Json }; Returns: string }
       current_staff_id: { Args: never; Returns: string }
+      fail_backup_run_v1: {
+        Args: { p_error_code: string; p_run_id: string }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
       list_archived_customer_privacy_v1: {
         Args: never
@@ -1470,6 +1619,21 @@ export type Database = {
       record_customer_privacy_notice_v1: {
         Args: { p_payload: Json }
         Returns: string
+      }
+      record_operational_event_v1: {
+        Args: {
+          p_error_code?: string
+          p_event_key: string
+          p_request_id?: string
+          p_route?: string
+          p_severity: string
+          p_source: string
+        }
+        Returns: string
+      }
+      resolve_operational_event_v1: {
+        Args: { p_event_id: string }
+        Returns: boolean
       }
       restore_backup_v2: { Args: { p_backup: Json }; Returns: Json }
       restore_customers_v1: {
@@ -1521,6 +1685,14 @@ export type Database = {
         Args: { p_status: string; p_task_id: string }
         Returns: boolean
       }
+      start_backup_run_v1: {
+        Args: {
+          p_artifact_label: string
+          p_backup_kind: string
+          p_trigger_type: string
+        }
+        Returns: string
+      }
       storage_document_id: { Args: { object_name: string }; Returns: string }
       sync_operational_tasks_v1: { Args: never; Returns: number }
       update_application_status_v1: {
@@ -1551,6 +1723,10 @@ export type Database = {
       upsert_privacy_notice_v1: {
         Args: { p_notice_id: string; p_payload: Json }
         Returns: string
+      }
+      verify_backup_run_v1: {
+        Args: { p_checksum_sha256: string; p_run_id: string }
+        Returns: boolean
       }
     }
     Enums: {

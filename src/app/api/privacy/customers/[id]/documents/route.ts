@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { requireAdmin } from "@/lib/authz";
+import { observedRoute } from "@/lib/observability";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
 function storagePath(value: string) {
@@ -12,7 +13,7 @@ function storagePath(value: string) {
   return null;
 }
 
-export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+async function deleteCustomerDocuments(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   let supabase;
   try {
     ({ supabase } = await requireAdmin());
@@ -46,3 +47,5 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
   if (markError) return NextResponse.json({ error: markError.message }, { status: 400 });
   return NextResponse.json({ success: true, deleted: changed ?? 0 });
 }
+
+export const POST = observedRoute("privacy.delete_documents", deleteCustomerDocuments);

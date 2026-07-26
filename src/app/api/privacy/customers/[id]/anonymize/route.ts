@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { requireAdmin } from "@/lib/authz";
+import { observedRoute } from "@/lib/observability";
 
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+async function anonymizeCustomer(request: Request, { params }: { params: Promise<{ id: string }> }) {
   let supabase;
   try {
     ({ supabase } = await requireAdmin());
@@ -16,3 +17,5 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === "42501" ? 403 : 400 });
   return NextResponse.json({ success: true });
 }
+
+export const POST = observedRoute("privacy.anonymize_customer", anonymizeCustomer);

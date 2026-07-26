@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { requireStaff } from "@/lib/authz";
+import {
+  errorCodeFrom,
+  observedRoute,
+  requestIdFrom,
+  structuredLog,
+} from "@/lib/observability";
+import { recordOperationalEvent } from "@/lib/operational-events";
 import type { Json } from "@/types/database";
 
 const TASK_STATUSES = new Set(["pending", "in_progress", "completed", "cancelled"]);
 const TASK_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
 
-export async function GET() {
+async function listTasks(request: Request) {
   let context;
   try {
     context = await requireStaff();
@@ -17,7 +24,21 @@ export async function GET() {
   const { supabase } = context;
   const { error: syncError } = await supabase.rpc("sync_operational_tasks_v1");
   if (syncError) {
-    console.error("Operational task sync failed:", syncError.message);
+    const requestId = requestIdFrom(request);
+    const errorCode = errorCodeFrom(syncError);
+    structuredLog("error", "tasks.operational_sync.failed", {
+      requestId,
+      operation: "tasks.operational_sync",
+      errorCode,
+    });
+    await recordOperationalEvent({
+      eventKey: "tasks.operational_sync.failed",
+      severity: "error",
+      source: "system",
+      requestId,
+      route: "/api/tasks",
+      errorCode,
+    });
   }
 
   const { data, error } = await supabase
@@ -39,7 +60,7 @@ export async function GET() {
   return NextResponse.json({ tasks: data ?? [] });
 }
 
-export async function POST(request: Request) {
+async function createTask(request: Request) {
   let context;
   try {
     context = await requireStaff();
@@ -87,7 +108,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ id: data }, { status: 201 });
 }
 
-export async function PATCH(request: Request) {
+async function updateTask(request: Request) {
   let context;
   try {
     context = await requireStaff();
@@ -125,3 +146,7 @@ export async function PATCH(request: Request) {
 
   return NextResponse.json({ success: true });
 }
+
+export const GET = observedRoute("tasks.list", listTasks);
+export const POST = observedRoute("tasks.create", createTask);
+export const PATCH = observedRoute("tasks.update", updateTask);

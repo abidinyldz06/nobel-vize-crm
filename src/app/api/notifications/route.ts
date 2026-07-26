@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { requireStaff } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
+import {
+  errorCodeFrom,
+  observedRoute,
+  requestIdFrom,
+  structuredLog,
+} from "@/lib/observability";
+import { recordOperationalEvent } from "@/lib/operational-events";
 
-export async function GET() {
+async function listNotifications(request: Request) {
   let supabase;
   try {
     ({ supabase } = await requireStaff());
@@ -11,7 +18,23 @@ export async function GET() {
   }
   
   const { error: syncError } = await supabase.rpc('sync_operational_tasks_v1');
-  if (syncError) console.error('Notification task sync failed:', syncError.message);
+  if (syncError) {
+    const requestId = requestIdFrom(request);
+    const errorCode = errorCodeFrom(syncError);
+    structuredLog("error", "notifications.task_sync.failed", {
+      requestId,
+      operation: "notifications.task_sync",
+      errorCode,
+    });
+    await recordOperationalEvent({
+      eventKey: "notifications.task_sync.failed",
+      severity: "error",
+      source: "system",
+      requestId,
+      route: "/api/notifications",
+      errorCode,
+    });
+  }
 
   const { data: notifications, error } = await supabase
     .from('notifications')
@@ -26,7 +49,7 @@ export async function GET() {
   return NextResponse.json(notifications);
 }
 
-export async function PATCH(request: Request) {
+async function updateNotifications(request: Request) {
   let supabase;
   try {
     ({ supabase } = await requireStaff());
@@ -51,3 +74,6 @@ export async function PATCH(request: Request) {
   
   return NextResponse.json({ success: true });
 }
+
+export const GET = observedRoute("notifications.list", listNotifications);
+export const PATCH = observedRoute("notifications.mark_read", updateNotifications);

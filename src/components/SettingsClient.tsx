@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database, MessagesSquare, ScrollText } from "lucide-react";
+import { Activity, Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database, MessagesSquare, ScrollText } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import AuditLog from "@/components/AuditLog";
 import BackupPanel from "@/components/BackupPanel";
@@ -8,6 +8,7 @@ import type { Tables, TablesUpdate } from "@/types/database";
 import MessageTemplatesSettings from "@/components/MessageTemplatesSettings";
 import PrivacyNoticeSettings from "@/components/PrivacyNoticeSettings";
 import PrivacyLifecycleSettings from "@/components/PrivacyLifecycleSettings";
+import OperationsPanel from "@/components/OperationsPanel";
 
 const TABS = [
   { id: "company", label: "Şirket Bilgileri", icon: Building2 },
@@ -15,12 +16,33 @@ const TABS = [
   { id: "privacy", label: "KVKK Metinleri", icon: ScrollText },
   { id: "security", label: "Güvenlik", icon: Shield },
   { id: "audit", label: "Sistem Log", icon: ClipboardList },
+  { id: "operations", label: "Operasyon", icon: Activity },
   { id: "backup", label: "Veri Yedekleme", icon: Database },
 ];
 
-export default function SettingsClient({ company, messageTemplates, privacyNotices, privacySettings }: { company: Tables<'tenants'>; messageTemplates: Tables<'message_templates'>[]; privacyNotices: Tables<'privacy_notice_versions'>[]; privacySettings: Tables<'privacy_settings'> }) {
+type SettingsClientProps = {
+  company: Tables<"tenants">;
+  messageTemplates: Tables<"message_templates">[];
+  privacyNotices: Tables<"privacy_notice_versions">[];
+  privacySettings: Tables<"privacy_settings">;
+  operationalEvents: Tables<"operational_events">[];
+  backupRuns: Tables<"backup_runs">[];
+  initialTab?: string;
+};
+
+export default function SettingsClient({
+  company,
+  messageTemplates,
+  privacyNotices,
+  privacySettings,
+  operationalEvents,
+  backupRuns,
+  initialTab,
+}: SettingsClientProps) {
   const supabase = createSupabaseBrowserClient();
-  const [activeTab, setActiveTab] = useState("company");
+  const [activeTab, setActiveTab] = useState(
+    TABS.some(tab => tab.id === initialTab) ? initialTab ?? "company" : "company",
+  );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -243,13 +265,17 @@ export default function SettingsClient({ company, messageTemplates, privacyNotic
           <div className="space-y-5"><PrivacyLifecycleSettings settings={privacySettings} /><PrivacyNoticeSettings initialNotices={privacyNotices} /></div>
         )}
 
+        {activeTab === "operations" && (
+          <OperationsPanel initialEvents={operationalEvents} />
+        )}
+
         {/* Backup Tab */}
         {activeTab === "backup" && (
-          <BackupPanel />
+          <BackupPanel initialRuns={backupRuns} />
         )}
 
         {/* Save Button */}
-        {activeTab !== "audit" && activeTab !== "backup" && activeTab !== "messages" && activeTab !== "privacy" && (
+        {activeTab !== "audit" && activeTab !== "backup" && activeTab !== "messages" && activeTab !== "privacy" && activeTab !== "operations" && (
           <div className="flex justify-end pt-2">
           <button
             onClick={handleSave}

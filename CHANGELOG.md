@@ -2,6 +2,42 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 3.7 İzleme ve İş Sürekliliği
+
+### İzleme ve olay yönetimi
+
+- Uygulama ve API isteklerine uçtan uca UUID request ID eklendi.
+- Kişisel veri, secret ve ham hata mesajı taşımayan allowlist tabanlı
+  yapılandırılmış JSON logları eklendi.
+- Minimal liveness ile ortam, veritabanı ve private Storage erişimini sınayan
+  aggregate readiness endpoint'leri eklendi.
+- Tekrarlanan operasyonel hataları birleştiren, yalnız admin tarafından
+  görüntülenip kapatılabilen olay ve bildirim akışı eklendi.
+
+### Yedekleme ve kurtarma
+
+- Yedek başlangıç, tamamlanma, hata ve doğrulama geçmişi admin kontrollü
+  RPC'lere taşındı.
+- JSON yedeğine SHA-256, tablo/satır sayısı ve recursive private Storage
+  envanteri eklendi; Storage binary'lerinin pakette olmadığı açıkça işaretlendi.
+- 36 saati geçen doğrulanmış yedek için `backup.stale` uyarısı ve başarılı
+  doğrulamada otomatik kapanma eklendi.
+- Yalnız yerel Supabase'e bağlanan, transaction sonunda rollback yapan ve
+  tablo/Storage bütünlüğünü karşılaştıran geri yükleme tatbikatı eklendi.
+- RPO/RTO hedefleri, SEV seviyeleri, yedekleme, restore kapıları ve olay kapatma
+  adımlarını içeren müdahale rehberi eklendi.
+
+### Kalite
+
+- Gözlemlenebilirlik, olay, yedek ve restore akışları pgTAP, birim, güvenlik ve
+  oturumlu Playwright testleriyle kapsam altına alındı.
+- Paylaşılan yerel Supabase fixture'larında çapraz test çakışmasını önlemek için
+  Playwright paketi tek worker'a sabitlendi.
+- İletişim popup testi, veritabanı kaydı tamamlanmasını bekleyerek geçici boş
+  sorgu sonucunu güvenli biçimde yeniden deneyecek şekilde sağlamlaştırıldı.
+- GitHub Actions Node 24 uyumlu action sürümlerine taşındı ve database kalite
+  kapısına izole restore tatbikatı eklendi.
+
 ## [Unreleased] — Faz 3.6 KVKK ve Veri Yaşam Döngüsü
 
 ### KVKK kayıtları

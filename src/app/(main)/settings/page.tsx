@@ -4,17 +4,31 @@ import SettingsClient from "@/components/SettingsClient";
 
 export const revalidate = 0;
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const { supabase } = await requireAdminPage();
+  const { tab } = await searchParams;
 
-  const [{ data: company, error }, { data: templates, error: templatesError }, { data: privacyNotices, error: privacyError }, { data: privacySettings, error: settingsError }] = await Promise.all([
+  const [
+    { data: company, error },
+    { data: templates, error: templatesError },
+    { data: privacyNotices, error: privacyError },
+    { data: privacySettings, error: settingsError },
+    { data: operationalEvents, error: operationalEventsError },
+    { data: backupRuns, error: backupRunsError },
+  ] = await Promise.all([
     supabase.from('tenants').select('id, company_name, email, phone, created_at').single(),
     supabase.from('message_templates').select('*').order('channel').order('name'),
     supabase.from('privacy_notice_versions').select('*').order('effective_at', { ascending: false }),
     supabase.from('privacy_settings').select('*').single(),
+    supabase.from('operational_events').select('*').order('last_seen_at', { ascending: false }).limit(50),
+    supabase.from('backup_runs').select('*').order('started_at', { ascending: false }).limit(20),
   ]);
 
-  if (error || !company || templatesError || privacyError || settingsError || !privacySettings) {
+  if (error || !company || templatesError || privacyError || settingsError || !privacySettings || operationalEventsError || backupRunsError) {
     throw new Error("Tek şirket ayarları yüklenemedi.");
   }
 
@@ -27,7 +41,15 @@ export default async function SettingsPage() {
           </h1>
           <p className="text-slate-500 text-xs mt-0.5">Nobel Vize şirket bilgilerini, güvenliği ve sistem verilerini yönetin.</p>
         </div>
-        <SettingsClient company={company} messageTemplates={templates ?? []} privacyNotices={privacyNotices ?? []} privacySettings={privacySettings} />
+        <SettingsClient
+          company={company}
+          messageTemplates={templates ?? []}
+          privacyNotices={privacyNotices ?? []}
+          privacySettings={privacySettings}
+          operationalEvents={operationalEvents ?? []}
+          backupRuns={backupRuns ?? []}
+          initialTab={tab}
+        />
       </div>
     </div>
   );

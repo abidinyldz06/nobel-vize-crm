@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireStaff } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
+import { observedRoute } from "@/lib/observability";
 
 const ALLOWED_STATUSES = new Set([
   "profil_analizi",
@@ -15,7 +16,7 @@ const ALLOWED_STATUSES = new Set([
   "kapandi",
 ]);
 
-export async function POST(req: Request) {
+async function updateCustomersBulk(req: Request) {
   let context;
   try {
     context = await requireStaff();
@@ -101,3 +102,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ success: true });
 }
+
+export const POST = observedRoute("customers.bulk_update", updateCustomersBulk);
