@@ -22,6 +22,8 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   Playwright doğrulaması yapan release adayı kapısı.
 - Liveness, readiness ve login rotalarını veri değiştirmeden doğrulayan
   production kapanış komutu.
+- Production doğrulamasındaki giriş kontrolü, uygulamanın gerçek giriş rotası
+  olan `/` adresine bağlandı.
 
 ### Düzeltildi
 

@@ -49,10 +49,16 @@ describe("phase 3.8 release gates", () => {
   });
 
   it("keeps CI release gates complete and production dependency audit blocking", async () => {
-    const workflow = await readFile(
-      path.join(projectRoot, ".github", "workflows", "quality.yml"),
-      "utf8",
-    );
+    const [workflow, productionCheck] = await Promise.all([
+      readFile(
+        path.join(projectRoot, ".github", "workflows", "quality.yml"),
+        "utf8",
+      ),
+      readFile(
+        path.join(projectRoot, "scripts", "verify-production.sh"),
+        "utf8",
+      ),
+    ]);
 
     for (const requiredStep of [
       "npm run lint",
@@ -70,5 +76,8 @@ describe("phase 3.8 release gates", () => {
       const escapedStep = requiredStep.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       assert.match(workflow, new RegExp(escapedStep));
     }
+
+    assert.match(productionCheck, /PRODUCTION_CHECK_OK endpoint=\/ http=200/);
+    assert.doesNotMatch(productionCheck, /\$base_url\/login/);
   });
 });
