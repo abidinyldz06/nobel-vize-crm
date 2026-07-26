@@ -42,6 +42,7 @@ export async function createCustomerWithApplication(formData: FormData) {
       passport_expiry: passportExpiry || null,
       passport_issuing_country: passportIssuingCountry,
       customer_notes: consultantNote || null,
+      consultant_note: consultantNote || null,
       country_id: countryId || null,
       visa_type: visaType,
       matched_rule_id: matchedRuleId || null,

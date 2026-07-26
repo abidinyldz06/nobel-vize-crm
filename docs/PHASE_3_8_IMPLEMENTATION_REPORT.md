@@ -4,7 +4,7 @@ Başlangıç: 26 Temmuz 2026
 
 Durum: Devam ediyor
 
-Dal: `agent/phase-3-8-role-acceptance`
+Dal: `agent/phase-3-8-critical-edge-flows`
 
 ## Kapsam
 
@@ -50,12 +50,46 @@ Yeni Playwright paketi şu katmanları birlikte doğruladı:
 
 İlk hedefli doğrulama sonucu: **3/3 Playwright testi geçti**.
 
-### 3.8.3–3.8.8
+### 3.8.3 bitti — Kritik müşteri ve operasyon akışları
+
+Mevcut görev, bildirim, iletişim, portal, KVKK, arşiv, süreç panosu, etiket,
+dashboard, hızlı eylem ve timeline senaryolarına ek olarak gerçek form
+etkileşimlerini tek zincirde doğrulayan kabul testi yazıldı:
+
+1. geçersiz telefon ile müşteri oluşturma engellenir ve veritabanı değişmez;
+2. geçerli müşteri kaydı müşteri, başvuru, ülke kuralı evrakları, danışman
+   notu ve audit kayıtlarını atomik olarak üretir;
+3. randevu kaydı başvuru durumunu, tarihini, konumunu ve audit kaydını günceller;
+4. evrak kontrolü onay durumunu kalıcılaştırır;
+5. sıfır tutarlı ödeme reddedilir, geçerli ödeme kaydedilip timeline'da görünür.
+
+Bu zincir sırasında yeni müşteri formundaki danışman notunun yalnız
+`customer_notes` adıyla gönderildiği, fakat RPC'nin `consultant_note` beklediği
+tespit edildi. Action iki uyumlu alanı birlikte gönderecek şekilde düzeltildi
+ve notun gerçekten `notes` tablosuna yazıldığı kabul testine bağlandı.
+
+### 3.8.4 bitti — Hata, boş veri, eşzamanlılık ve tekrar deneme
+
+- Atanmış verisi olmayan danışmanın dashboard, müşteri, başvuru ve görev
+  ekranlarında güvenli ve açıklayıcı boş durumlar gösterdiği doğrulandı.
+- Bozuk JSON, boş görev, bulunmayan görev ve bulunmayan evrak indirme
+  isteklerinin 400/404 ile veri değiştirmeden sonuçlandığı doğrulandı.
+- Aynı başvuru durumuna iki eşzamanlı geçişte yalnız bir isteğin kabul edildiği,
+  diğerinin reddedildiği ve yalnız bir audit kaydı üretildiği doğrulandı.
+- Görev senkronizasyonunun tekrar çalıştırıldığında aynı kayıt kimliklerini
+  koruduğu ve otomatik görev idempotency anahtarlarının benzersiz kaldığı
+  doğrulandı.
+- Auth, staff, müşteri, ülke ve ilişkili kayıt temizliği iki kez çalıştırıldı;
+  ikinci çalıştırmanın da hata vermediği ve sıfır fixture bıraktığı kanıtlandı.
+
+Yeni hedefli doğrulama sonucu: **3/3 Playwright testi geçti**.
+
+### 3.8.5–3.8.8
 
 Kalan paketler Faz 3 planındaki sırayla yürütülecektir. Bu rapor, her paket
 tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişletilir.
 
-## İlk paket değişiklikleri
+## Tamamlanan paket değişiklikleri
 
 | Alan | Sonuç |
 |---|---|
@@ -65,6 +99,10 @@ tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişle
 | Rol E2E | Admin, iki danışman, pasif ve bağlantısız hesap matrisi |
 | API regresyonu | Arama/görev kapsamı; evrak 404; admin işlemleri 403 |
 | RLS regresyonu | Yedi kritik veri alanında çapraz görünürlük engeli |
+| Kritik akış | Müşteri → başvuru/evrak/not → randevu → evrak → ödeme |
+| Hata ve boş durum | 400/404, boş danışman ekranları ve değişmeyen veri |
+| Eşzamanlılık | Tek kabul edilen durum geçişi ve tek audit kaydı |
+| Retry / cleanup | Kararlı görev kimlikleri, benzersiz anahtarlar ve iki kez temizlik |
 
 ## Kalite kanıtları
 
@@ -80,7 +118,7 @@ tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişle
 | Temiz migration zinciri | `supabase db reset` geçti |
 | PostgreSQL schema lint | 0 hata |
 | pgTAP | 230/230 geçti |
-| Playwright | 15/15 geçti; bunun 3'ü yeni rol kabul testi |
+| Playwright | 18/18 geçti; 3 rol ve 3 kritik/kenar kabul testi |
 | İzole restore tatbikatı | Checksum doğrulandı ve transaction rollback edildi |
 
 GitHub Actions ve inceleme bağlantısı, bu doğrulamalardan sonra oluşturulan pull

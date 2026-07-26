@@ -160,10 +160,10 @@ Durum: **Devam ediyor — 26 Temmuz 2026**
   ortak Auth-Supabase E2E fixture altyapısı ve doğrulanan cleanup
 - [x] **3.8.2 bitti:** admin-danışman sayfa, menü, API ve doğrudan RLS rol
   izolasyonu; iç içe personel URL yetki boşluklarının kapatılması
-- [ ] **3.8.3:** müşteri, başvuru, evrak, ödeme, randevu, görev, iletişim,
-  portal, KVKK ve arşiv kritik kullanıcı akışları
-- [ ] **3.8.4:** hata, boş veri, eşzamanlı işlem, tekrar deneme ve fixture
-  temizliği regresyonları
+- [x] **3.8.3 bitti:** müşteri, başvuru, evrak, ödeme, randevu, görev,
+  iletişim, portal, KVKK ve arşiv kritik kullanıcı akışları
+- [x] **3.8.4 bitti:** hata, boş veri, eşzamanlı işlem, tekrar deneme ve
+  iki kez çalıştırılarak doğrulanan fixture temizliği regresyonları
 - [ ] **3.8.5:** mobil/masaüstü, erişilebilirlik ve performans kabul kontrolleri
 - [ ] **3.8.6:** migration, RLS, audit, build ve dependency güvenlik kapıları
 - [ ] **3.8.7:** kullanıcı kabul oturumu, production adayı, yedek ve geri dönüş
