@@ -4,7 +4,7 @@ Başlangıç: 26 Temmuz 2026
 
 Durum: Devam ediyor
 
-Dal: `agent/phase-3-8-critical-edge-flows`
+Dal: `agent/phase-3-8-responsive-a11y-performance`
 
 ## Kapsam
 
@@ -84,7 +84,40 @@ ve notun gerçekten `notes` tablosuna yazıldığı kabul testine bağlandı.
 
 Yeni hedefli doğrulama sonucu: **3/3 Playwright testi geçti**.
 
-### 3.8.5–3.8.8
+### 3.8.5 bitti — Responsive, erişilebilirlik ve performans kabulü
+
+`e2e/phase38-responsive-a11y-performance.spec.ts` ile dört katmanlı kabul
+paketi eklendi:
+
+- giriş, dashboard, müşteri, başvuru ve görev ekranları 390×844 mobil ile
+  1440×900 masaüstünde yatay taşma olmadan doğrulandı;
+- giriş, dashboard ve müşteri ekranları axe-core ile WCAG 2 A/AA kurallarında
+  sıfır ihlalle geçti;
+- ana içeriğe geç bağlantısı, landmark adları, görünür odak, mobil menünün
+  Enter ile açılması, Escape ile kapanması ve odağın tetikleyiciye dönmesi
+  doğrulandı;
+- önbelleği temizlenmiş dashboard yüklemesi ölçülebilir performans ve görsel
+  kararlılık bütçelerine bağlandı.
+
+Kabul bütçeleri:
+
+| Ölçüt | Üst sınır |
+|---|---:|
+| DOMContentLoaded | 4.000 ms |
+| Load | 5.000 ms |
+| Kaynak sayısı | 120 |
+| Transfer boyutu | 4.000.000 byte |
+| Cumulative Layout Shift | 0,1 |
+
+İlk tarama koyu temadaki ikincil metinlerin kontrast eşiğini karşılamadığını
+gösterdi. Koyu tema `slate-500/600` metinleri AA uyumlu renge yükseltildi.
+Ayrıca mobil menü ve tema butonları için hydration sırasında kaybolabilen
+etkileşim/ad farkı kapatıldı; müşteri filtreleri dar ekranda alt alta akacak
+şekilde düzenlendi ve reduced-motion tercihi eklendi.
+
+Hedefli doğrulama sonucu: **4/4 Playwright testi geçti**.
+
+### 3.8.6–3.8.8
 
 Kalan paketler Faz 3 planındaki sırayla yürütülecektir. Bu rapor, her paket
 tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişletilir.
@@ -103,6 +136,9 @@ tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişle
 | Hata ve boş durum | 400/404, boş danışman ekranları ve değişmeyen veri |
 | Eşzamanlılık | Tek kabul edilen durum geçişi ve tek audit kaydı |
 | Retry / cleanup | Kararlı görev kimlikleri, benzersiz anahtarlar ve iki kez temizlik |
+| Responsive | 390px mobil ve 1440px masaüstünde beş kritik ekran |
+| Erişilebilirlik | WCAG 2 A/AA, klavye, landmark, focus ve reduced-motion |
+| Performans | DCL/load/kaynak/transfer/CLS otomatik bütçeleri |
 
 ## Kalite kanıtları
 
@@ -118,7 +154,7 @@ tamamlandığında test, CI, yayın ve kullanıcı kabul kanıtlarıyla genişle
 | Temiz migration zinciri | `supabase db reset` geçti |
 | PostgreSQL schema lint | 0 hata |
 | pgTAP | 230/230 geçti |
-| Playwright | 18/18 geçti; 3 rol ve 3 kritik/kenar kabul testi |
+| Playwright | 22/22 geçti; 4 yeni responsive/a11y/performance kabul testi |
 | İzole restore tatbikatı | Checksum doğrulandı ve transaction rollback edildi |
 
 GitHub doğrulaması:

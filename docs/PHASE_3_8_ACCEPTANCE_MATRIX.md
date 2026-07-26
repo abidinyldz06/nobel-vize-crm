@@ -93,6 +93,29 @@ kanıtları:
 
 3.8.3–3.8.4 hedefli paket sonucu: **3/3 Playwright testi geçti**.
 
+## Responsive, erişilebilirlik ve performans kabulü
+
+`e2e/phase38-responsive-a11y-performance.spec.ts` ile tamamlanan 3.8.5
+kanıtları:
+
+| Kabul alanı | Ölçüm | Sonuç |
+|---|---|---|
+| Mobil | 390×844; giriş/dashboard/müşteri/başvuru/görev | Yatay taşma yok |
+| Masaüstü | 1440×900; aynı kritik ekranlar | Yatay taşma yok |
+| WCAG | axe-core; WCAG 2 A, AA, 2.1 A ve AA | 0 ihlal |
+| Klavye | Skip-link, Enter ile menü açma, Escape ile kapatma | Geçti |
+| Odak | Görünür focus ve kapanışta tetikleyiciye dönüş | Geçti |
+| Hareket | `prefers-reduced-motion` | Destekleniyor |
+| Performans | DCL ≤4 sn, load ≤5 sn, ≤120 kaynak, ≤4 MB, CLS ≤0,1 | Geçti |
+
+Tarama kapsamı anonim giriş ile oturumlu admin dashboard ve müşteri
+ekranlarının hem mobil hem masaüstü görünümünü içerir. Başvuru ve görev
+ekranları responsive taşma regresyonuna dahildir. Performans testi Chromium
+önbelleğini temizleyerek dashboard navigation/resource timing ve layout-shift
+değerlerini ölçer.
+
+3.8.5 hedefli paket sonucu: **4/4 Playwright testi geçti**.
+
 ## Manuel UAT kontrol listesi
 
 Bu maddeler 3.8.7 kapsamında gerçek kullanıcı ve production adayı üzerinde

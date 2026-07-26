@@ -102,7 +102,7 @@ Faz 2 kapsamı, doğrulama matrisi ve kalan riskler
 - [x] Faz 3.5 — Müşteri iletişimi ve portal (tamamlandı 22 Temmuz 2026)
 - [x] Faz 3.6 — KVKK ve veri yaşam döngüsü (tamamlandı 22 Temmuz 2026)
 - [x] Faz 3.7 — İzleme ve iş sürekliliği (tamamlandı 26 Temmuz 2026)
-- [ ] Faz 3.8 — Son kalite ve kullanıcı kabulü (devam ediyor; 3.8.1–3.8.4 tamamlandı)
+- [ ] Faz 3.8 — Son kalite ve kullanıcı kabulü (devam ediyor; 3.8.1–3.8.5 tamamlandı)
 
 Faz 3 ayrıntılı kapsamı ve aşama durumları `docs/PHASE_3_PLAN.md` içindedir.
 Tenant, abonelik, plan, kota, white-label ve subdomain geliştirmeleri bu fazın

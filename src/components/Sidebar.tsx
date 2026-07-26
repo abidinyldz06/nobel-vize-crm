@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Calendar, Settings, LogOut, Globe, BarChart3, UserCog, ListTodo, Columns3 } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, Settings, LogOut, Globe, BarChart3, UserCog, ListTodo, Columns3, X } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import type { CurrentStaffProfile } from "@/types/staff-profile";
 
@@ -55,14 +55,16 @@ export default function Sidebar({
     <>
       {/* Mobile Overlay */}
       {isMobileOpen && (
-        <div 
+        <button
+          type="button"
+          aria-label="Ana menüyü kapat"
           className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`
+      <aside id="primary-sidebar" aria-label="Ana menü" className={`
         w-60 flex flex-col h-screen fixed md:sticky top-0 left-0 z-50 md:z-40 
         bg-white dark:bg-[#0d1420] border-r border-slate-200 dark:border-[#1f2937]
         transition-transform duration-300 ease-in-out
@@ -75,14 +77,22 @@ export default function Sidebar({
               <Globe className="text-white w-4 h-4" />
             </div>
             <div>
-              <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">Nobel Vize</h1>
+              <p className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">Nobel Vize</p>
               <p className="text-[10px] text-blue-500 dark:text-blue-400 font-medium uppercase tracking-wider">CRM Sistemi</p>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Ana menüyü kapat"
+            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 md:hidden dark:hover:bg-[#1f2937] dark:hover:text-white"
+          >
+            <X aria-hidden="true" className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav aria-label="Birincil navigasyon" className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-600 mb-3 px-2 uppercase tracking-widest">Ana Menü</p>
           {links.map((link) => {
             const isActive = pathname.startsWith(link.href);
@@ -91,6 +101,7 @@ export default function Sidebar({
                 key={link.href}
                 href={link.href}
                 onClick={onClose}
+                aria-current={isActive ? "page" : undefined}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium ${
                   isActive
                     ? "bg-blue-50 dark:bg-blue-600/15 border border-blue-200 dark:border-blue-600/30 text-blue-600 dark:text-blue-400"
@@ -114,6 +125,7 @@ export default function Sidebar({
             </div>
           </div>
           <button
+            type="button"
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all text-sm font-medium border border-transparent"
           >

@@ -170,9 +170,9 @@ export default async function Dashboard() {
   const statusData = Object.entries(statusMap).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#060d1a] p-6">
+    <div className="min-h-screen bg-white p-4 dark:bg-[#060d1a] md:p-6">
       {/* Header */}
-      <header className="flex justify-between items-center mb-7">
+      <header className="mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <h1 className="text-xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
