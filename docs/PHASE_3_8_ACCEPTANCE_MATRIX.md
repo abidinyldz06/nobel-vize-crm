@@ -62,7 +62,7 @@ oluşturur:
 - bir pasif danışman;
 - staff bağlantısı olmayan bir Auth kullanıcısı.
 
-Test, tarayıcı sayfalarını, oturum çerezli API çağrılarını ve anon key ile
+Testler, tarayıcı sayfalarını, oturum çerezli API çağrılarını ve anon key ile
 oturum açmış doğrudan Supabase istemcilerini birlikte kontrol eder. Cleanup
 adımlarındaki her Supabase/Auth hatası testi düşürür; test sonunda personel ve
 Auth fixture sayılarının sıfır olduğu ayrıca doğrulanır.
@@ -76,6 +76,22 @@ Auth fixture sayılarının sıfır olduğu ayrıca doğrulanır.
   engellendi;
 - çapraz update, toplu arşiv/atama ve yedek API yetkileri doğrulandı;
 - pasif ve staff bağlantısız Auth hesapları reddedildi.
+
+`e2e/phase38-critical-edge-flows.spec.ts` ile tamamlanan 3.8.3–3.8.4 kabul
+kanıtları:
+
+- geçersiz ve geçerli müşteri oluşturma, otomatik başvuru/evrak/not/audit,
+  randevu, evrak onayı ve ödeme tek kritik zincirde doğrulandı;
+- görev, bildirim, iletişim, portal, KVKK, arşiv, süreç, etiket, dashboard,
+  hızlı eylem ve timeline kapsamı mevcut E2E senaryolarıyla birlikte korundu;
+- verisiz danışmanın dashboard, müşteri, başvuru ve görev boş durumları
+  doğrulandı;
+- bozuk JSON ve eksik kaynakların 400/404 üretip veri değiştirmediği doğrulandı;
+- eşzamanlı aynı durum geçişinde tek işlem ve tek audit, görev senkronizasyonu
+  tekrarında kararlı kimlikler doğrulandı;
+- fixture cleanup iki kez çalıştırıldı ve artık kayıt bırakmadı.
+
+3.8.3–3.8.4 hedefli paket sonucu: **3/3 Playwright testi geçti**.
 
 ## Manuel UAT kontrol listesi
 

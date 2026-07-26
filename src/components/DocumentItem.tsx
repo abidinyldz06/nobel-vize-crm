@@ -153,7 +153,7 @@ export default function DocumentItem({ doc }: { doc: Tables<'documents'> }) {
   };
 
   return (
-    <div className={`flex items-center justify-between p-3 mb-2 rounded-xl transition-colors cursor-pointer group ${
+    <div data-testid={`document-${doc.id}`} className={`flex items-center justify-between p-3 mb-2 rounded-xl transition-colors cursor-pointer group ${
       isCompleted ? 'bg-slate-50 dark:bg-[#0a101a] border border-slate-200 dark:border-[#1f2937]' : 'bg-white dark:bg-[#0d1420] hover:bg-slate-100 dark:bg-[#1a2232] border border-slate-200 dark:border-[#1f2937]'
     }`} onClick={toggleStatus}>
       

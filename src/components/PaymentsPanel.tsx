@@ -96,7 +96,7 @@ export default function PaymentsPanel({
   };
 
   return (
-    <div className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg">
+    <div data-testid="payments-panel" className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-2xl overflow-hidden shadow-lg">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-200 dark:border-[#1f2937] bg-slate-50 dark:bg-[#0a101a] flex justify-between items-center">
         <div>
@@ -158,6 +158,7 @@ export default function PaymentsPanel({
             <div className="space-y-1">
               <label className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Tutar *</label>
               <input
+                aria-label="Ödeme tutarı"
                 type="number"
                 min="1"
                 value={form.amount}
@@ -169,6 +170,7 @@ export default function PaymentsPanel({
             <div className="space-y-1">
               <label className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Para Birimi</label>
               <select
+                aria-label="Ödeme para birimi"
                 value={form.currency}
                 onChange={e => setForm(f => ({ ...f, currency: e.target.value }))}
                 className="w-full px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 appearance-none"
@@ -181,6 +183,7 @@ export default function PaymentsPanel({
             <div className="space-y-1">
               <label className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Tür</label>
               <select
+                aria-label="Ödeme türü"
                 value={form.type}
                 onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
                 className="w-full px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 appearance-none"
@@ -195,6 +198,7 @@ export default function PaymentsPanel({
             <div className="space-y-1">
               <label className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Ödeme Yöntemi</label>
               <select
+                aria-label="Ödeme yöntemi"
                 value={form.method}
                 onChange={e => setForm(f => ({ ...f, method: e.target.value }))}
                 className="w-full px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 appearance-none"
@@ -208,6 +212,7 @@ export default function PaymentsPanel({
             <div className="space-y-1">
               <label className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Not (isteğe bağlı)</label>
               <input
+                aria-label="Ödeme notu"
                 type="text"
                 value={form.note}
                 onChange={e => setForm(f => ({ ...f, note: e.target.value }))}

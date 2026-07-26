@@ -12,6 +12,18 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   sıfır artık kayıt kontrolü sağlayan ortak Playwright test desteği.
 - İki danışmanın müşteri, başvuru, evrak, not, ödeme, görev ve bildirim
   izolasyonunu doğrulayan Faz 3.8 rol E2E paketi.
+- Müşteri oluşturma, otomatik başvuru/evrak/not üretimi, randevu, evrak onayı
+  ve ödeme kaydını tek kabul zincirinde doğrulayan kritik akış paketi.
+- Boş danışman ekranları, bozuk ve eksik API istekleri, eşzamanlı durum
+  değişimi, tekrar deneme idempotency'si ve iki kez cleanup kontrolleri.
+
+### Düzeltildi
+
+- Yeni müşteri formundaki danışman notunun RPC tarafından beklenen
+  `consultant_note` alanına da aktarılması sağlandı; notun başvuru timeline'ına
+  sessizce yazılmaması sorunu kapatıldı.
+- Evrak ve ödeme panellerine kararlı E2E seçicileri ile ödeme alanlarına
+  erişilebilir adlar eklendi.
 
 ### Güvenlik
 
@@ -21,6 +33,8 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   bağlantıları kaldırıldı.
 - Çapraz müşteri güncelleme, evrak indirme, yedek, toplu arşiv ve toplu
   danışman atama yetkileri regresyon kapsamına alındı.
+- Eşzamanlı aynı başvuru durum geçişinin yalnız bir kez uygulanıp tek audit
+  üretmesi regresyon kapsamına alındı.
 
 ### CI
 
