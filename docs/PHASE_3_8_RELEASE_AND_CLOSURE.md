@@ -105,6 +105,12 @@ Kanıt satırları `PRODUCTION_CHECK_OK` ile başlar. Pull request, GitHub Actio
 run'ı, Vercel deployment ve migration kimlikleri GitHub kapanış kaydında
 saklanır; secret ve kişisel veri rapora yazılmaz.
 
+Production katalog doğrulaması, eski kurulumdan kalan ve uygulama sorgularında
+kullanılmayan `appointments` tablosunda RLS'in kapalı olduğunu yakaladı.
+`202607260004_phase38_legacy_appointments_rls.sql` tabloyu silmeden RLS'i
+etkinleştirir ve anonim yetkileri kapatır. Böylece production drift'i veri kaybı
+oluşturmadan migration zincirine alınmıştır.
+
 ## 5. Bilinen sınırlamalar
 
 - Sistem tek şirketli iç CRM'dir. SaaS/tenant, paket, kota, faturalandırma,
