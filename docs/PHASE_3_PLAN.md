@@ -164,7 +164,8 @@ Durum: **Devam ediyor — 26 Temmuz 2026**
   iletişim, portal, KVKK ve arşiv kritik kullanıcı akışları
 - [x] **3.8.4 bitti:** hata, boş veri, eşzamanlı işlem, tekrar deneme ve
   iki kez çalıştırılarak doğrulanan fixture temizliği regresyonları
-- [ ] **3.8.5:** mobil/masaüstü, erişilebilirlik ve performans kabul kontrolleri
+- [x] **3.8.5 bitti:** 390px mobil ve 1440px masaüstü responsive kabulü,
+  WCAG 2 A/AA taraması, klavye/landmark akışı ve ölçülebilir performans bütçeleri
 - [ ] **3.8.6:** migration, RLS, audit, build ve dependency güvenlik kapıları
 - [ ] **3.8.7:** kullanıcı kabul oturumu, production adayı, yedek ve geri dönüş
   provası

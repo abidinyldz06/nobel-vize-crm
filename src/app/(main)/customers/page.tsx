@@ -57,7 +57,7 @@ export default async function CustomersPage() {
   }
 
   return (
-    <div className="p-6 min-h-screen bg-white dark:bg-[#060d1a]">
+    <div className="min-h-screen bg-white p-4 dark:bg-[#060d1a] md:p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-7">
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -65,7 +65,7 @@ export default async function CustomersPage() {
           </h1>
           <p className="text-slate-500 text-xs mt-0.5">Sistemdeki tüm müşteriler ve başvuru durumları.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
           {isAdmin && (
             <Link href="/customers/archive" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:border-[#1f2937] dark:bg-[#0d1420] dark:text-slate-300 dark:hover:bg-[#1a2232]">
               <Archive className="h-4 w-4 text-amber-500" /> Arşiv

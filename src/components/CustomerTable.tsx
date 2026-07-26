@@ -159,6 +159,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
           <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
             {/* Status Update */}
             <select 
+              aria-label="Seçili müşterilerin durumunu güncelle"
               className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 cursor-pointer min-w-[140px]"
               onChange={(e) => {
                 if (e.target.value) {
@@ -177,6 +178,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
             {/* Assign Staff (Admin Only) */}
             {isAdmin && staffList.length > 0 && (
               <select 
+                aria-label="Seçili müşterilere danışman ata"
                 className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 cursor-pointer min-w-[140px]"
                 onChange={(e) => {
                   if (e.target.value) {
@@ -194,6 +196,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
             )}
 
             <button 
+              type="button"
               onClick={handleWhatsAppReminder}
               disabled={isProcessing}
               className="flex items-center gap-1.5 px-3 py-2 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 border border-[#25D366]/20 rounded-lg text-xs font-bold transition-colors whitespace-nowrap"
@@ -203,6 +206,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
 
             {isAdmin && (
               <button 
+                type="button"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={isProcessing}
                 className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-xs font-bold transition-colors whitespace-nowrap"
@@ -212,7 +216,9 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
             )}
 
             <button 
+              type="button"
               onClick={() => setSelected([])}
+              aria-label="Toplu seçimi iptal et"
               className="p-2 text-slate-400 hover:text-white transition-colors ml-auto sm:ml-0"
               title="Seçimi İptal Et"
             >
@@ -255,19 +261,21 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
+            aria-label="Müşteri ara"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="İsim, telefon, e-posta veya ülke ile ara..."
             className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#060c18] border border-slate-200 dark:border-[#1f2937] rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-500 transition-all"
           />
         </div>
-        <div className="flex gap-2">
-          <div className="flex items-center px-4 py-2.5 bg-slate-50 dark:bg-[#060c18] border border-slate-200 dark:border-[#1f2937] rounded-xl">
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex min-w-0 items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 dark:border-[#1f2937] dark:bg-[#060c18]">
             <Filter className="w-4 h-4 text-slate-500 shrink-0 mr-2" />
             <select
+              aria-label="Başvuru durumuna göre filtrele"
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="bg-transparent focus:outline-none text-sm font-medium text-slate-700 dark:text-slate-300 min-w-[160px] appearance-none cursor-pointer"
+              className="min-w-0 flex-1 cursor-pointer appearance-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none dark:text-slate-300 sm:min-w-[160px]"
             >
               <option value="all">Tüm Durumlar</option>
               {Object.entries(STATUS_CONFIG).map(([k, v]) => (
@@ -275,12 +283,12 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
               ))}
             </select>
           </div>
-          <div className="flex items-center px-4 py-2.5 bg-slate-50 dark:bg-[#060c18] border border-slate-200 dark:border-[#1f2937] rounded-xl">
+          <div className="flex min-w-0 items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 dark:border-[#1f2937] dark:bg-[#060c18]">
             <select
               aria-label="Etikete göre filtrele"
               value={tagFilter}
               onChange={event => setTagFilter(event.target.value)}
-              className="bg-transparent focus:outline-none text-sm font-medium text-slate-700 dark:text-slate-300 min-w-[140px] appearance-none cursor-pointer"
+              className="min-w-0 flex-1 cursor-pointer appearance-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none dark:text-slate-300 sm:min-w-[140px]"
             >
               <option value="all">Tüm Etiketler</option>
               {availableTags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
@@ -294,6 +302,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
           <div className="flex items-center gap-3">
             <input 
               type="checkbox" 
+              aria-label="Görünen tüm müşterileri seç"
               checked={selected.length === filtered.length && filtered.length > 0}
               onChange={toggleSelectAll}
               className="md:hidden w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
@@ -311,6 +320,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                 <th className="px-6 py-4 w-10">
                   <input 
                     type="checkbox" 
+                    aria-label="Görünen tüm müşterileri seç"
                     checked={selected.length === filtered.length && filtered.length > 0}
                     onChange={toggleSelectAll}
                     className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
@@ -335,6 +345,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                     <td className="px-6 py-4">
                       <input 
                         type="checkbox" 
+                        aria-label={`${customer.first_name} ${customer.last_name} müşterisini seç`}
                         checked={isSelected}
                         onChange={() => toggleSelect(customer.id)}
                         className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
@@ -427,6 +438,7 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
                   <div className="mt-1">
                     <input 
                       type="checkbox" 
+                      aria-label={`${customer.first_name} ${customer.last_name} müşterisini seç`}
                       checked={isSelected}
                       onChange={() => toggleSelect(customer.id)}
                       className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"

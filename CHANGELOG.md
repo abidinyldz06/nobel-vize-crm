@@ -16,6 +16,8 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   ve ödeme kaydını tek kabul zincirinde doğrulayan kritik akış paketi.
 - Boş danışman ekranları, bozuk ve eksik API istekleri, eşzamanlı durum
   değişimi, tekrar deneme idempotency'si ve iki kez cleanup kontrolleri.
+- 390px mobil ve 1440px masaüstü taşma kabulü, WCAG 2 A/AA axe taraması,
+  klavye/landmark senaryoları ve dashboard performans bütçeleri.
 
 ### Düzeltildi
 
@@ -24,6 +26,12 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   sessizce yazılmaması sorunu kapatıldı.
 - Evrak ve ödeme panellerine kararlı E2E seçicileri ile ödeme alanlarına
   erişilebilir adlar eklendi.
+- Ana içeriğe geç bağlantısı, etiketli landmark/navigation, mobil menü
+  açma-kapatma adları, Escape/focus dönüşü ve görünür odak stilleri eklendi.
+- Koyu temadaki ikincil metin kontrastı WCAG AA seviyesine çıkarıldı; hareket
+  azaltma tercihi ve dar ekran müşteri filtre yerleşimi iyileştirildi.
+- Tema ve mobil menü kontrolleri hydration tamamlanana kadar kararlı erişilebilir
+  ad ve etkileşim durumu kullanacak şekilde düzenlendi.
 
 ### Güvenlik
 
