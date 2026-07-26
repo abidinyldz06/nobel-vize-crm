@@ -22,6 +22,12 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
 - Çapraz müşteri güncelleme, evrak indirme, yedek, toplu arşiv ve toplu
   danışman atama yetkileri regresyon kapsamına alındı.
 
+### CI
+
+- Ağ erişimi olmayan GitHub runner kapanışında PostHog timeout'u ile başarılı
+  DB lint sonucunu kırmaması için Supabase CLI telemetrisi kalite işlerinde
+  açıkça kapatıldı.
+
 ## [Unreleased] — Faz 3.7 İzleme ve İş Sürekliliği
 
 ### İzleme ve olay yönetimi
