@@ -1558,6 +1558,10 @@ export type Database = {
         Args: { p_payload: Json }
         Returns: Json
       }
+      create_customer_application_v1_core: {
+        Args: { p_payload: Json }
+        Returns: Json
+      }
       create_data_subject_request_v1: {
         Args: { p_payload: Json }
         Returns: string

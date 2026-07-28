@@ -2,7 +2,7 @@
 
 Tarih: 26 Temmuz 2026
 
-Durum: Faz 4.1 tamamlandı; Faz 4.2 bekliyor.
+Durum: Faz 4.1 tamamlandı; Faz 4.1.1 stabilizasyon release adayı; Faz 4.2 bekliyor.
 
 Ön koşul: Faz 3.8 production kapanışı tamamlandı (`3a4d66c`).
 
@@ -96,6 +96,35 @@ Kabul kriterleri:
       gösterir.
 - [x] Lint, typecheck, birim, güvenlik, pgTAP, Playwright ve build kapıları
       başarılıdır.
+
+### 4.1.1 — Stabilizasyon ve veri bütünlüğü
+
+Kapsam:
+
+- boş profil alanlarında evrak kuralı seçimi ve frontend/DB eşleştirme uyumu;
+- açık tema, ana etiket kataloğu ve görev ilk yükleme görünürlüğü;
+- eksik başvuru bilgisi filtresi ve yeni kayıtlarda zorunlu profil alanları;
+- normalize telefon, e-posta ve pasaportla atomik mükerrer müşteri koruması;
+- doğrulanmış ALPER ORS kaydının hard delete olmadan birleştirilmesi;
+- şirket iletişim verisi boşken görünür ayar uyarısı;
+- birim, pgTAP, Playwright ve release regresyonları.
+
+Kapsam dışı:
+
+- geçmiş başvurulara tahmini profil verisi yazılması;
+- gerçek şirket telefonu veya e-postasının ürün sahibi yerine uydurulması;
+- doğrulanmış kaynağı olmayan ülke/evrak kurallarının otomatik üretilmesi;
+- kullanıcı etkileşiminden bağımsız görev cron'u (Faz 4.2).
+
+Kabul kriterleri:
+
+- [x] Kod, migration, test ve rapor paketi hazırdır.
+- [x] Production öncesi şifreli DB/Auth/Storage yedeği doğrulanmıştır.
+- [x] Yerel tam `release:verify` kapısı başarılıdır.
+- [ ] GitHub PR ve CI kapıları başarılıdır.
+- [ ] Migration production'a uygulanmış ve canlı akış doğrulanmıştır.
+
+Rapor: `docs/PHASE_4_1_1_IMPLEMENTATION_REPORT.md`
 
 ### 4.2 — Zamanlanmış operasyon sistemi
 
@@ -252,7 +281,7 @@ Kabul kriterleri:
 
 Önerilen uygulama sırası:
 
-`4.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6 → 4.7 → 4.8 → 4.9`
+`4.1 → 4.1.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6 → 4.7 → 4.8 → 4.9`
 
 - 4.6 ve 4.7, zamanlanmış işler için 4.2 altyapısını yeniden kullanır.
 - 4.5 sağlayıcı kararı olmadan başlamaz.
@@ -271,6 +300,7 @@ GitHub kayıtları:
 
 - [Milestone #1](https://github.com/abidinyldz06/nobel-vize-crm/milestone/1)
 - [Faz 4.1 — Issue #31](https://github.com/abidinyldz06/nobel-vize-crm/issues/31)
+- [Faz 4.1.1 — Issue #43](https://github.com/abidinyldz06/nobel-vize-crm/issues/43)
 - [Faz 4.2 — Issue #32](https://github.com/abidinyldz06/nobel-vize-crm/issues/32)
 - [Faz 4.3 — Issue #33](https://github.com/abidinyldz06/nobel-vize-crm/issues/33)
 - [Faz 4.4 — Issue #34](https://github.com/abidinyldz06/nobel-vize-crm/issues/34)

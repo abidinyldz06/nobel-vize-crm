@@ -64,22 +64,22 @@ export default function LoginForm() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-800 flex items-center justify-center shadow-xl shadow-blue-900/60">
-              <Globe className="text-slate-900 dark:text-white w-6 h-6" />
+              <Globe className="text-white w-6 h-6" />
             </div>
             <div className="text-left">
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Nobel Vize CRM</h1>
+              <h1 className="text-xl font-bold text-white tracking-tight">Nobel Vize CRM</h1>
               <p className="text-[11px] text-blue-400 font-medium uppercase tracking-widest">Visa Management System</p>
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Hoş Geldiniz</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Vize başvurularınızı yönetin</p>
+          <h2 className="text-2xl font-bold text-white mb-1">Hoş Geldiniz</h2>
+          <p className="text-sm text-slate-400">Vize başvurularınızı yönetin</p>
         </div>
 
         {/* Card */}
         {isResetMode ? (
-          <form onSubmit={handleResetPassword} className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1e2d45] rounded-2xl p-7 shadow-2xl shadow-black/60">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Şifre Sıfırlama</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Sisteme kayıtlı e-posta adresinizi girin, size bir sıfırlama bağlantısı göndereceğiz.</p>
+          <form onSubmit={handleResetPassword} className="bg-[#0d1420] border border-[#1e2d45] rounded-2xl p-7 shadow-2xl shadow-black/60">
+            <h3 className="text-xl font-bold text-white mb-2">Şifre Sıfırlama</h3>
+            <p className="text-sm text-slate-400 mb-6">Sisteme kayıtlı e-posta adresinizi girin, size bir sıfırlama bağlantısı göndereceğiz.</p>
             
             {resetMessage && (
               <div className={`mb-4 p-3 rounded-xl border flex items-center gap-2 text-sm ${resetMessage.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-500 dark:text-red-400'}`}>
@@ -90,7 +90,7 @@ export default function LoginForm() {
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label htmlFor="reset-email" className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
+                <label htmlFor="reset-email" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input
@@ -101,7 +101,7 @@ export default function LoginForm() {
                     onChange={(e) => setResetEmail(e.target.value)}
                     disabled={loading}
                     placeholder="ornek@nobelvize.com"
-                    className="w-full pl-10 pr-4 py-3 bg-[#060c18] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
+                    className="w-full pl-10 pr-4 py-3 bg-[#060c18] border border-[#1f2937] rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -110,14 +110,14 @@ export default function LoginForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center items-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/40 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center items-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/40 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Bağlantı Gönder'}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setIsResetMode(false); setResetMessage(null); }}
-                  className="w-full py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="w-full py-2.5 text-sm font-medium text-slate-400 hover:text-white transition-colors"
                 >
                   Giriş Ekranına Dön
                 </button>
@@ -125,7 +125,7 @@ export default function LoginForm() {
             </div>
           </form>
         ) : (
-          <form action={handleSubmit} className="bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1e2d45] rounded-2xl p-7 shadow-2xl shadow-black/60">
+          <form action={handleSubmit} className="bg-[#0d1420] border border-[#1e2d45] rounded-2xl p-7 shadow-2xl shadow-black/60">
           
           {/* Error */}
           {error && (
@@ -137,7 +137,7 @@ export default function LoginForm() {
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor="login-email" className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
+              <label htmlFor="login-email" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
@@ -147,15 +147,15 @@ export default function LoginForm() {
                   required
                   placeholder="ornek@nobelvize.com"
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-3 bg-[#060c18] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
+                  className="w-full pl-10 pr-4 py-3 bg-[#060c18] border border-[#1f2937] rounded-xl text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label htmlFor="login-password" className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Şifre</label>
-                <button type="button" onClick={() => setIsResetMode(true)} className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Şifremi Unuttum</button>
+                <label htmlFor="login-password" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Şifre</label>
+                <button type="button" onClick={() => setIsResetMode(true)} className="text-xs text-[#93c5fd] hover:text-[#bfdbfe] transition-colors">Şifremi Unuttum</button>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -166,21 +166,21 @@ export default function LoginForm() {
                   required
                   placeholder="••••••••"
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-3 bg-[#060c18] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
+                  className="w-full pl-10 pr-4 py-3 bg-[#060c18] border border-[#1f2937] rounded-xl text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
                 />
               </div>
             </div>
 
             <div className="flex items-center gap-2 pt-1">
               <input type="checkbox" id="remember" className="w-4 h-4 rounded accent-blue-600" />
-              <label htmlFor="remember" className="text-sm text-slate-500 dark:text-slate-400">Beni Hatırla</label>
+              <label htmlFor="remember" className="text-sm text-slate-400">Beni Hatırla</label>
             </div>
 
             <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/40 hover:shadow-blue-900/60 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/40 hover:shadow-blue-900/60 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>

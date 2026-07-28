@@ -25,6 +25,7 @@ export interface CustomerApplicationPayload {
   consultant_note?: string | null;
   activity_action?: string | null;
   reject_duplicate_application?: boolean;
+  allow_duplicate_customer?: boolean;
 }
 
 export interface CustomerApplicationResult {

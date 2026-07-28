@@ -2,6 +2,31 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 4.1.1 Stabilizasyon ve Veri Bütünlüğü
+
+### Düzeltildi
+
+- Boş başvuru profil alanlarının evrak kuralını yanlışlıkla elemesi kaldırıldı;
+  arayüz ve veritabanı aynı kararlı fallback sıralamasına geçirildi.
+- Varsayılan tema açık moda çevrildi.
+- Etiket filtresi ana etiket kataloğundan beslenerek hazır etiketlerin boş
+  listede de görünmesi sağlandı.
+- Görev ekranına sunucu ilk verisi, görünür yenileme hatası ve tekrar deneme
+  davranışı eklendi.
+- Yeni ve düzenlenen başvurularda profil alanları zorunlu hale getirildi;
+  eksik geçmiş kayıtlar için müşteri filtresi eklendi.
+- Boş şirket iletişim bilgilerinin örnek placeholder ile karıştırılmasını
+  engelleyen ayar uyarısı eklendi.
+
+### Veri bütünlüğü
+
+- Normalize telefon, e-posta ve pasaport üzerinden transaction seviyesinde
+  mükerrer müşteri koruması ile açık kullanıcı istisnası eklendi.
+- Başvuru profil değerleri müşteri/başvuru oluşturma transaction'ına alındı.
+- Doğrulanmış ALPER ORS mükerrer kaydı hard delete uygulanmadan, ilişkileri
+  korunarak kanonik müşteriye birleştirilecek migration eklendi.
+- Birim, pgTAP, Playwright ve release-gate regresyon kapsamı genişletildi.
+
 ## [Unreleased] — Faz 4.1 Müşteri Puanlamasının Kaldırılması
 
 ### Değiştirildi

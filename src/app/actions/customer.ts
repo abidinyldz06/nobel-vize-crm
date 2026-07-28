@@ -22,6 +22,7 @@ export async function createCustomerWithApplication(formData: FormData) {
   const occupation = formData.get('occupation') as string
   const withChildren = formData.get('withChildren') as string
   const nationality = formData.get('nationality') as string
+  const allowDuplicateCustomer = formData.get('allowDuplicateCustomer') === 'true'
   
   // Passport Data
   const passportNo = formData.get('passportNo') as string
@@ -53,39 +54,16 @@ export async function createCustomerWithApplication(formData: FormData) {
       assigned_staff_id: finalAssignedStaffId || null,
       consulate_fee: consulateFeeStr || null,
       service_fee: serviceFeeStr || null,
+      allow_duplicate_customer: allowDuplicateCustomer,
     })
     customerId = result.customer_id
-    if (result.application_id) {
-      const { error: profileError } = await supabase.rpc('update_customer_application_v1', {
-        p_customer_id: result.customer_id,
-        p_application_id: result.application_id,
-        p_payload: {
-          first_name: firstName,
-          last_name: lastName,
-          phone,
-          email: email || null,
-          financial_status: 'orta',
-          passport_no: passportNo || null,
-          passport_expiry: passportExpiry || null,
-          passport_issuing_country: passportIssuingCountry,
-          notes: consultantNote || null,
-          assigned_staff_id: finalAssignedStaffId || null,
-          country_id: countryId,
-          visa_type: visaType,
-          status: 'profil_analizi',
-          travel_method: travelMethod || null,
-          accommodation: accommodation || null,
-          occupation: occupation || null,
-          with_children: withChildren || null,
-          nationality: nationality || null,
-        },
-      })
-      if (profileError) throw profileError
-    }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Müşteri oluşturulamadı'
     console.error("Atomic customer workflow error:", message)
-    redirect('/customers/new?error=' + encodeURIComponent(message))
+    const publicError = message.includes('possible_duplicate_customer')
+      ? 'possible_duplicate_customer'
+      : 'customer_create_failed'
+    redirect('/customers/new?error=' + publicError)
   }
 
   revalidatePath('/customers')

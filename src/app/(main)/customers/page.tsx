@@ -20,7 +20,7 @@ export default async function CustomersPage() {
     .from('customers')
     .select(`
       id, first_name, last_name, phone, email, created_at, assigned_staff_id,
-      applications (id, country, status, created_at),
+      applications (id, country, status, created_at, travel_method, accommodation, occupation, with_children, nationality),
       customer_tags (tag:tags (id, name, color))
     `)
     .eq('is_deleted', false)
@@ -30,7 +30,10 @@ export default async function CustomersPage() {
     query.eq('assigned_staff_id', staffId);
   }
 
-  const { data: customers, error } = await query;
+  const [{ data: customers, error }, { data: allTags }] = await Promise.all([
+    query,
+    supabase.from('tags').select('id, name, color').order('name'),
+  ]);
 
   if (error) console.error("Supabase Error:", error);
 
@@ -45,6 +48,15 @@ export default async function CustomersPage() {
       latest_application_id: latest?.id ?? null,
       country: latest?.country ?? null,
       status: latest?.status ?? null,
+      profile_complete: latest
+        ? [
+            latest.travel_method,
+            latest.accommodation,
+            latest.occupation,
+            latest.with_children,
+            latest.nationality,
+          ].every(value => value !== null)
+        : false,
       tags: customer.customer_tags.map(item => item.tag).filter(Boolean),
     };
   });
@@ -79,7 +91,12 @@ export default async function CustomersPage() {
         </div>
       </div>
 
-      <CustomerTable customers={flat} isAdmin={isAdmin} staffList={staffList} />
+      <CustomerTable
+        customers={flat}
+        isAdmin={isAdmin}
+        staffList={staffList}
+        allTags={allTags ?? []}
+      />
     </div>
   );
 }
