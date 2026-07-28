@@ -72,7 +72,7 @@ export default function DaySidebar({
               <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Randevular ({dayApps.length})</h4>
               
               {dayApps.map(app => {
-                const isAppCancelled = app.status === 'reddedildi' || app.status === 'iptal';
+                const isAppCancelled = app.appointment_status === "cancelled" || app.status === "reddedildi";
                 const appDate = new Date(app.appointment_date);
                 
                 return (

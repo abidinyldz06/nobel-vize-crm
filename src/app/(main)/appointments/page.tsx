@@ -19,6 +19,9 @@ export default async function AppointmentsPage() {
       status,
       appointment_date, 
       appointment_location,
+      appointment_status,
+      appointment_duration_minutes,
+      appointment_timezone,
       customers!inner (id, first_name, last_name, phone)
     `)
     .eq('customers.is_deleted', false)

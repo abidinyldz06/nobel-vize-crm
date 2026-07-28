@@ -96,7 +96,10 @@ export type Database = {
         Row: {
           accommodation: string | null
           appointment_date: string | null
+          appointment_duration_minutes: number
           appointment_location: string | null
+          appointment_status: string | null
+          appointment_timezone: string
           assigned_staff_id: string | null
           consulate_fee: number
           country: string
@@ -118,7 +121,10 @@ export type Database = {
         Insert: {
           accommodation?: string | null
           appointment_date?: string | null
+          appointment_duration_minutes?: number
           appointment_location?: string | null
+          appointment_status?: string | null
+          appointment_timezone?: string
           assigned_staff_id?: string | null
           consulate_fee?: number
           country: string
@@ -140,7 +146,10 @@ export type Database = {
         Update: {
           accommodation?: string | null
           appointment_date?: string | null
+          appointment_duration_minutes?: number
           appointment_location?: string | null
+          appointment_status?: string | null
+          appointment_timezone?: string
           assigned_staff_id?: string | null
           consulate_fee?: number
           country?: string
@@ -176,6 +185,70 @@ export type Database = {
           },
           {
             foreignKeyName: "applications_customer_fk"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointment_events: {
+        Row: {
+          actor_staff_id: string | null
+          application_id: string
+          appointment_date: string | null
+          created_at: string
+          customer_id: string
+          duration_minutes: number | null
+          event_type: string
+          id: string
+          location: string | null
+          note: string | null
+          previous_date: string | null
+        }
+        Insert: {
+          actor_staff_id?: string | null
+          application_id: string
+          appointment_date?: string | null
+          created_at?: string
+          customer_id: string
+          duration_minutes?: number | null
+          event_type: string
+          id?: string
+          location?: string | null
+          note?: string | null
+          previous_date?: string | null
+        }
+        Update: {
+          actor_staff_id?: string | null
+          application_id?: string
+          appointment_date?: string | null
+          created_at?: string
+          customer_id?: string
+          duration_minutes?: number | null
+          event_type?: string
+          id?: string
+          location?: string | null
+          note?: string | null
+          previous_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_events_actor_staff_id_fkey"
+            columns: ["actor_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_events_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
@@ -936,6 +1009,167 @@ export type Database = {
           },
         ]
       }
+      lead_events: {
+        Row: {
+          actor_staff_id: string | null
+          created_at: string
+          event_type: string
+          from_status: string | null
+          id: string
+          lead_id: string
+          note: string | null
+          to_status: string | null
+        }
+        Insert: {
+          actor_staff_id?: string | null
+          created_at?: string
+          event_type: string
+          from_status?: string | null
+          id?: string
+          lead_id: string
+          note?: string | null
+          to_status?: string | null
+        }
+        Update: {
+          actor_staff_id?: string | null
+          created_at?: string
+          event_type?: string
+          from_status?: string | null
+          id?: string
+          lead_id?: string
+          note?: string | null
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_events_actor_staff_id_fkey"
+            columns: ["actor_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          assigned_staff_id: string
+          campaign: string | null
+          converted_application_id: string | null
+          converted_at: string | null
+          converted_customer_id: string | null
+          created_at: string
+          created_by_staff_id: string
+          email: string | null
+          email_normalized: string | null
+          first_name: string
+          follow_up_due_at: string | null
+          id: string
+          last_contacted_at: string | null
+          last_name: string
+          notes: string | null
+          passport_no: string | null
+          passport_normalized: string | null
+          phone: string | null
+          phone_normalized: string | null
+          referral: string | null
+          source: string
+          status: string
+          target_country: string | null
+          updated_at: string
+          visa_type: string
+        }
+        Insert: {
+          assigned_staff_id: string
+          campaign?: string | null
+          converted_application_id?: string | null
+          converted_at?: string | null
+          converted_customer_id?: string | null
+          created_at?: string
+          created_by_staff_id: string
+          email?: string | null
+          email_normalized?: string | null
+          first_name: string
+          follow_up_due_at?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          last_name: string
+          notes?: string | null
+          passport_no?: string | null
+          passport_normalized?: string | null
+          phone?: string | null
+          phone_normalized?: string | null
+          referral?: string | null
+          source?: string
+          status?: string
+          target_country?: string | null
+          updated_at?: string
+          visa_type?: string
+        }
+        Update: {
+          assigned_staff_id?: string
+          campaign?: string | null
+          converted_application_id?: string | null
+          converted_at?: string | null
+          converted_customer_id?: string | null
+          created_at?: string
+          created_by_staff_id?: string
+          email?: string | null
+          email_normalized?: string | null
+          first_name?: string
+          follow_up_due_at?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          last_name?: string
+          notes?: string | null
+          passport_no?: string | null
+          passport_normalized?: string | null
+          phone?: string | null
+          phone_normalized?: string | null
+          referral?: string | null
+          source?: string
+          status?: string
+          target_country?: string | null
+          updated_at?: string
+          visa_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assigned_staff_id_fkey"
+            columns: ["assigned_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_converted_application_id_fkey"
+            columns: ["converted_application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_converted_customer_id_fkey"
+            columns: ["converted_customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_created_by_staff_id_fkey"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_outbox: {
         Row: {
           accepted_at: string | null
@@ -1315,6 +1549,170 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      privacy_action_approvals: {
+        Row: {
+          action_id: string
+          created_at: string
+          id: string
+          reason: string
+          staff_id: string
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          id?: string
+          reason: string
+          staff_id: string
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          id?: string
+          reason?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_action_approvals_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "privacy_action_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "privacy_action_approvals_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      privacy_action_queue: {
+        Row: {
+          action_type: string
+          approved_at: string | null
+          completed_at: string | null
+          created_at: string
+          customer_id: string | null
+          failure_code: string | null
+          id: string
+          reason: string
+          request_id: string | null
+          requested_by_staff_id: string
+          required_approvals: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          approved_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          failure_code?: string | null
+          id?: string
+          reason: string
+          request_id?: string | null
+          requested_by_staff_id: string
+          required_approvals: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          approved_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          failure_code?: string | null
+          id?: string
+          reason?: string
+          request_id?: string | null
+          requested_by_staff_id?: string
+          required_approvals?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_action_queue_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "privacy_action_queue_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "data_subject_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "privacy_action_queue_requested_by_staff_id_fkey"
+            columns: ["requested_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      privacy_audit_log: {
+        Row: {
+          action_id: string | null
+          actor_staff_id: string | null
+          created_at: string
+          customer_id: string | null
+          event_type: string
+          id: string
+          metadata: Json
+          reason: string | null
+        }
+        Insert: {
+          action_id?: string | null
+          actor_staff_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+        }
+        Update: {
+          action_id?: string | null
+          actor_staff_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_audit_log_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "privacy_action_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "privacy_audit_log_actor_staff_id_fkey"
+            columns: ["actor_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "privacy_audit_log_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
         ]
@@ -1791,6 +2189,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      approve_privacy_action_v1: {
+        Args: { p_action_id: string; p_reason: string }
+        Returns: boolean
+      }
       archive_customers_v1: {
         Args: { p_customer_ids: string[] }
         Returns: number
@@ -1827,6 +2229,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      convert_lead_v1: {
+        Args: { p_lead_id: string; p_payload: Json }
+        Returns: Json
+      }
       create_customer_application_v1: {
         Args: { p_payload: Json }
         Returns: Json
@@ -1839,14 +2245,41 @@ export type Database = {
         Args: { p_payload: Json }
         Returns: string
       }
+      create_lead_v1: { Args: { p_payload: Json }; Returns: string }
       create_task_v1: { Args: { p_payload: Json }; Returns: string }
       current_staff_id: { Args: never; Returns: string }
       enqueue_message_v1: { Args: { p_payload: Json }; Returns: string }
+      execute_privacy_action_v1: {
+        Args: { p_action_id: string }
+        Returns: Json
+      }
       fail_backup_run_v1: {
         Args: { p_error_code: string; p_run_id: string }
         Returns: boolean
       }
+      find_lead_duplicates_v1: {
+        Args: { p_lead_id: string }
+        Returns: {
+          display_name: string
+          entity_id: string
+          entity_type: string
+          match_reason: string
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
+      list_appointment_conflicts_v1: {
+        Args: {
+          p_application_id: string
+          p_appointment_date: string
+          p_duration_minutes?: number
+        }
+        Returns: {
+          application_id: string
+          appointment_date: string
+          appointment_location: string
+          customer_name: string
+        }[]
+      }
       list_archived_customer_privacy_v1: {
         Args: never
         Returns: {
@@ -1873,6 +2306,20 @@ export type Database = {
         }[]
       }
       list_current_user_sessions_v1: { Args: never; Returns: Json }
+      list_privacy_lifecycle_candidates_v1: {
+        Args: never
+        Returns: {
+          blocked_reasons: string[]
+          customer_id: string
+          customer_name: string
+          deleted_at: string
+          grace_eligible: boolean
+          hold_active: boolean
+          proposed_action: string
+          request_id: string
+          storage_file_count: number
+        }[]
+      }
       mark_all_notifications_read_v1: { Args: never; Returns: number }
       mark_customer_documents_deleted_v1: {
         Args: { p_customer_id: string; p_document_ids: string[] }
@@ -1885,6 +2332,15 @@ export type Database = {
       purge_deleted_customers_v1: {
         Args: { p_customer_ids: string[] }
         Returns: number
+      }
+      queue_privacy_action_v1: {
+        Args: {
+          p_action_type: string
+          p_customer_id: string
+          p_reason: string
+          p_request_id: string
+        }
+        Returns: string
       }
       record_communication_v1: { Args: { p_payload: Json }; Returns: string }
       record_customer_consent_v1: { Args: { p_payload: Json }; Returns: string }
@@ -1920,12 +2376,20 @@ export type Database = {
         Args: { p_event_type: string; p_outcome?: string }
         Returns: string
       }
+      reject_privacy_action_v1: {
+        Args: { p_action_id: string; p_reason: string }
+        Returns: boolean
+      }
       resolve_operational_event_v1: {
         Args: { p_event_id: string }
         Returns: boolean
       }
       restore_backup_v2: { Args: { p_backup: Json }; Returns: Json }
       restore_backup_v2_core_phase411: {
+        Args: { p_backup: Json }
+        Returns: Json
+      }
+      restore_backup_v2_core_phase45: {
         Args: { p_backup: Json }
         Returns: Json
       }
@@ -1949,6 +2413,10 @@ export type Database = {
           p_system?: string
         }
         Returns: Json
+      }
+      set_appointment_status_v1: {
+        Args: { p_application_id: string; p_note?: string; p_status: string }
+        Returns: boolean
       }
       set_communication_delivery_v1: {
         Args: {
@@ -1995,6 +2463,7 @@ export type Database = {
         Returns: string
       }
       storage_document_id: { Args: { object_name: string }; Returns: string }
+      sync_lead_followup_tasks_v1: { Args: never; Returns: number }
       sync_operational_tasks_v1: { Args: never; Returns: number }
       update_application_status_v1: {
         Args: {
@@ -2012,6 +2481,10 @@ export type Database = {
           p_payload: Json
         }
         Returns: Json
+      }
+      update_lead_v1: {
+        Args: { p_lead_id: string; p_payload: Json }
+        Returns: boolean
       }
       update_privacy_settings_v1: {
         Args: { p_payload: Json }

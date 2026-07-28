@@ -280,7 +280,7 @@ export default async function Dashboard() {
                   href={`/customers/${app.customers?.id || ''}`}
                   className="flex items-center gap-4 px-6 py-3.5 hover:bg-white/[0.02] transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-blue-900/40 flex items-center justify-center text-blue-300 font-bold text-xs uppercase shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xs uppercase shrink-0">
                     {app.customers?.first_name?.[0]}{app.customers?.last_name?.[0]}
                   </div>
                   <div className="flex-1 min-w-0">

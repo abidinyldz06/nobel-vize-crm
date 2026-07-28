@@ -18,6 +18,8 @@ import {
   summarizeDocuments,
 } from "@/lib/report-metrics";
 import type { Tables } from "@/types/database";
+import AdvancedReportsPanel from "@/components/AdvancedReportsPanel";
+import { loadAdvancedReport } from "@/lib/advanced-report-data";
 
 export const revalidate = 0;
 
@@ -39,6 +41,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const today = new Date();
   const period = normalizeReportPeriod(params.month, params.year, today);
   const selectedMonthRange = monthRangeUtc(period.year, period.month);
+  const advancedReportPromise = loadAdvancedReport(params.month, params.year, today);
   const { start: startDate, end: endDate } = selectedMonthRange;
 
   // Get current user and staff record
@@ -349,6 +352,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   }
 
   const COLORS = ["bg-blue-500", "bg-purple-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"];
+  const advancedReport = await advancedReportPromise;
 
   return (
     <div className="p-6 min-h-screen bg-white dark:bg-[#060d1a]">
@@ -573,6 +577,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       {isAdmin && (
         <RejectionAnalysis data={rejectedAppsData} />
       )}
+      <AdvancedReportsPanel report={advancedReport} />
     </div>
   );
 }

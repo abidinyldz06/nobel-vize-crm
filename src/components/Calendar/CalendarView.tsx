@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from "lucid
 import MonthGrid from "./MonthGrid";
 import DaySidebar from "./DaySidebar";
 import type { CalendarAppointment } from "@/types/calendar";
+import AppointmentActions from "@/components/AppointmentActions";
 
 type ViewMode = "month" | "list";
 
@@ -85,15 +86,16 @@ export default function CalendarView({ appointments }: { appointments: CalendarA
               
               <div className="space-y-2">
                 {appointments.slice(0, 50).map(app => (
-                  <div key={app.id} className="p-3 bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl flex justify-between items-center">
+                  <div key={app.id} className="p-3 bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl flex flex-col gap-3 lg:flex-row lg:justify-between lg:items-center">
                     <div>
                       <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{app.customers?.first_name} {app.customers?.last_name}</p>
                       <p className="text-xs text-slate-500">{app.country} - {app.appointment_location || 'Belirtilmedi'}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{format(new Date(app.appointment_date), 'dd MMM yyyy', { locale: tr })}</p>
-                      <p className="text-xs text-slate-500">{format(new Date(app.appointment_date), 'HH:mm')}</p>
+                      <p className="text-xs text-slate-500">{format(new Date(app.appointment_date), 'HH:mm')} · {app.appointment_status ?? "scheduled"}</p>
                     </div>
+                    <AppointmentActions id={app.id} status={app.appointment_status} />
                   </div>
                 ))}
               </div>

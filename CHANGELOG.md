@@ -2,6 +2,38 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 4.6–4.9 KVKK, Lead, Takvim ve Bakım
+
+### KVKK ve lead operasyonları
+
+- Veri değiştirmeyen dry-run aday listesi, saklama kilidi, yönetici onay
+  kuyruğu, kalıcı silmede iki ayrı onay ve son onaydan sonra doğrulanmış yedek
+  kapısı eklendi.
+- Storage temizliği tamamlanmadan sonuçlandırmayı engelleyen kontrollü
+  anonimleştirme/silme yürütücüsü ve değiştirilemez privacy audit izi eklendi.
+- Kaynak, kampanya, yönlendirme, SLA ve sorumlu takibi bulunan lead yaşam
+  döngüsü; normalize mükerrer tespiti ve kontrollü müşteriye dönüşüm eklendi.
+- Geciken lead takipleri mevcut zamanlanmış görev altyapısına idempotent
+  biçimde bağlandı.
+
+### Takvim ve gerçek raporlar
+
+- Randevu çakışma kontrolü, iptal/gelmedi/tamamlandı durumları, değiştirilemez
+  randevu geçmişi ve Europe/Istanbul saat dilimli ICS çıktısı eklendi.
+- Ülke/vize sonucu, bekleyen tahsilat yaşlandırma, lead SLA ve danışman iş
+  yükü raporları eklendi.
+- Ekranla aynı yetki ve dönem filtresini kullanan CSV ve PDF çıktıları eklendi.
+
+### Bakım ve kalite
+
+- Next.js, React, Supabase, Playwright ve diğer uyumlu patch/minor
+  bağımlılıklar güncellendi; `pdf-lib` ile sunucu tarafı PDF üretimi eklendi.
+- Haftalık Dependabot patch/minor grubu ve zamanlanmış production dependency
+  audit workflow'u eklendi; ana sürüm yükseltmeleri otomatik kapsam dışında
+  bırakıldı.
+- Toplu doğrulama 65 Node testi, 324 pgTAP, restore drill, 26 Playwright testi,
+  temiz şema lint'i, production audit ve Next.js build ile geçti.
+
 ## [Unreleased] — Faz 4.2–4.5 Otomasyon ve Güvenlik
 
 ### Operasyon ve iş sürekliliği

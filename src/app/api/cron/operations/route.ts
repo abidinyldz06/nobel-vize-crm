@@ -30,10 +30,17 @@ export async function GET(request: Request) {
         code: result.error_code ?? "scheduled_operations_failed",
       });
     }
+    let leadInsertedCount = 0;
+    if (result?.status !== "skipped") {
+      const { data: leadResult, error: leadError } = await createSupabaseAdminClient()
+        .rpc("sync_lead_followup_tasks_v1");
+      if (leadError) throw leadError;
+      leadInsertedCount = leadResult ?? 0;
+    }
     return NextResponse.json({
       ok: true,
       status: result?.status ?? "succeeded",
-      inserted_count: result?.inserted_count ?? 0,
+      inserted_count: (result?.inserted_count ?? 0) + leadInsertedCount,
     });
   } catch (error) {
     const errorCode = errorCodeFrom(error);
