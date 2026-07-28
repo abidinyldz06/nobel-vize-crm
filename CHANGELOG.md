@@ -30,6 +30,13 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
   eklendi.
 - Cron, yedek ve mesaj secret'ları `.env.example` içinde yalnız sunucu
   değişkenleri olarak belgelendi.
+- Faz 4.2 operasyon cron'u production'da yetki ve idempotency kontrolleriyle
+  doğrulandı.
+- Faz 4.3 ilk zamanlanmış production yedeği 269 veritabanı satırı ve 1 private
+  Storage nesnesiyle oluşturulup `verified` olarak doğrulandı.
+- Service-role yedek doğrulamasının sistem olayını personel kimliği olmadan
+  kapatabilmesi ve başarısız günlük pencerenin kontrollü yeniden denenmesi
+  production hotfix migration'ıyla düzeltildi.
 
 ## [Unreleased] — Faz 4.1.1 Stabilizasyon ve Veri Bütünlüğü
 
