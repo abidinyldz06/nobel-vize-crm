@@ -56,6 +56,7 @@ export default function SettingsClient({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [consultantMfaRequired, setConsultantMfaRequired] = useState(company.consultant_mfa_required);
 
   const saveCompanyData = async (payload: TablesUpdate<'tenants'>) => {
     const { error } = await supabase.from('tenants').update(payload).eq('id', company.id);
@@ -75,8 +76,14 @@ export default function SettingsClient({
   };
 
   const handleSaveSecurity = async () => {
+    await saveCompanyData({
+      admin_mfa_required: true,
+      consultant_mfa_required: consultantMfaRequired,
+    });
+
+    if (!currentPassword && !newPassword && !confirmPassword) return;
     if (!currentPassword) throw new Error("Mevcut şifrenizi girmelisiniz.");
-    if (newPassword.length < 6) throw new Error("Yeni şifre en az 6 karakter olmalıdır.");
+    if (newPassword.length < 12) throw new Error("Yeni şifre en az 12 karakter olmalıdır.");
     if (newPassword !== confirmPassword) throw new Error("Yeni şifreler eşleşmiyor.");
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -104,6 +111,10 @@ export default function SettingsClient({
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
+    await supabase.rpc("record_own_security_event_v1", {
+      p_event_type: "password_changed",
+      p_outcome: "success",
+    });
   };
 
   const handleSave = async () => {
@@ -224,6 +235,23 @@ export default function SettingsClient({
               <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Güvenlik Ayarları</h2>
             </div>
             <div className="px-6 py-5 space-y-4">
+              <div className="space-y-3 rounded-xl border border-slate-200 p-4 dark:border-[#1f2937]">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Rol bazlı MFA politikası</p>
+                <label className="flex items-center justify-between text-sm text-slate-700 dark:text-slate-200">
+                  <span>Yöneticiler için zorunlu</span>
+                  <input type="checkbox" checked disabled className="h-4 w-4 accent-blue-600" />
+                </label>
+                <label className="flex items-center justify-between text-sm text-slate-700 dark:text-slate-200">
+                  <span>Danışmanlar için zorunlu</span>
+                  <input
+                    type="checkbox"
+                    checked={consultantMfaRequired}
+                    onChange={event => setConsultantMfaRequired(event.target.checked)}
+                    className="h-4 w-4 accent-blue-600"
+                  />
+                </label>
+                <p className="text-[10px] text-slate-500">Danışman politikası sonraki girişte uygulanır.</p>
+              </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mevcut Şifre</label>
                 <input 
@@ -255,7 +283,7 @@ export default function SettingsClient({
                 />
               </div>
               <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
-                Şifreniz en az 6 karakter olmalıdır. Şifrenizi güvenli tutmak için güçlü bir kombinasyon seçin.
+                Şifre değiştiriyorsanız en az 12 karakter kullanın. MFA ve cihaz yönetimi profil menüsündeki Hesap Güvenliği ekranındadır.
               </div>
             </div>
           </div>

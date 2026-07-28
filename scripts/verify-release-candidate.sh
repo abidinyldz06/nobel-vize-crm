@@ -6,6 +6,12 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+# macOS dosya senkronizasyonu bazen yeniden üretilebilir Next type cache
+# dosyalarını " 2.ts" ekiyle çoğaltır ve tsc aynı bildirimi iki kez okur.
+if [ -d .next/types ]; then
+  find .next/types -type f -name '* 2.ts' -delete
+fi
+
 npm run quality
 npm run db:start
 npm run db:reset

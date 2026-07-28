@@ -131,10 +131,10 @@ Faz 4'ün sıralı kapsamı:
 1. 4.0 — Plan, kabul kriterleri ve GitHub iş listesi — tamamlandı
 2. 4.1 — Yanıltıcı müşteri puanlamasının kaldırılması — tamamlandı
 3. 4.1.1 — Stabilizasyon ve veri bütünlüğü — release adayı
-4. 4.2 — Zamanlanmış operasyon sistemi
-5. 4.3 — Otomatik, şifreli ve repo dışı DB/Storage yedeği
-6. 4.4 — Hesap ve giriş güvenliğinin güçlendirilmesi
-7. 4.5 — Sağlayıcı destekli gerçek bildirim ve iletişim
+4. 4.2 — Zamanlanmış operasyon sistemi — release adayı
+5. 4.3 — Otomatik, şifreli ve repo dışı DB/Storage yedeği — release adayı
+6. 4.4 — Hesap ve giriş güvenliğinin güçlendirilmesi — release adayı
+7. 4.5 — İzin/outbox/webhook temeli hazır; gerçek sağlayıcı seçimi bekliyor
 8. 4.6 — Kontrollü KVKK yaşam döngüsü otomasyonu
 9. 4.7 — Lead ve müşteri operasyonlarının geliştirilmesi
 10. 4.8 — Takvim entegrasyonu ve gelişmiş gerçek raporlar

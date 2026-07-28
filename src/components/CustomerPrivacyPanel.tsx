@@ -9,6 +9,7 @@ import type { Tables } from "@/types/database";
 type Notice = Tables<"privacy_notice_versions">;
 type Delivery = Tables<"customer_privacy_notices">;
 type Consent = Tables<"customer_consents">;
+type CommunicationPreference = Tables<"communication_preferences">;
 type DataRequest = Tables<"data_subject_requests">;
 
 const consentLabels: Record<string, string> = {
@@ -19,7 +20,7 @@ const consentLabels: Record<string, string> = {
 const decisionLabels: Record<string, string> = { granted: "Rıza verdi", refused: "Reddetti", withdrawn: "Rızayı geri çekti" };
 const methodLabels: Record<string, string> = { yuz_yuze: "Yüz yüze", email: "E-posta", whatsapp: "WhatsApp", portal: "Portal", telefon: "Telefon", diger: "Diğer" };
 
-export default function CustomerPrivacyPanel({ customerId, notices, deliveries, consents, requests, isAdmin }: { customerId: string; notices: Notice[]; deliveries: Delivery[]; consents: Consent[]; requests: DataRequest[]; isAdmin: boolean }) {
+export default function CustomerPrivacyPanel({ customerId, notices, deliveries, consents, communicationPreferences, requests, isAdmin }: { customerId: string; notices: Notice[]; deliveries: Delivery[]; consents: Consent[]; communicationPreferences: CommunicationPreference[]; requests: DataRequest[]; isAdmin: boolean }) {
   const supabase = createSupabaseBrowserClient();
   const router = useRouter();
   const activeNotices = notices.filter(notice => notice.is_active && new Date(notice.effective_at) <= new Date());
@@ -32,6 +33,11 @@ export default function CustomerPrivacyPanel({ customerId, notices, deliveries, 
   const [evidence, setEvidence] = useState("");
   const [requestType, setRequestType] = useState("access");
   const [requestVia, setRequestVia] = useState("email");
+  const [preferences, setPreferences] = useState(communicationPreferences);
+  const [preferenceChannel, setPreferenceChannel] = useState("email");
+  const [preferencePurpose, setPreferencePurpose] = useState("transactional");
+  const [preferenceAllowed, setPreferenceAllowed] = useState(false);
+  const [preferenceEvidence, setPreferenceEvidence] = useState("");
   const [requestNotes, setRequestNotes] = useState("");
   const [saving, setSaving] = useState<"notice" | "consent" | "request" | "status" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -66,6 +72,36 @@ export default function CustomerPrivacyPanel({ customerId, notices, deliveries, 
     } finally {
       setSaving(null);
     }
+  };
+
+  const saveCommunicationPreference = async () => {
+    if (!preferenceEvidence.trim()) return;
+    setSaving("consent");
+    setError(null);
+    setMessage(null);
+    const { error } = await supabase.rpc("set_communication_preference_v1", {
+      p_payload: {
+        customer_id: customerId,
+        channel: preferenceChannel,
+        purpose: preferencePurpose,
+        allowed: preferenceAllowed,
+        evidence_note: preferenceEvidence.trim(),
+      },
+    });
+    if (!error) {
+      const { data } = await supabase
+        .from("communication_preferences")
+        .select("*")
+        .eq("customer_id", customerId)
+        .order("channel")
+        .order("purpose");
+      setPreferences(data ?? []);
+      setPreferenceEvidence("");
+      setMessage("İletişim kanal izni kaydedildi.");
+    } else {
+      setError(error.message);
+    }
+    setSaving(null);
   };
 
   const createRequest = async () => {
@@ -112,6 +148,38 @@ export default function CustomerPrivacyPanel({ customerId, notices, deliveries, 
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Güncel rıza durumu</p>
           <div className="space-y-2">{Object.entries(consentLabels).map(([type, label]) => { const current = latestConsents.get(type); return <div key={type} className="flex items-center justify-between text-xs"><span className="text-slate-600 dark:text-slate-300">{label}</span><span className={current?.decision === "granted" ? "text-emerald-500" : "text-amber-500"}>{current ? decisionLabels[current.decision] : "Kayıt yok"}</span></div>; })}</div>
           <p className="mt-3 text-[10px] text-slate-500">Aydınlatma kayıtları: {deliveries.length} · Rıza kararları: {consents.length}</p>
+        </div>
+
+        <div className="border-t border-slate-200 pt-4 dark:border-[#1f2937]">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Sağlayıcı iletişim izinleri</p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <label className="space-y-1 text-xs font-semibold text-slate-500">Kanal
+              <select aria-label="İletişim İzin Kanalı" value={preferenceChannel} onChange={event => setPreferenceChannel(event.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-2 py-2 text-xs font-normal dark:border-[#1f2937] dark:bg-[#060d1a] dark:text-slate-200">
+                <option value="email">E-posta</option><option value="whatsapp">WhatsApp</option>
+              </select>
+            </label>
+            <label className="space-y-1 text-xs font-semibold text-slate-500">Amaç
+              <select aria-label="İletişim İzin Amacı" value={preferencePurpose} onChange={event => setPreferencePurpose(event.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-2 py-2 text-xs font-normal dark:border-[#1f2937] dark:bg-[#060d1a] dark:text-slate-200">
+                <option value="transactional">Operasyonel</option><option value="marketing">Pazarlama</option>
+              </select>
+            </label>
+            <label className="flex items-end gap-2 pb-2 text-xs text-slate-600 dark:text-slate-300">
+              <input type="checkbox" checked={preferenceAllowed} onChange={event => setPreferenceAllowed(event.target.checked)} />
+              Gönderime izin verildi
+            </label>
+          </div>
+          <textarea aria-label="İletişim İzin Kanıtı" value={preferenceEvidence} onChange={event => setPreferenceEvidence(event.target.value)} maxLength={1000} rows={2} placeholder="İzin veya ret kaynağı ve kanıt notu (zorunlu)" className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs dark:border-[#1f2937] dark:bg-[#060d1a] dark:text-slate-200" />
+          <button type="button" onClick={() => void saveCommunicationPreference()} disabled={saving !== null || !preferenceEvidence.trim()} className="mt-3 w-full rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-xs font-semibold text-purple-600 disabled:opacity-50">Kanal iznini kaydet</button>
+          <div className="mt-3 space-y-1">
+            {preferences.length === 0
+              ? <p className="text-[10px] text-slate-500">Kayıt yok; sağlayıcı üzerinden gönderim kapalıdır.</p>
+              : preferences.map(preference => (
+                <div key={`${preference.channel}-${preference.purpose}`} className="flex items-center justify-between text-xs">
+                  <span className="text-slate-600 dark:text-slate-300">{preference.channel} · {preference.purpose}</span>
+                  <span className={preference.allowed ? "text-emerald-500" : "text-red-500"}>{preference.allowed ? "İzinli" : "Reddedildi"}</span>
+                </div>
+              ))}
+          </div>
         </div>
 
         <div className="border-t border-slate-200 pt-4 dark:border-[#1f2937]">

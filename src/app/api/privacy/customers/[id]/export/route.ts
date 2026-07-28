@@ -34,10 +34,12 @@ async function exportCustomerData(request: Request, { params }: { params: Promis
       if (error) throw error;
       return data ?? [];
     };
-    const [documents, notes, payments, activity, communications, visaHistory, familyMembers, tags, notices, consents, requests, tasks] = await Promise.all([
+    const [documents, notes, payments, activity, communications, communicationPreferences, outbox, visaHistory, familyMembers, tags, notices, consents, requests, tasks] = await Promise.all([
       byApplications("documents"), byApplications("notes"), byApplications("payments"),
       admin.from("activity_log").select("id, application_id, customer_id, action, performed_by, type, created_at").or(`customer_id.eq.${id}${applicationIds.length ? `,application_id.in.(${applicationIds.join(",")})` : ""}`).order("created_at"),
       admin.from("communications").select("*").eq("customer_id", id).order("created_at"),
+      admin.from("communication_preferences").select("*").eq("customer_id", id).order("recorded_at"),
+      admin.from("message_outbox").select("id, communication_id, application_id, template_id, channel, purpose, status, idempotency_key, provider_name, provider_message_id, attempt_count, queued_at, accepted_at, delivered_at, failed_at").eq("customer_id", id).order("queued_at"),
       admin.from("visa_history").select("*").eq("customer_id", id).order("created_at"),
       admin.from("family_members").select("*").eq("customer_id", id).order("created_at"),
       admin.from("customer_tags").select("created_at, tags(name, color)").eq("customer_id", id),
@@ -46,7 +48,7 @@ async function exportCustomerData(request: Request, { params }: { params: Promis
       admin.from("data_subject_requests").select("*").eq("customer_id", id).order("requested_at"),
       admin.from("tasks").select("id, title, description, task_type, status, priority, due_at, completed_at, created_at").eq("customer_id", id).order("created_at"),
     ]);
-    for (const result of [activity, communications, visaHistory, familyMembers, tags, notices, consents, requests, tasks]) if (result.error) throw result.error;
+    for (const result of [activity, communications, communicationPreferences, outbox, visaHistory, familyMembers, tags, notices, consents, requests, tasks]) if (result.error) throw result.error;
 
     const { error: auditError } = await supabase.rpc("record_customer_export_v1", { p_customer_id: id });
     if (auditError) throw auditError;
@@ -62,6 +64,8 @@ async function exportCustomerData(request: Request, { params }: { params: Promis
       payments,
       activity: activity.data ?? [],
       communications: communications.data ?? [],
+      communication_preferences: communicationPreferences.data ?? [],
+      message_delivery_history: outbox.data ?? [],
       visa_history: visaHistory.data ?? [],
       family_members: familyMembers.data ?? [],
       tags: tags.data ?? [],

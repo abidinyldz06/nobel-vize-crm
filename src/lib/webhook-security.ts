@@ -5,8 +5,7 @@ import { verifyHmacSha256Signature } from "@/lib/webhook-signature";
 const MAX_CLOCK_SKEW_SECONDS = 5 * 60;
 const MAX_BODY_BYTES = 256 * 1024;
 
-export async function verifySignedWebhook(request: Request) {
-  const secret = process.env.GOOGLE_FORM_WEBHOOK_SECRET;
+export async function verifySignedWebhookWithSecret(request: Request, secret: string | undefined) {
   if (!secret || new TextEncoder().encode(secret).byteLength < 32) {
     return { ok: false as const, status: 503, error: "Webhook güvenlik anahtarı yapılandırılmamış." };
   }
@@ -50,4 +49,8 @@ export async function verifySignedWebhook(request: Request) {
   }
 
   return { ok: true as const, rawBody, eventId };
+}
+
+export async function verifySignedWebhook(request: Request) {
+  return verifySignedWebhookWithSecret(request, process.env.GOOGLE_FORM_WEBHOOK_SECRET);
 }

@@ -2,6 +2,35 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 4.2–4.5 Otomasyon ve Güvenlik
+
+### Operasyon ve iş sürekliliği
+
+- Secret korumalı Vercel Cron ile pasaport, randevu, evrak, ödeme ve
+  hareketsiz başvuru görevleri sayfa ziyaretinden bağımsız hale getirildi.
+- Zamanlanmış işlere advisory lock, saat/gün penceresi idempotency'si, çalışma
+  geçmişi ve operasyon hata kaydı eklendi.
+- Veritabanı ile private Storage binary'lerini aynı recovery point'e alan,
+  AES-256-GCM şifreli ve SHA-256 doğrulamalı zamanlanmış yedek eklendi.
+- Günlük 14, haftalık 8 ve aylık 12 kopyalık retention ile Faz 4.2–4.5
+  tablolarının backup/restore uyumluluğu eklendi.
+
+### Hesap ve iletişim güvenliği
+
+- Admin için zorunlu, danışman için politika tabanlı TOTP/MFA; giriş kilidi,
+  güvenlik audit izi ve aktif oturum yönetimi eklendi.
+- Kanal/amaç bazlı iletişim izni, pazarlama rızası kontrolü, idempotent outbox,
+  retry ve imzalı webhook/replay koruması eklendi.
+- Sağlayıcı kabulü ile gerçek teslimat ayrıldı. Gerçek sağlayıcı seçilene
+  kadar worker kapalı ve manuel `mailto:`/`wa.me` fallback'i korunuyor.
+
+### Kalite ve işletim
+
+- Birim, güvenlik, pgTAP ve Playwright regresyonları ile production runbook'u
+  eklendi.
+- Cron, yedek ve mesaj secret'ları `.env.example` içinde yalnız sunucu
+  değişkenleri olarak belgelendi.
+
 ## [Unreleased] — Faz 4.1.1 Stabilizasyon ve Veri Bütünlüğü
 
 ### Düzeltildi

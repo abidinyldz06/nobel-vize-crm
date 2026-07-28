@@ -183,6 +183,30 @@ export type Database = {
           },
         ]
       }
+      auth_login_attempts: {
+        Row: {
+          failure_count: number
+          key_hash: string
+          last_attempt_at: string
+          locked_until: string | null
+          window_started_at: string
+        }
+        Insert: {
+          failure_count?: number
+          key_hash: string
+          last_attempt_at?: string
+          locked_until?: string | null
+          window_started_at?: string
+        }
+        Update: {
+          failure_count?: number
+          key_hash?: string
+          last_attempt_at?: string
+          locked_until?: string | null
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       backup_runs: {
         Row: {
           artifact_label: string
@@ -252,6 +276,51 @@ export type Database = {
           {
             foreignKeyName: "backup_runs_verified_by_staff_fk"
             columns: ["verified_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_preferences: {
+        Row: {
+          allowed: boolean
+          channel: string
+          customer_id: string
+          evidence_note: string | null
+          purpose: string
+          recorded_at: string
+          recorded_by_staff_id: string | null
+        }
+        Insert: {
+          allowed?: boolean
+          channel: string
+          customer_id: string
+          evidence_note?: string | null
+          purpose?: string
+          recorded_at?: string
+          recorded_by_staff_id?: string | null
+        }
+        Update: {
+          allowed?: boolean
+          channel?: string
+          customer_id?: string
+          evidence_note?: string | null
+          purpose?: string
+          recorded_at?: string
+          recorded_by_staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_preferences_customer_fk"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_preferences_staff_fk"
+            columns: ["recorded_by_staff_id"]
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
@@ -867,6 +936,120 @@ export type Database = {
           },
         ]
       }
+      message_outbox: {
+        Row: {
+          accepted_at: string | null
+          application_id: string | null
+          attempt_count: number
+          body: string
+          channel: string
+          communication_id: string
+          created_by_staff_id: string | null
+          customer_id: string
+          delivered_at: string | null
+          failed_at: string | null
+          id: string
+          idempotency_key: string
+          last_error_code: string | null
+          next_attempt_at: string
+          processing_started_at: string | null
+          provider_message_id: string | null
+          provider_name: string | null
+          purpose: string
+          queued_at: string
+          recipient: string
+          status: string
+          subject: string | null
+          template_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          application_id?: string | null
+          attempt_count?: number
+          body: string
+          channel: string
+          communication_id: string
+          created_by_staff_id?: string | null
+          customer_id: string
+          delivered_at?: string | null
+          failed_at?: string | null
+          id?: string
+          idempotency_key: string
+          last_error_code?: string | null
+          next_attempt_at?: string
+          processing_started_at?: string | null
+          provider_message_id?: string | null
+          provider_name?: string | null
+          purpose?: string
+          queued_at?: string
+          recipient: string
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          application_id?: string | null
+          attempt_count?: number
+          body?: string
+          channel?: string
+          communication_id?: string
+          created_by_staff_id?: string | null
+          customer_id?: string
+          delivered_at?: string | null
+          failed_at?: string | null
+          id?: string
+          idempotency_key?: string
+          last_error_code?: string | null
+          next_attempt_at?: string
+          processing_started_at?: string | null
+          provider_message_id?: string | null
+          provider_name?: string | null
+          purpose?: string
+          queued_at?: string
+          recipient?: string
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_outbox_application_fk"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_outbox_communication_fk"
+            columns: ["communication_id"]
+            isOneToOne: true
+            referencedRelation: "communications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_outbox_created_by_staff_fk"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_outbox_customer_fk"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_outbox_template_fk"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_templates: {
         Row: {
           body_template: string
@@ -1221,6 +1404,80 @@ export type Database = {
           },
         ]
       }
+      scheduled_job_runs: {
+        Row: {
+          completed_at: string | null
+          error_code: string | null
+          id: string
+          inserted_count: number
+          job_name: string
+          started_at: string
+          status: string
+          window_key: string
+        }
+        Insert: {
+          completed_at?: string | null
+          error_code?: string | null
+          id?: string
+          inserted_count?: number
+          job_name: string
+          started_at?: string
+          status?: string
+          window_key: string
+        }
+        Update: {
+          completed_at?: string | null
+          error_code?: string | null
+          id?: string
+          inserted_count?: number
+          job_name?: string
+          started_at?: string
+          status?: string
+          window_key?: string
+        }
+        Relationships: []
+      }
+      security_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          outcome: string
+          session_id: string | null
+          staff_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          outcome: string
+          session_id?: string | null
+          staff_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          outcome?: string
+          session_id?: string | null
+          staff_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_events_staff_fk"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff: {
         Row: {
           created_at: string
@@ -1366,21 +1623,27 @@ export type Database = {
       }
       tenants: {
         Row: {
+          admin_mfa_required: boolean
           company_name: string
+          consultant_mfa_required: boolean
           created_at: string
           email: string | null
           id: string
           phone: string | null
         }
         Insert: {
+          admin_mfa_required?: boolean
           company_name?: string
+          consultant_mfa_required?: boolean
           created_at?: string
           email?: string | null
           id?: string
           phone?: string | null
         }
         Update: {
+          admin_mfa_required?: boolean
           company_name?: string
+          consultant_mfa_required?: boolean
           created_at?: string
           email?: string | null
           id?: string
@@ -1519,6 +1782,15 @@ export type Database = {
         Args: { p_from: string; p_to: string }
         Returns: boolean
       }
+      apply_message_delivery_event_v1: {
+        Args: {
+          p_error_code?: string
+          p_outbox_id: string
+          p_provider_message_id?: string
+          p_status: string
+        }
+        Returns: boolean
+      }
       archive_customers_v1: {
         Args: { p_customer_ids: string[] }
         Returns: number
@@ -1543,6 +1815,7 @@ export type Database = {
         Args: { target_document_id: string }
         Returns: boolean
       }
+      check_login_rate_limit_v1: { Args: { p_key_hash: string }; Returns: Json }
       complete_backup_run_v1: {
         Args: {
           p_checksum_sha256: string
@@ -1568,6 +1841,7 @@ export type Database = {
       }
       create_task_v1: { Args: { p_payload: Json }; Returns: string }
       current_staff_id: { Args: never; Returns: string }
+      enqueue_message_v1: { Args: { p_payload: Json }; Returns: string }
       fail_backup_run_v1: {
         Args: { p_error_code: string; p_run_id: string }
         Returns: boolean
@@ -1598,6 +1872,7 @@ export type Database = {
           purge_eligible: boolean
         }[]
       }
+      list_current_user_sessions_v1: { Args: never; Returns: Json }
       mark_all_notifications_read_v1: { Args: never; Returns: number }
       mark_customer_documents_deleted_v1: {
         Args: { p_customer_id: string; p_document_ids: string[] }
@@ -1621,6 +1896,15 @@ export type Database = {
         Args: { p_payload: Json }
         Returns: string
       }
+      record_login_attempt_v1: {
+        Args: {
+          p_key_hash: string
+          p_staff_id?: string
+          p_success: boolean
+          p_user_id?: string
+        }
+        Returns: Json
+      }
       record_operational_event_v1: {
         Args: {
           p_error_code?: string
@@ -1632,17 +1916,29 @@ export type Database = {
         }
         Returns: string
       }
+      record_own_security_event_v1: {
+        Args: { p_event_type: string; p_outcome?: string }
+        Returns: string
+      }
       resolve_operational_event_v1: {
         Args: { p_event_id: string }
         Returns: boolean
       }
       restore_backup_v2: { Args: { p_backup: Json }; Returns: Json }
+      restore_backup_v2_core_phase411: {
+        Args: { p_backup: Json }
+        Returns: Json
+      }
       restore_customers_v1: {
         Args: { p_customer_ids: string[] }
         Returns: number
       }
       rotate_customer_portal_token_v1: {
         Args: { p_customer_id: string; p_valid_days?: number }
+        Returns: Json
+      }
+      run_scheduled_operations_v1: {
+        Args: { p_window_key: string }
         Returns: Json
       }
       set_application_appointment_v1: {
@@ -1661,6 +1957,10 @@ export type Database = {
           p_status: string
         }
         Returns: undefined
+      }
+      set_communication_preference_v1: {
+        Args: { p_payload: Json }
+        Returns: boolean
       }
       set_customer_portal_access_v1: {
         Args: { p_customer_id: string; p_enabled: boolean }

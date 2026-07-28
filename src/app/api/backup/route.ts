@@ -15,6 +15,8 @@ import type { Json } from "@/types/database";
 const TABLES_ORDER = [
   "tenants",
   "staff",
+  "security_events",
+  "scheduled_job_runs",
   "privacy_settings",
   "privacy_notice_versions",
   "message_templates",
@@ -24,6 +26,7 @@ const TABLES_ORDER = [
   "customers",
   "customer_privacy_notices",
   "customer_consents",
+  "communication_preferences",
   "data_subject_requests",
   "customer_tags",
   "applications",
@@ -32,6 +35,7 @@ const TABLES_ORDER = [
   "payments",
   "activity_log",
   "communications",
+  "message_outbox",
   "tasks",
   "notifications",
   "visa_history",
@@ -44,6 +48,8 @@ type BackupTable = typeof TABLES_ORDER[number];
 const TABLE_ORDER_COLUMNS: Record<BackupTable, string> = {
   tenants: "id",
   staff: "id",
+  security_events: "id",
+  scheduled_job_runs: "id",
   privacy_settings: "id",
   privacy_notice_versions: "id",
   message_templates: "id",
@@ -53,6 +59,7 @@ const TABLE_ORDER_COLUMNS: Record<BackupTable, string> = {
   customers: "id",
   customer_privacy_notices: "id",
   customer_consents: "id",
+  communication_preferences: "customer_id",
   data_subject_requests: "id",
   customer_tags: "customer_id",
   applications: "id",
@@ -61,6 +68,7 @@ const TABLE_ORDER_COLUMNS: Record<BackupTable, string> = {
   payments: "id",
   activity_log: "id",
   communications: "id",
+  message_outbox: "id",
   tasks: "id",
   notifications: "id",
   visa_history: "id",
@@ -107,6 +115,10 @@ const OPTIONAL_V2_TABLES = new Set<BackupTable>([
   "customer_privacy_notices",
   "customer_consents",
   "data_subject_requests",
+  "security_events",
+  "scheduled_job_runs",
+  "communication_preferences",
+  "message_outbox",
 ]);
 
 function isBackupV2(value: unknown): value is BackupV2 {
