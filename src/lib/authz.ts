@@ -24,6 +24,13 @@ export class AuthorizationError extends Error {
   }
 }
 
+export class MfaRequiredError extends AuthorizationError {
+  constructor() {
+    super("İkinci doğrulama adımı gerekiyor.", 403);
+    this.name = "MfaRequiredError";
+  }
+}
+
 export async function requireStaff() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -47,6 +54,24 @@ export async function requireStaff() {
 
   if (staff.role !== "admin" && staff.role !== "consultant") {
     throw new AuthorizationError("Geçersiz personel rolü.", 403);
+  }
+
+  const { data: company, error: companyError } = await supabase
+    .from("tenants")
+    .select("admin_mfa_required, consultant_mfa_required")
+    .single();
+  if (companyError || !company) {
+    throw new AuthorizationError("Güvenlik politikası okunamadı.", 403);
+  }
+  const mfaRequired = staff.role === "admin"
+    ? company.admin_mfa_required
+    : company.consultant_mfa_required;
+  if (mfaRequired) {
+    const { data: assurance, error: assuranceError } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assuranceError || assurance.currentLevel !== "aal2") {
+      throw new MfaRequiredError();
+    }
   }
 
   return {

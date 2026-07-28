@@ -2,7 +2,8 @@
 
 Tarih: 26 Temmuz 2026
 
-Durum: Faz 4.1 tamamlandı; Faz 4.1.1 stabilizasyon release adayı; Faz 4.2 bekliyor.
+Durum: Faz 4.1 tamamlandı; Faz 4.1.1 ve Faz 4.2–4.4 release adayı; Faz 4.5
+sağlayıcı-bağımsız temeli hazır, gerçek sağlayıcı kararı bekliyor.
 
 Ön koşul: Faz 3.8 production kapanışı tamamlandı (`3a4d66c`).
 
@@ -128,6 +129,9 @@ Rapor: `docs/PHASE_4_1_1_IMPLEMENTATION_REPORT.md`
 
 ### 4.2 — Zamanlanmış operasyon sistemi
 
+Uygulama durumu: Kod, migration ve test kapsamı hazır; toplu kalite kapısı,
+GitHub CI ve production kabulü bekliyor.
+
 Kapsam:
 
 - Vercel Cron tarafından çağrılan, secret ile korunan sunucu endpoint'i;
@@ -145,6 +149,9 @@ Kabul kriterleri:
 - [ ] Unit, güvenlik, pgTAP ve zamanlanmış iş entegrasyon testleri başarılıdır.
 
 ### 4.3 — Otomatik, şifreli ve repo dışı yedekleme
+
+Uygulama durumu: Kod, migration, retention ve restore uyumluluğu hazır; toplu
+kalite kapısı ve production ilk zamanlanmış recovery point kanıtı bekliyor.
 
 Kapsam:
 
@@ -164,6 +171,9 @@ Kabul kriterleri:
 
 ### 4.4 — Hesap ve giriş güvenliğinin güçlendirilmesi
 
+Uygulama durumu: Kod, migration ve test kapsamı hazır; production admin MFA
+enrollment ve oturum iptal kabulü bekliyor.
+
 Kapsam:
 
 - admin için zorunlu, personel için politika ile yönetilen MFA/TOTP;
@@ -180,6 +190,10 @@ Kabul kriterleri:
 - [ ] Admin/danışman/anonim regresyon testleri başarılıdır.
 
 ### 4.5 — Sağlayıcı destekli gerçek bildirim ve iletişim
+
+Uygulama durumu: İzin, outbox, retry ve imzalı webhook temeli hazırdır.
+Başlangıç kapısı nedeniyle gerçek provider adaptörü ve sandbox testi
+başlatılmamıştır.
 
 Başlangıç kapısı:
 

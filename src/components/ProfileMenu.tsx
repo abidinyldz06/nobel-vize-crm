@@ -95,6 +95,15 @@ export default function ProfileMenu({ profile }: { profile: CurrentStaffProfile 
               <UserRound className="h-4 w-4 text-slate-400" />
               <span>Personel No: {profile.staffId.slice(0, 8)}</span>
             </div>
+            <Link
+              href="/account/security"
+              role="menuitem"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              Hesap Güvenliği
+            </Link>
             {profile.role === "admin" && (
               <Link
                 href="/settings"

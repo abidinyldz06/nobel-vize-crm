@@ -59,12 +59,13 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
   const activeApp = applications?.[0];
 
-  const [{ data: messageTemplates }, { data: company }, { data: privacyNotices }, { data: privacyDeliveries }, { data: customerConsents }, { data: dataRequests }] = await Promise.all([
+  const [{ data: messageTemplates }, { data: company }, { data: privacyNotices }, { data: privacyDeliveries }, { data: customerConsents }, { data: communicationPreferences }, { data: dataRequests }] = await Promise.all([
     supabase.from('message_templates').select('*').eq('is_active', true).order('channel').order('name'),
     supabase.from('tenants').select('company_name').single(),
     supabase.from('privacy_notice_versions').select('*').order('effective_at', { ascending: false }),
     supabase.from('customer_privacy_notices').select('*').eq('customer_id', id).order('delivered_at', { ascending: false }),
     supabase.from('customer_consents').select('*').eq('customer_id', id).order('decision_at', { ascending: false }).order('created_at', { ascending: false }),
+    supabase.from('communication_preferences').select('*').eq('customer_id', id).order('channel').order('purpose'),
     supabase.from('data_subject_requests').select('*').eq('customer_id', id).order('requested_at', { ascending: false }),
   ]);
 
@@ -230,6 +231,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
             notices={privacyNotices ?? []}
             deliveries={privacyDeliveries ?? []}
             consents={customerConsents ?? []}
+            communicationPreferences={communicationPreferences ?? []}
             requests={dataRequests ?? []}
             isAdmin={isAdmin}
           />

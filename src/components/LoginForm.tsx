@@ -3,10 +3,12 @@ import { useState } from "react"
 import { loginAction } from "@/app/actions/auth"
 import { Globe, Mail, Lock, ArrowRight, Shield, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
+import MfaChallenge from "@/components/MfaChallenge"
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mfa, setMfa] = useState<{ enrollmentRequired: boolean; factorId: string | null } | null>(null)
   
   const [isResetMode, setIsResetMode] = useState(false)
   const [resetEmail, setResetEmail] = useState("")
@@ -22,6 +24,14 @@ export default function LoginForm() {
       return
     }
     if (result?.success) {
+      if (result.mfa?.required) {
+        setMfa({
+          enrollmentRequired: result.mfa.enrollmentRequired,
+          factorId: result.mfa.factorId,
+        })
+        setLoading(false)
+        return
+      }
       window.location.assign("/dashboard")
     }
   }
@@ -76,7 +86,14 @@ export default function LoginForm() {
         </div>
 
         {/* Card */}
-        {isResetMode ? (
+        {mfa ? (
+          <div className="rounded-2xl border border-[#1e2d45] bg-[#0d1420] p-7 shadow-2xl shadow-black/60">
+            <MfaChallenge
+              factorId={mfa.factorId}
+              enrollmentRequired={mfa.enrollmentRequired}
+            />
+          </div>
+        ) : isResetMode ? (
           <form onSubmit={handleResetPassword} className="bg-[#0d1420] border border-[#1e2d45] rounded-2xl p-7 shadow-2xl shadow-black/60">
             <h3 className="text-xl font-bold text-white mb-2">Şifre Sıfırlama</h3>
             <p className="text-sm text-slate-400 mb-6">Sisteme kayıtlı e-posta adresinizi girin, size bir sıfırlama bağlantısı göndereceğiz.</p>

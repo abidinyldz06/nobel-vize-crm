@@ -12,12 +12,14 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 - **Müşteri Portalı (Extranet)**: Müşterilerin kendilerine özel güvenli (token tabanlı) link üzerinden başvuru süreçlerini canlı takip edebilmeleri.
 - **Audit Log (Sistem Logu)**: Hangi personelin hangi müşteri üzerinde ne zaman değişiklik yaptığının detaylı kaydı.
 - **Görev ve Gerçek Bildirimler**: Personel bazlı manuel görevler; randevu, geciken evrak, bekleyen ödeme ve hareketsiz başvuru hatırlatmaları; kişiye özel okundu durumu.
+- **Zamanlanmış Operasyonlar**: Vercel Cron ile pasaport, randevu, evrak, ödeme ve hareketsiz başvuru görevlerini kullanıcı sayfa açmadan üretme.
 - **Başvuru Süreç Panosu**: Kontrollü durum geçişleri, personel/ülke/tarih/gecikme filtreleri ve atomik audit kaydı.
 - **Müşteri Deneyimi**: Kanonik başvuru bilgileri, renkli etiketler, hızlı iletişim/not eylemleri ve birleşik müşteri timeline'ı.
 - **Yönetilebilir İletişim**: WhatsApp/e-posta şablonları, değişkenli mesaj hazırlama, iletişim durumları ve audit izi.
 - **Kontrollü Müşteri Portalı**: Süreli bağlantı yenileme/iptal akışı ile başvuru, evrak, randevu, ödeme ve geçmiş özeti.
 - **KVKK ve Veri Yaşam Döngüsü**: Sürümlü aydınlatma/rıza kanıtı, ilgili kişi talepleri, veri paketi, saklama kilidi, Storage temizliği ve kontrollü anonimleştirme.
 - **İzleme ve İş Sürekliliği**: Request ID ile yapılandırılmış güvenli loglar, liveness/readiness kontrolleri, admin operasyon uyarıları, doğrulanmış yedek geçmişi ve izole geri yükleme tatbikatı.
+- **Hesap Güvenliği**: Rol bazlı TOTP/MFA, giriş kilidi, oturum görünürlüğü ve diğer cihaz oturumlarını sonlandırma.
 - **Kişisel Veri Maskeleme**: Liste, arama ve özet ekranlarında telefon, e-posta ve pasaport bilgilerinin sınırlı gösterimi.
 - **Operasyon Dashboard'u**: Aylık başvuru/onay/red/gelir metrikleri ile süresi dolan veya altı ay içinde bitecek pasaport uyarıları.
 - **Yedekleme ve Dışa Aktarma**: SHA-256 ile doğrulanan sürümlü veritabanı JSON yedeği, private Storage envanteri ve müşteri verilerini CSV olarak dışa aktarabilme. Storage belge binary'leri continuity paketinde ayrıca saklanır.
@@ -42,6 +44,9 @@ npm install
 # NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 # SUPABASE_SERVICE_ROLE_KEY=...       # yalnızca sunucu
 # GOOGLE_FORM_WEBHOOK_SECRET=...      # yalnızca sunucu
+# CRON_SECRET=...                     # yalnızca sunucu, en az 32 bayt
+# BACKUP_ENCRYPTION_KEY=...           # yalnızca sunucu, 32 bayt base64
+# MESSAGE_PROVIDER=disabled           # sağlayıcı kararı verilene kadar
 # ENABLE_ATOMIC_RESTORE=false          # normal çalışma için kapalı
 
 # Geliştirme sunucusunu başlatın
@@ -50,7 +55,7 @@ npm run dev
 
 ## Güvenlik notları
 
-- `SUPABASE_SERVICE_ROLE_KEY` ve `GOOGLE_FORM_WEBHOOK_SECRET` hiçbir zaman `NEXT_PUBLIC_` önekiyle tanımlanmamalıdır.
+- `SUPABASE_SERVICE_ROLE_KEY`, webhook, cron ve yedek anahtarları hiçbir zaman `NEXT_PUBLIC_` önekiyle tanımlanmamalıdır.
 - Müşteri evrakları private Supabase Storage bucket'ında tutulur ve uygulama kısa süreli imzalı bağlantı üretir.
 - Google Form webhook istekleri `x-webhook-timestamp`, benzersiz UUID biçiminde `x-webhook-id` ve `x-webhook-signature` başlıklarını göndermelidir. İmza, `${timestamp}.${eventId}.${hamJsonGövdesi}` metninin `GOOGLE_FORM_WEBHOOK_SECRET` ile HMAC-SHA256 özetidir.
 - Veritabanı migration'ları önce staging ortamında uygulanmalıdır. Ayrıntılar `supabase/migrations/README.md` dosyasındadır.
@@ -98,7 +103,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 1 — Veritabanı standardizasyonu | Production'a uygulandı ve doğrulandı | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
-| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.1 tamamlandı; 4.1.1 stabilizasyon release adayı | `docs/PHASE_4_1_1_IMPLEMENTATION_REPORT.md` |
+| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.2–4.4 ve 4.5 sağlayıcı-bağımsız temeli release adayı | `docs/PHASE_4_2_TO_4_5_IMPLEMENTATION_REPORT.md` |
 
 Faz 3 alt aşama takibi:
 
@@ -125,8 +130,10 @@ ve veritabanından kaldırıldı; eski yedeklerle uyumluluk korundu. Faz 4.1.1
 stabilizasyon paketi boş evrak seçimi, açık tema, ana etiket kataloğu, görev
 ilk yüklemesi, eksik başvuru verisi görünürlüğü ve mükerrer müşteri
 korumasını kapsar. Faz 4,
-zamanlanmış operasyonlar, otomatik şifreli DB/Storage yedeği, hesap
-güvenliği, sağlayıcı destekli iletişim, kontrollü KVKK otomasyonu, lead
+zamanlanmış operasyonlar, otomatik şifreli DB/Storage yedeği ve hesap
+güvenliği için 4.2–4.4 release adayı hazırlanmıştır. Faz 4.5'in izin/outbox,
+retry ve webhook temeli hazırdır; gerçek sağlayıcı entegrasyonu ürün kararı
+verilene kadar kapalıdır. Faz 4 kontrollü KVKK otomasyonu, lead
 yönetimi, takvim ve gerçek veriye dayalı raporlamayla devam edecektir.
 Alt aşamalar, bağımlılıklar ve kabul kriterleri `docs/PHASE_4_PLAN.md`
 dosyasındadır. SaaS/tenant ve abonelik özellikleri Faz 4 kapsamında değildir.

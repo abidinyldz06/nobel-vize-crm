@@ -20,7 +20,7 @@ export default async function SettingsPage({
     { data: operationalEvents, error: operationalEventsError },
     { data: backupRuns, error: backupRunsError },
   ] = await Promise.all([
-    supabase.from('tenants').select('id, company_name, email, phone, created_at').single(),
+    supabase.from('tenants').select('id, company_name, email, phone, admin_mfa_required, consultant_mfa_required, created_at').single(),
     supabase.from('message_templates').select('*').order('channel').order('name'),
     supabase.from('privacy_notice_versions').select('*').order('effective_at', { ascending: false }),
     supabase.from('privacy_settings').select('*').single(),

@@ -1,12 +1,13 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
-import { AuthorizationError, requireAdmin, requireStaff } from "@/lib/authz";
+import { AuthorizationError, MfaRequiredError, requireAdmin, requireStaff } from "@/lib/authz";
 
 export async function requireStaffPage() {
   try {
     return await requireStaff();
   } catch (error) {
+    if (error instanceof MfaRequiredError) redirect("/mfa");
     if (error instanceof AuthorizationError) redirect("/");
     throw error;
   }
