@@ -42,3 +42,23 @@ Migration sırası değiştirilmemeli; production uygulama, MFA kabulü, cron ve
 restore adımları için `docs/PHASE_4_2_TO_4_5_PRODUCTION_RUNBOOK.md`
 izlenmelidir. Sağlayıcı kararı verilmeden mesaj provider değişkeni
 etkinleştirilmemelidir.
+
+## Faz 4.6–4.8 migration ve ortam gereksinimleri
+
+`202607280008`–`202607280011` migration'ları kontrollü KVKK işlem kuyruğu,
+lead yaşam döngüsü, randevu geçmişi/çakışma kontrolü ve bu tabloların atomik
+backup/restore uyumluluğunu ekler.
+
+- `automatic_actions_enabled=false` güvenli varsayılandır; KVKK cron'u bu
+  ayar açık olmadan veri değiştirmez.
+- Kalıcı silme iki ayrı admin onayı, son onaydan sonra `verified` yedek ve
+  tamamlanmış Storage temizliği ister.
+- Privacy cron'u her gün yedek cron'undan sonra `/api/cron/privacy` üzerinden
+  çalışır ve mevcut `CRON_SECRET` değerini kullanır.
+- Yeni kalıcı tablolar hem manuel v2 restore hem şifreli continuity paketine
+  dahildir.
+
+Production uygulamasından önce `202607280008`–`202607280011` dry-run çıktısı
+kontrol edilmeli, mevcut DB/Storage recovery point doğrulanmalı ve migration
+sonrası `/privacy`, `/leads`, `/appointments`, `/reports` kabul akışları
+çalıştırılmalıdır.

@@ -2,9 +2,9 @@
 
 Tarih: 26 Temmuz 2026
 
-Durum: Faz 4.1 tamamlandı; Faz 4.1.1 release adayı; Faz 4.2–4.3 production'da
-tamamlandı; Faz 4.4 kullanıcı kabulü, Faz 4.5 gerçek sağlayıcı kararı
-bekliyor.
+Durum: Faz 4.1–4.3 production'da tamamlandı. Faz 4.6–4.8 release adayı
+doğrulandı; Faz 4.9 production kabulü bekliyor. Faz 4.4 gerçek admin kullanıcı
+kabulü, Faz 4.5 gerçek sağlayıcı kararı nedeniyle açık tutuluyor.
 
 Ön koşul: Faz 3.8 production kapanışı tamamlandı (`3a4d66c`).
 
@@ -230,11 +230,11 @@ Kapsam:
 
 Kabul kriterleri:
 
-- [ ] Varsayılan davranış veri değiştirmeyen dry-run'dır.
-- [ ] Kilitli veya hukuken bekletilen kayıt işlenmez.
-- [ ] Onaysız kalıcı silme yapılamaz.
-- [ ] Storage temizliği tamamlanmadan müşteri kaydı sonuçlandırılmaz.
-- [ ] Her karar, aktör, zaman ve gerekçeyle audit kaydına yazılır.
+- [x] Varsayılan davranış veri değiştirmeyen dry-run'dır.
+- [x] Kilitli veya hukuken bekletilen kayıt işlenmez.
+- [x] Onaysız kalıcı silme yapılamaz.
+- [x] Storage temizliği tamamlanmadan müşteri kaydı sonuçlandırılmaz.
+- [x] Her karar, aktör, zaman ve gerekçeyle audit kaydına yazılır.
 
 ### 4.7 — Lead ve müşteri operasyonlarının geliştirilmesi
 
@@ -248,11 +248,11 @@ Kapsam:
 
 Kabul kriterleri:
 
-- [ ] Lead, başvuru müşterisine veri kaybetmeden dönüştürülebilir.
-- [ ] Mükerrer eşleşme açıklanabilir ve kullanıcı onayı olmadan kayıt birleştirmez.
-- [ ] Danışman yalnız yetkili olduğu lead/müşteri kayıtlarını görür.
-- [ ] SLA uyarıları Faz 4.2 zamanlayıcısını yeniden kullanır.
-- [ ] Dönüşüm raporu gerçek yaşam döngüsü kayıtlarından hesaplanır.
+- [x] Lead, başvuru müşterisine veri kaybetmeden dönüştürülebilir.
+- [x] Mükerrer eşleşme açıklanabilir ve kullanıcı onayı olmadan kayıt birleştirmez.
+- [x] Danışman yalnız yetkili olduğu lead/müşteri kayıtlarını görür.
+- [x] SLA uyarıları Faz 4.2 zamanlayıcısını yeniden kullanır.
+- [x] Dönüşüm raporu gerçek yaşam döngüsü kayıtlarından hesaplanır.
 
 ### 4.8 — Takvim entegrasyonu ve gelişmiş gerçek raporlar
 
@@ -265,11 +265,11 @@ Kapsam:
 
 Kabul kriterleri:
 
-- [ ] Takvim çıktısı doğru saat dilimi ve randevu bilgisi üretir.
-- [ ] Çakışma uyarısı yetki sınırlarını aşmadan çalışır.
-- [ ] Raporlarda sabit veya tahmini başarı yüzdesi bulunmaz.
-- [ ] Tüm metrikler kanonik tablolardan ve seçili dönemden hesaplanır.
-- [ ] CSV/PDF çıktıları ekrandaki filtrelerle tutarlıdır.
+- [x] Takvim çıktısı doğru saat dilimi ve randevu bilgisi üretir.
+- [x] Çakışma uyarısı yetki sınırlarını aşmadan çalışır.
+- [x] Raporlarda sabit veya tahmini başarı yüzdesi bulunmaz.
+- [x] Tüm metrikler kanonik tablolardan ve seçili dönemden hesaplanır.
+- [x] CSV/PDF çıktıları ekrandaki filtrelerle tutarlıdır.
 
 ### 4.9 — Bakım, kabul ve production kapanışı
 
@@ -285,11 +285,11 @@ Kapsam:
 
 Kabul kriterleri:
 
-- [ ] Production dependency audit yüksek/kritik açık göstermez.
-- [ ] Lint, typecheck, unit, security, build, temiz DB reset, schema lint,
+- [x] Production dependency audit yüksek/kritik açık göstermez.
+- [x] Lint, typecheck, unit, security, build, temiz DB reset, schema lint,
       pgTAP, restore drill ve tam Playwright paketi başarılıdır.
 - [ ] Production öncesi DB ve Storage yedeği doğrulanır.
-- [ ] Migration dry-run yalnız beklenen Faz 4 migration'larını gösterir.
+- [x] Migration dry-run yalnız beklenen Faz 4 migration'larını gösterir.
 - [ ] Canlı health, giriş, rol izolasyonu ve kritik okuma akışları doğrulanır.
 - [ ] Tüm Faz 4 issue'ları kanıt bağlantılarıyla kapatılır.
 

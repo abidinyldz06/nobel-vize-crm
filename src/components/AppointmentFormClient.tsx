@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react";
-import { Save, AlertTriangle, Info, MapPin, Calendar, Clock } from "lucide-react";
-import { checkAppointmentDensity } from "@/app/actions/update-customer";
+import { Save, AlertTriangle, MapPin, Calendar, Clock } from "lucide-react";
+import { checkAppointmentConflicts } from "@/app/actions/update-customer";
 import { addAppointment } from "@/app/actions/update-customer";
 
 interface DensityApp {
@@ -18,17 +18,18 @@ export default function AppointmentFormClient({
   applicationId: string;
 }) {
   const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const [existingApps, setExistingApps] = useState<DensityApp[]>([]);
   const [isChecking, setIsChecking] = useState(false);
-  const canCheckDensity = Boolean(date && location.length > 2);
+  const canCheckDensity = Boolean(date && time);
 
   useEffect(() => {
     if (canCheckDensity) {
       const timer = setTimeout(async () => {
         setIsChecking(true);
         try {
-          const apps = await checkAppointmentDensity(date, location);
+          const apps = await checkAppointmentConflicts(applicationId, date, time);
           setExistingApps(apps);
         } catch (error) {
           console.error("Density check error", error);
@@ -39,12 +40,12 @@ export default function AppointmentFormClient({
 
       return () => clearTimeout(timer);
     }
-  }, [date, location, canCheckDensity]);
+  }, [applicationId, date, time, canCheckDensity]);
 
   const visibleExistingApps = canCheckDensity ? existingApps : [];
   const densityCount = visibleExistingApps.length;
-  const isBusy = densityCount >= 3 && densityCount < 5;
-  const isVeryBusy = densityCount >= 5;
+  const isBusy = false;
+  const isVeryBusy = densityCount > 0;
 
   return (
     <form action={addAppointment} className="space-y-5">
@@ -61,10 +62,10 @@ export default function AppointmentFormClient({
           <AlertTriangle className={`w-5 h-5 shrink-0 ${isVeryBusy ? 'text-red-500' : 'text-orange-500'}`} />
           <div className="flex-1">
             <h4 className="font-bold text-sm mb-1">
-              Dikkat! Bu tarih ve lokasyon {isVeryBusy ? 'çok yoğun' : 'yoğun'}.
+              Dikkat! Bu saat aralığında çakışan randevu var.
             </h4>
             <p className="text-xs opacity-90 mb-2">
-              Seçtiğiniz lokasyonda ({location}) aynı gün için <strong>{densityCount} adet</strong> kayıtlı randevunuz bulunmaktadır.
+              Seçilen 60 dakikalık zaman aralığıyla çakışan <strong>{densityCount} adet</strong> randevu bulunmaktadır.
             </p>
             <div className={`text-xs rounded-lg p-2.5 space-y-1.5 ${isVeryBusy ? 'bg-red-100/50 dark:bg-red-900/20' : 'bg-orange-100/50 dark:bg-orange-900/20'}`}>
               <div className="font-semibold opacity-70 mb-1 flex items-center gap-1.5"><Clock className="w-3 h-3"/> Mevcut Randevular:</div>
@@ -76,15 +77,6 @@ export default function AppointmentFormClient({
               ))}
             </div>
           </div>
-        </div>
-      )}
-
-      {densityCount > 0 && densityCount < 3 && (
-        <div className="p-3 rounded-xl border bg-blue-50 dark:bg-blue-500/5 border-blue-200 dark:border-blue-500/20 text-blue-800 dark:text-blue-300 flex items-start gap-2 text-xs">
-          <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-500" />
-          <p>
-            Seçtiğiniz konumda bu tarihte <strong>{densityCount} adet</strong> randevu bulunmaktadır. Müsaitlik var.
-          </p>
         </div>
       )}
 
@@ -130,6 +122,7 @@ export default function AppointmentFormClient({
             <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1"><Clock className="w-3.5 h-3.5"/> Saat *</label>
             <input
               required name="time" type="time"
+              value={time} onChange={(e) => setTime(e.target.value)}
               className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all [color-scheme:dark]"
             />
           </div>

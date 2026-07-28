@@ -13,6 +13,9 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 - **Audit Log (Sistem Logu)**: Hangi personelin hangi müşteri üzerinde ne zaman değişiklik yaptığının detaylı kaydı.
 - **Görev ve Gerçek Bildirimler**: Personel bazlı manuel görevler; randevu, geciken evrak, bekleyen ödeme ve hareketsiz başvuru hatırlatmaları; kişiye özel okundu durumu.
 - **Zamanlanmış Operasyonlar**: Vercel Cron ile pasaport, randevu, evrak, ödeme ve hareketsiz başvuru görevlerini kullanıcı sayfa açmadan üretme.
+- **Lead Yönetimi**: Kaynak, kampanya, yönlendirme, sorumlu, SLA, mükerrer tespiti ve kontrollü müşteri dönüşümü.
+- **Kontrollü KVKK Otomasyonu**: Dry-run adayları, hukuki saklama, yönetici/çift onay, doğrulanmış yedek kapısı ve değiştirilemez audit izi.
+- **Takvim ve Dışa Aktarım**: Randevu çakışması ve durum geçmişi, Europe/Istanbul uyumlu ICS ile filtre tutarlı CSV/PDF raporları.
 - **Başvuru Süreç Panosu**: Kontrollü durum geçişleri, personel/ülke/tarih/gecikme filtreleri ve atomik audit kaydı.
 - **Müşteri Deneyimi**: Kanonik başvuru bilgileri, renkli etiketler, hızlı iletişim/not eylemleri ve birleşik müşteri timeline'ı.
 - **Yönetilebilir İletişim**: WhatsApp/e-posta şablonları, değişkenli mesaj hazırlama, iletişim durumları ve audit izi.
@@ -103,7 +106,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 1 — Veritabanı standardizasyonu | Production'a uygulandı ve doğrulandı | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
-| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.2–4.3 production'da tamamlandı; 4.4 kullanıcı kabulü ve 4.5 sağlayıcı kararı bekliyor | `docs/PHASE_4_2_TO_4_5_IMPLEMENTATION_REPORT.md` |
+| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.6–4.8 release adayı doğrulandı; 4.9 production kabulü, 4.4 kullanıcı kabulü ve 4.5 sağlayıcı kararı bekliyor | `docs/PHASE_4_6_TO_4_9_IMPLEMENTATION_REPORT.md` |
 
 Faz 3 alt aşama takibi:
 
@@ -134,8 +137,10 @@ zamanlanmış operasyonlar ve otomatik şifreli DB/Storage yedeği için 4.2–4
 production kabulü tamamlanmıştır. Faz 4.4 production'a alınmış olup gerçek
 admin TOTP enrollment/oturum kabulü beklemektedir. Faz 4.5'in izin/outbox,
 retry ve webhook temeli production'dadır; gerçek sağlayıcı entegrasyonu ürün
-kararı verilene kadar kapalıdır. Faz 4 kontrollü KVKK otomasyonu, lead
-yönetimi, takvim ve gerçek veriye dayalı raporlamayla devam edecektir.
+kararı verilene kadar kapalıdır. Faz 4.6–4.8 kontrollü KVKK otomasyonu, lead
+yönetimi, takvim ve gerçek veriye dayalı raporlama olarak release adayı
+seviyesinde tamamlandı. Faz 4.9'un teknik kalite kapıları yeşildir; production
+kabulü ve Faz 4'ün bütünü için açık 4.4/4.5 kararları ayrıca izlenir.
 Alt aşamalar, bağımlılıklar ve kabul kriterleri `docs/PHASE_4_PLAN.md`
 dosyasındadır. SaaS/tenant ve abonelik özellikleri Faz 4 kapsamında değildir.
 

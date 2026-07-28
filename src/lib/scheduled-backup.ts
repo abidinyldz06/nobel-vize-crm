@@ -10,7 +10,8 @@ const TABLES = [
   "privacy_settings", "privacy_notice_versions",
   "message_templates", "tags", "countries", "country_visa_rules",
   "customers", "customer_privacy_notices", "customer_consents", "communication_preferences",
-  "data_subject_requests", "customer_tags", "applications", "documents",
+  "data_subject_requests", "privacy_action_queue", "privacy_action_approvals", "privacy_audit_log",
+  "leads", "lead_events", "customer_tags", "applications", "appointment_events", "documents",
   "notes", "payments", "activity_log", "communications", "message_outbox", "tasks",
   "notifications", "visa_history", "family_members", "webhook_events",
 ] as const;

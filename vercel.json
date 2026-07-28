@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/messages",
       "schedule": "45 4 * * *"
+    },
+    {
+      "path": "/api/cron/privacy",
+      "schedule": "0 5 * * *"
     }
   ]
 }

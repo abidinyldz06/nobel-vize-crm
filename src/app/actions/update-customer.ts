@@ -78,7 +78,7 @@ export async function addAppointment(formData: FormData) {
   const time = formData.get('time') as string
   const location = formData.get('location') as string
   const system = formData.get('appointmentSystem') as string || 'VFS'
-  const datetime = `${date}T${time}:00`
+  const datetime = `${date}T${time}:00+03:00`
 
   const { error } = await supabase.rpc('set_application_appointment_v1', {
     p_application_id: applicationId,
@@ -96,34 +96,23 @@ export async function addAppointment(formData: FormData) {
   redirect(`/customers/${customerId}`)
 }
 
-export async function checkAppointmentDensity(dateStr: string, location: string) {
-  if (!dateStr || !location) return [];
-  
+export async function checkAppointmentConflicts(applicationId: string, dateStr: string, time: string) {
+  if (!applicationId || !dateStr || !time) return [];
   const { supabase } = await requireStaff();
-  
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return [];
-  
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
-  
-  const endOfDay = new Date(date);
-  endOfDay.setHours(23, 59, 59, 999);
-
-  const { data, error } = await supabase
-    .from('applications')
-    .select('id, appointment_date, customers!inner(first_name, last_name)')
-    .eq('customers.is_deleted', false)
-    .not('appointment_date', 'is', null)
-    .gte('appointment_date', startOfDay.toISOString())
-    .lte('appointment_date', endOfDay.toISOString())
-    .ilike('appointment_location', `%${location.trim()}%`);
+  const { data, error } = await supabase.rpc("list_appointment_conflicts_v1", {
+    p_application_id: applicationId,
+    p_appointment_date: `${dateStr}T${time}:00+03:00`,
+    p_duration_minutes: 60,
+  });
 
   if (error || !data) return [];
-  
   return data.map((app) => ({
-    id: app.id,
-    time: new Date(app.appointment_date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
-    customerName: `${app.customers.first_name} ${app.customers.last_name}`
+    id: app.application_id,
+    time: new Date(app.appointment_date).toLocaleTimeString("tr-TR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/Istanbul",
+    }),
+    customerName: app.customer_name,
   })).sort((a, b) => a.time.localeCompare(b.time));
 }
