@@ -121,28 +121,28 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
               )}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Seyahat Aracı</label>
-                <select aria-label="Seyahat Aracı" name="travelMethod" defaultValue={activeApp.travel_method || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                <select required aria-label="Seyahat Aracı" name="travelMethod" defaultValue={activeApp.travel_method || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                   <option value="">— Belirtilmedi —</option>
                   {Object.entries(TRAVEL_METHOD_OPTIONS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Konaklama</label>
-                <select aria-label="Konaklama" name="accommodation" defaultValue={activeApp.accommodation || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                <select required aria-label="Konaklama" name="accommodation" defaultValue={activeApp.accommodation || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                   <option value="">— Belirtilmedi —</option>
                   {Object.entries(ACCOMMODATION_OPTIONS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Meslek</label>
-                <select aria-label="Meslek" name="occupation" defaultValue={activeApp.occupation || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                <select required aria-label="Meslek" name="occupation" defaultValue={activeApp.occupation || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                   <option value="">— Belirtilmedi —</option>
                   {Object.entries(OCCUPATION_OPTIONS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Çocuk Durumu</label>
-                <select aria-label="Çocuk Durumu" name="withChildren" defaultValue={activeApp.with_children === null ? '' : String(activeApp.with_children)} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                <select required aria-label="Çocuk Durumu" name="withChildren" defaultValue={activeApp.with_children === null ? '' : String(activeApp.with_children)} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                   <option value="">— Belirtilmedi —</option>
                   <option value="false">Yok</option>
                   <option value="true">Var</option>
@@ -150,7 +150,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Uyruk</label>
-                <select aria-label="Uyruk" name="nationality" defaultValue={activeApp.nationality || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                <select required aria-label="Uyruk" name="nationality" defaultValue={activeApp.nationality || ''} className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                   <option value="">— Belirtilmedi —</option>
                   {Object.entries(NATIONALITY_OPTIONS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>

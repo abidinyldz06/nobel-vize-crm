@@ -19,7 +19,7 @@ type TaskStatus = "pending" | "in_progress" | "completed" | "cancelled";
 type TaskPriority = "low" | "normal" | "high" | "urgent";
 type TaskTab = "today" | "overdue" | "upcoming" | "completed";
 
-type TaskItem = {
+export type TaskItem = {
   id: string;
   title: string;
   description: string | null;
@@ -76,15 +76,18 @@ export default function TaskBoard({
   currentStaffId,
   staffOptions,
   customerOptions,
+  initialTasks,
 }: {
   isAdmin: boolean;
   currentStaffId: string;
   staffOptions: StaffOption[];
   customerOptions: CustomerOption[];
+  initialTasks: TaskItem[];
 }) {
-  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [tasks, setTasks] = useState<TaskItem[]>(initialTasks);
   const [activeTab, setActiveTab] = useState<TaskTab>("today");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -99,13 +102,16 @@ export default function TaskBoard({
 
   const loadTasks = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const response = await fetch("/api/tasks", { cache: "no-store" });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Görevler yüklenemedi.");
       setTasks(payload.tasks ?? []);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Görevler yüklenemedi.");
+      const message = error instanceof Error ? error.message : "Görevler yüklenemedi.";
+      setLoadError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -219,6 +225,18 @@ export default function TaskBoard({
           </button>
         ))}
       </div>
+
+      {loadError && (
+        <div role="alert" className="mb-5 flex flex-col gap-3 rounded-2xl border border-red-500/25 bg-red-500/10 p-4 text-red-600 dark:text-red-300 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold">Görevler yenilenemedi.</p>
+            <p className="mt-1 text-xs">Ekranda son sunucu verisi korunuyor; bu durum sıfır görev olarak yorumlanmamalıdır.</p>
+          </div>
+          <button type="button" onClick={() => void loadTasks()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/30 px-3 py-2 text-xs font-semibold">
+            <RefreshCw className="h-4 w-4" /> Tekrar Dene
+          </button>
+        </div>
+      )}
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg dark:border-[#1f2937] dark:bg-[#0d1420]">
         {loading ? (

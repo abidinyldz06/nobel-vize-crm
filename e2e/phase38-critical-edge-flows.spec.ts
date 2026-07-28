@@ -200,8 +200,37 @@ test("3.8.3 müşteri oluşturma, randevu, evrak ve ödeme zinciri uçtan uca ç
     .select("id, performed_by_staff_id")
     .eq("customer_id", customerId);
   assertNoSupabaseError("Müşteri oluşturma audit kayıtları okunamadı", activity);
-  expect(activity.data!.length).toBeGreaterThanOrEqual(2);
+  expect(activity.data!.length).toBeGreaterThanOrEqual(1);
   expect(activity.data!.every(item => item.performed_by_staff_id === adminIdentity.staffId)).toBe(true);
+
+  await page.goto("/customers/new");
+  await page.locator('input[name="firstName"]').fill("Mükerrer Kritik");
+  await page.locator('input[name="lastName"]').fill("Akış");
+  await page.locator('input[name="phone"]').fill("0555 000 3850".replaceAll(" ", ""));
+  await page.locator('input[name="email"]').fill(uiCustomerEmail);
+  await page.locator('input[name="passportNo"]').fill("P3800001");
+  await page.locator('input[name="passportExpiry"]').fill(
+    new Date(Date.now() + 365 * 86_400_000).toISOString().slice(0, 10),
+  );
+  await page.locator('select[name="countryId"]').selectOption(countryId);
+  await page.locator('select[name="visaType"]').selectOption("turistik");
+  await page.locator('select[name="travelMethod"]').selectOption("ucak");
+  await page.locator('select[name="accommodation"]').selectOption("otel");
+  await page.locator('select[name="occupation"]').selectOption("calisan");
+  await page.locator('select[name="withChildren"]').selectOption("false");
+  await page.locator('select[name="nationality"]').selectOption("tc");
+  await page.getByRole("button", { name: "Kaydet ve Dosya Aç" }).click();
+  await expect(page).toHaveURL("/customers/new?error=possible_duplicate_customer");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Benzer bir müşteri kaydı" }),
+  ).toContainText("Benzer bir müşteri kaydı zaten bulunuyor.");
+
+  const duplicateCount = await e2eAdmin
+    .from("customers")
+    .select("id", { count: "exact", head: true })
+    .eq("email", uiCustomerEmail);
+  assertNoSupabaseError("Mükerrer müşteri koruması doğrulanamadı", duplicateCount);
+  expect(duplicateCount.count).toBe(1);
 
   const appointmentDate = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
   await page.goto(`/customers/${customerId}/appointment`);

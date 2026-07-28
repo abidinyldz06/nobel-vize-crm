@@ -216,7 +216,7 @@ export default async function Dashboard() {
         <div className="flex flex-col gap-2 border-b border-slate-200 bg-amber-500/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-[#1f2937]">
           <div>
             <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white"><AlertCircle className="h-4 w-4 text-amber-500" /> Pasaport Uyarıları</h2>
-            <p className="mt-1 text-xs text-slate-500">{expiringPassportCount} pasaport 6 ay içinde bitiyor{expiredPassportCount > 0 ? ` · ${expiredPassportCount} pasaportun süresi dolmuş` : ''}.</p>
+            <p className="mt-1 text-xs text-slate-700 dark:text-slate-400">{expiringPassportCount} pasaport 6 ay içinde bitiyor{expiredPassportCount > 0 ? ` · ${expiredPassportCount} pasaportun süresi dolmuş` : ''}.</p>
           </div>
           <Link href="/customers" className="text-xs font-semibold text-amber-600 hover:text-amber-500">Müşterileri aç →</Link>
         </div>

@@ -19,6 +19,7 @@ type Customer = {
   country?: string | null;
   status?: string | null;
   latest_application_id?: string | null;
+  profile_complete: boolean;
   assigned_staff_id: string | null;
   tags: { id: string; name: string; color: string }[];
 };
@@ -27,6 +28,12 @@ type StaffOption = {
   id: string;
   full_name: string;
   role: string;
+};
+
+type TagOption = {
+  id: string;
+  name: string;
+  color: string;
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon }> = {
@@ -42,18 +49,23 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: Lucide
   kapandi:            { label: "Kapandı",             color: "text-slate-500 bg-slate-800/50",    icon: XCircle },
 };
 
-export default function CustomerTable({ customers, isAdmin, staffList = [] }: { customers: Customer[], isAdmin: boolean, staffList?: StaffOption[] }) {
+export default function CustomerTable({
+  customers,
+  isAdmin,
+  staffList = [],
+  allTags = [],
+}: {
+  customers: Customer[],
+  isAdmin: boolean,
+  staffList?: StaffOption[],
+  allTags?: TagOption[],
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [statusFilter, setStatusFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState("all");
-
-  const availableTags = useMemo(() => {
-    const tagMap = new Map<string, { id: string; name: string; color: string }>();
-    customers.forEach(customer => customer.tags.forEach(tag => tagMap.set(tag.id, tag)));
-    return [...tagMap.values()].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
-  }, [customers]);
+  const [profileFilter, setProfileFilter] = useState("all");
   
   // Bulk Selection State
   const [selected, setSelected] = useState<string[]>([]);
@@ -72,9 +84,11 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
       const matchesStatus =
         statusFilter === "all" || (c.status || "profil_analizi") === statusFilter;
       const matchesTag = tagFilter === "all" || c.tags.some(tag => tag.id === tagFilter);
-      return matchesSearch && matchesStatus && matchesTag;
+      const matchesProfile = profileFilter === "all"
+        || (profileFilter === "complete" ? c.profile_complete : !c.profile_complete);
+      return matchesSearch && matchesStatus && matchesTag && matchesProfile;
     });
-  }, [customers, search, statusFilter, tagFilter]);
+  }, [customers, search, statusFilter, tagFilter, profileFilter]);
 
   const toggleSelect = (id: string) => {
     setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -290,7 +304,19 @@ export default function CustomerTable({ customers, isAdmin, staffList = [] }: { 
               className="min-w-0 flex-1 cursor-pointer appearance-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none dark:text-slate-300 sm:min-w-[140px]"
             >
               <option value="all">Tüm Etiketler</option>
-              {availableTags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
+              {allTags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
+            </select>
+          </div>
+          <div className="flex min-w-0 items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 dark:border-[#1f2937] dark:bg-[#060c18]">
+            <select
+              aria-label="Başvuru bilgi durumuna göre filtrele"
+              value={profileFilter}
+              onChange={event => setProfileFilter(event.target.value)}
+              className="min-w-0 flex-1 cursor-pointer appearance-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none dark:text-slate-300 sm:min-w-[170px]"
+            >
+              <option value="all">Tüm Bilgi Durumları</option>
+              <option value="incomplete">Eksik Başvuru Bilgisi</option>
+              <option value="complete">Başvuru Bilgisi Tam</option>
             </select>
           </div>
         </div>

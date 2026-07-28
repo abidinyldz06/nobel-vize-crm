@@ -98,7 +98,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 1 — Veritabanı standardizasyonu | Production'a uygulandı ve doğrulandı | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
-| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.1 tamamlandı; 4.2 bekliyor | `docs/PHASE_4_1_IMPLEMENTATION_REPORT.md` |
+| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.1 tamamlandı; 4.1.1 stabilizasyon release adayı | `docs/PHASE_4_1_1_IMPLEMENTATION_REPORT.md` |
 
 Faz 3 alt aşama takibi:
 
@@ -121,7 +121,10 @@ kanıtları ilgili uygulama raporlarındadır. Bir aşama
 staging/production kanıtı tamamlanmadan `Tamamlandı` olarak işaretlenmez.
 
 Faz 4.1'de yanıltıcı müşteri profil puanlaması uygulama, rapor, dışa aktarma
-ve veritabanından kaldırıldı; eski yedeklerle uyumluluk korundu. Faz 4,
+ve veritabanından kaldırıldı; eski yedeklerle uyumluluk korundu. Faz 4.1.1
+stabilizasyon paketi boş evrak seçimi, açık tema, ana etiket kataloğu, görev
+ilk yüklemesi, eksik başvuru verisi görünürlüğü ve mükerrer müşteri
+korumasını kapsar. Faz 4,
 zamanlanmış operasyonlar, otomatik şifreli DB/Storage yedeği, hesap
 güvenliği, sağlayıcı destekli iletişim, kontrollü KVKK otomasyonu, lead
 yönetimi, takvim ve gerçek veriye dayalı raporlamayla devam edecektir.

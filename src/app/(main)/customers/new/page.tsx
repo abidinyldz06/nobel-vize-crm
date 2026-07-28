@@ -1,12 +1,17 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createCustomerWithApplication } from "@/app/actions/customer";
-import { UserPlus, Save, ArrowLeft } from "lucide-react";
+import { UserPlus, Save, ArrowLeft, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import SmartDocumentSelector from "@/components/SmartDocumentSelector";
 
 export const revalidate = 0;
 
-export default async function NewCustomerPage() {
+export default async function NewCustomerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const supabase = await createSupabaseServerClient();
   // countries tablosundan kayıtlı ülkeleri çek
   const { data: dbCountries } = await supabase.from('countries').select('id, name').order('name');
@@ -29,6 +34,24 @@ export default async function NewCustomerPage() {
             <p className="text-slate-500 text-xs mt-0.5">Müşteri bilgilerini girin ve başvuru dosyasını oluşturun.</p>
           </div>
         </div>
+
+        {error && (
+          <div role="alert" className="mb-5 flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/70 dark:bg-amber-950/40 dark:text-amber-100">
+            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-semibold">
+                {error === 'possible_duplicate_customer'
+                  ? 'Benzer bir müşteri kaydı zaten bulunuyor.'
+                  : 'Müşteri kaydı oluşturulamadı.'}
+              </p>
+              <p className="mt-1 text-xs opacity-80">
+                {error === 'possible_duplicate_customer'
+                  ? 'Telefon, e-posta veya pasaport bilgisini kontrol edin. Kayıt gerçekten farklı bir kişiye aitse aşağıdaki onay kutusunu işaretleyip tekrar kaydedin.'
+                  : 'Bilgileri kontrol edip tekrar deneyin. Sorun sürerse sistem kayıtlarını inceleyin.'}
+              </p>
+            </div>
+          </div>
+        )}
 
         <form action={createCustomerWithApplication} className="space-y-5">
           {/* Kişisel Bilgiler */}
@@ -127,6 +150,21 @@ export default async function NewCustomerPage() {
               </div>
             </div>
           </div>
+
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+            <input
+              type="checkbox"
+              name="allowDuplicateCustomer"
+              value="true"
+              className="mt-0.5 h-4 w-4 rounded border-amber-400"
+            />
+            <span>
+              <span className="block font-semibold">Benzer kayıt uyarısına rağmen yeni müşteri oluştur</span>
+              <span className="mt-1 block text-xs opacity-75">
+                Yalnızca aynı iletişim veya pasaport bilgisine sahip farklı bir kişi olduğundan eminseniz kullanın.
+              </span>
+            </span>
+          </label>
 
           {/* Actions */}
           <div className="flex justify-end gap-3">

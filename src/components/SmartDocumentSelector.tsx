@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import { AlertCircle, FileText, CheckCircle2 } from "lucide-react";
 import type { Json, Tables } from "@/types/database";
+import { selectBestDocumentRule } from "@/lib/document-rule-matcher";
 
 const TRAVEL_METHODS = { ucak: "Uçak", tur_paketi: "Tur Paketi", gemi: "Gemi", kendi_araci: "Kendi Aracı" };
 const ACCOMMODATIONS = { otel: "Otel", aile_arkadas: "Aile/Arkadaş Yanı", diger: "Diğer" };
@@ -49,32 +50,13 @@ export default function SmartDocumentSelector({
       .map(rule => ({ ...rule, parsedDocuments: parseDocuments(rule.documents) }));
     if (countryRules.length === 0) return null;
 
-    // Müşteri değerlendirmesi yapmadan en özgül evrak kuralını seç.
-    // Tam eşleşme daha özgül, null alan genel, uyumsuz alan geçersizdir.
-    let bestRule: SmartRule | null = null;
-    let highestSpecificity = -1;
-
-    for (const rule of countryRules) {
-      let specificity = 0;
-      const checkField = (ruleVal: unknown, stateVal: string) => {
-        if (ruleVal === null) return 1;
-        if (stateVal && String(ruleVal) === stateVal) return 10;
-        return -100;
-      };
-
-      specificity += checkField(rule.travel_method, travelMethod);
-      specificity += checkField(rule.accommodation, accommodation);
-      specificity += checkField(rule.occupation, occupation);
-      specificity += checkField(rule.with_children, withChildren);
-      specificity += checkField(rule.nationality, nationality);
-
-      if (specificity >= 0 && specificity > highestSpecificity) {
-        highestSpecificity = specificity;
-        bestRule = rule;
-      }
-    }
-
-    return bestRule;
+    return selectBestDocumentRule(countryRules, {
+      travel_method: travelMethod,
+      accommodation,
+      occupation,
+      with_children: withChildren,
+      nationality,
+    });
   }, [selectedCountry, selectedVisaType, travelMethod, accommodation, occupation, withChildren, nationality, allRules]);
 
   return (
@@ -98,7 +80,7 @@ export default function SmartDocumentSelector({
         </div>
         <div className="space-y-1.5">
           <label className="text-[10px] font-semibold text-slate-500 uppercase">Seyahat Aracı</label>
-          <select name="travelMethod" value={travelMethod} onChange={e => setTravelMethod(e.target.value)}
+          <select required name="travelMethod" value={travelMethod} onChange={e => setTravelMethod(e.target.value)}
             className="w-full px-3 py-2 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-lg text-xs outline-none focus:border-blue-500">
             <option value="">— Seçin —</option>
             {Object.entries(TRAVEL_METHODS).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
@@ -106,7 +88,7 @@ export default function SmartDocumentSelector({
         </div>
         <div className="space-y-1.5">
           <label className="text-[10px] font-semibold text-slate-500 uppercase">Konaklama Tipi</label>
-          <select name="accommodation" value={accommodation} onChange={e => setAccommodation(e.target.value)}
+          <select required name="accommodation" value={accommodation} onChange={e => setAccommodation(e.target.value)}
             className="w-full px-3 py-2 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-lg text-xs outline-none focus:border-blue-500">
             <option value="">— Seçin —</option>
             {Object.entries(ACCOMMODATIONS).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
@@ -114,7 +96,7 @@ export default function SmartDocumentSelector({
         </div>
         <div className="space-y-1.5">
           <label className="text-[10px] font-semibold text-slate-500 uppercase">Meslek</label>
-          <select name="occupation" value={occupation} onChange={e => setOccupation(e.target.value)}
+          <select required name="occupation" value={occupation} onChange={e => setOccupation(e.target.value)}
             className="w-full px-3 py-2 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-lg text-xs outline-none focus:border-blue-500">
             <option value="">— Seçin —</option>
             {Object.entries(OCCUPATIONS).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
@@ -122,7 +104,7 @@ export default function SmartDocumentSelector({
         </div>
         <div className="space-y-1.5">
           <label className="text-[10px] font-semibold text-slate-500 uppercase">Çocuklu Mu?</label>
-          <select name="withChildren" value={withChildren} onChange={e => setWithChildren(e.target.value)}
+          <select required name="withChildren" value={withChildren} onChange={e => setWithChildren(e.target.value)}
             className="w-full px-3 py-2 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-lg text-xs outline-none focus:border-blue-500">
             <option value="">— Seçin —</option>
             {Object.entries(WITH_CHILDREN).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
@@ -130,7 +112,7 @@ export default function SmartDocumentSelector({
         </div>
         <div className="space-y-1.5">
           <label className="text-[10px] font-semibold text-slate-500 uppercase">Uyruk</label>
-          <select name="nationality" value={nationality} onChange={e => setNationality(e.target.value)}
+          <select required name="nationality" value={nationality} onChange={e => setNationality(e.target.value)}
             className="w-full px-3 py-2 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-lg text-xs outline-none focus:border-blue-500">
             <option value="">— Seçin —</option>
             {Object.entries(NATIONALITIES).map(([k,v]) => <option key={k} value={k}>{v}</option>)}

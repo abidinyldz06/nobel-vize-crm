@@ -126,3 +126,49 @@ describe("phase 4.1 profile score removal", () => {
     assert.match(reportsPage, /summarizeDocuments\(allDocs\)/);
   });
 });
+
+describe("phase 4.1.1 stabilization and data integrity", () => {
+  it("keeps duplicate protection and rule matching inside the atomic database workflow", async () => {
+    const migration = await readFile(
+      path.join(migrationsRoot, "202607280001_phase411_data_integrity.sql"),
+      "utf8",
+    );
+
+    assert.match(migration, /possible_duplicate_customer/);
+    assert.match(migration, /allow_duplicate_customer/);
+    assert.match(migration, /pg_advisory_xact_lock/);
+    assert.match(migration, /create_customer_application_v1_core/);
+    assert.match(migration, /v_travel_method IS NULL OR rule\.travel_method IS NULL/);
+    assert.match(migration, /rule\.created_at,\s+rule\.id/);
+    assert.match(migration, /UPDATE public\.applications\s+SET\s+country_id = v_country_id/);
+  });
+
+  it("merges the verified duplicate without hard deleting customer data", async () => {
+    const migration = await readFile(
+      path.join(migrationsRoot, "202607280001_phase411_data_integrity.sql"),
+      "utf8",
+    );
+
+    assert.match(migration, /36d2e790-6348-4541-b85a-8d04e50a676e/);
+    assert.match(migration, /618078b5-a75c-4adc-a8ea-e566e1098f7f/);
+    assert.match(migration, /UPDATE public\.applications SET customer_id = target_customer_id/);
+    assert.match(migration, /is_deleted = true/);
+    assert.match(migration, /Mükerrer müşteri kaydı birleştirildi; ilişkili kayıtlar korundu/);
+    assert.doesNotMatch(migration, /DELETE FROM public\.customers/);
+  });
+
+  it("keeps light theme, master tag options and server-provided task state visible", async () => {
+    const [layout, customersPage, taskPage, taskBoard] = await Promise.all([
+      readFile(path.join(projectRoot, "src", "app", "layout.tsx"), "utf8"),
+      readFile(path.join(projectRoot, "src", "app", "(main)", "customers", "page.tsx"), "utf8"),
+      readFile(path.join(projectRoot, "src", "app", "(main)", "tasks", "page.tsx"), "utf8"),
+      readFile(path.join(projectRoot, "src", "components", "TaskBoard.tsx"), "utf8"),
+    ]);
+
+    assert.match(layout, /defaultTheme="light"/);
+    assert.match(customersPage, /\.from\(['"]tags['"]\)/);
+    assert.match(taskPage, /initialTasks=/);
+    assert.match(taskBoard, /useState<TaskItem\[]>\(initialTasks\)/);
+    assert.match(taskBoard, /Görevler yenilenemedi/);
+  });
+});

@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { Activity, Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database, MessagesSquare, ScrollText } from "lucide-react";
+import { Activity, Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database, MessagesSquare, ScrollText, Info } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import AuditLog from "@/components/AuditLog";
 import BackupPanel from "@/components/BackupPanel";
@@ -175,6 +175,15 @@ export default function SettingsClient({
               <p className="text-xs text-slate-500 mt-0.5">Nobel Vize tek şirket kaydı ve iletişim bilgileri.</p>
             </div>
             <div className="px-6 py-5 space-y-4">
+              {(!email.trim() || !phone.trim()) && (
+                <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-300">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                  <p className="text-xs">
+                    Şirket e-posta veya telefon bilgisi henüz kaydedilmedi.
+                    Buradaki örnek metinler kayıtlı iletişim bilgisi değildir.
+                  </p>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Şirket Adı</label>

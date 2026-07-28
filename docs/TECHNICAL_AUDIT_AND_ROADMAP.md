@@ -85,6 +85,14 @@ dışa aktarma akışlarından kaldırıldı. Gerçek başvuru sonuçları ile e
 metrikleri korunurken sabit başarı yüzdeleri kaldırıldı. Eski yedek girdileri
 yeni şemada güvenle yok sayılır.
 
+### Release adayı — Faz 4.1.1 stabilizasyonu
+
+Boş evrak seçimi, açık tema, ana etiket filtresi, görev ilk yüklemesi ve eksik
+başvuru verisi görünürlüğü düzeltildi. Normalize iletişim/pasaport verisiyle
+atomik mükerrer müşteri koruması ve doğrulanmış ALPER ORS birleştirme
+migration'ı hazırlandı. Geçmiş profil alanları ile şirket iletişim değerleri
+tahmin edilmeden manuel veri işi olarak bırakıldı.
+
 ### P1 — Zamanlanmış operasyon ve iş sürekliliği
 
 - Operasyon görev senkronizasyonu bugün görev API'sinin çağrılmasına bağlıdır;
@@ -122,14 +130,15 @@ Faz 4'ün sıralı kapsamı:
 
 1. 4.0 — Plan, kabul kriterleri ve GitHub iş listesi — tamamlandı
 2. 4.1 — Yanıltıcı müşteri puanlamasının kaldırılması — tamamlandı
-3. 4.2 — Zamanlanmış operasyon sistemi
-4. 4.3 — Otomatik, şifreli ve repo dışı DB/Storage yedeği
-5. 4.4 — Hesap ve giriş güvenliğinin güçlendirilmesi
-6. 4.5 — Sağlayıcı destekli gerçek bildirim ve iletişim
-7. 4.6 — Kontrollü KVKK yaşam döngüsü otomasyonu
-8. 4.7 — Lead ve müşteri operasyonlarının geliştirilmesi
-9. 4.8 — Takvim entegrasyonu ve gelişmiş gerçek raporlar
-10. 4.9 — Bakım, kabul ve production kapanışı
+3. 4.1.1 — Stabilizasyon ve veri bütünlüğü — release adayı
+4. 4.2 — Zamanlanmış operasyon sistemi
+5. 4.3 — Otomatik, şifreli ve repo dışı DB/Storage yedeği
+6. 4.4 — Hesap ve giriş güvenliğinin güçlendirilmesi
+7. 4.5 — Sağlayıcı destekli gerçek bildirim ve iletişim
+8. 4.6 — Kontrollü KVKK yaşam döngüsü otomasyonu
+9. 4.7 — Lead ve müşteri operasyonlarının geliştirilmesi
+10. 4.8 — Takvim entegrasyonu ve gelişmiş gerçek raporlar
+11. 4.9 — Bakım, kabul ve production kapanışı
 
 Ayrıntılı kapsam, kapsam dışı maddeler, bağımlılıklar ve kabul kriterleri
 `docs/PHASE_4_PLAN.md` dosyasındadır.
