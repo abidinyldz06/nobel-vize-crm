@@ -2,8 +2,9 @@
 
 Tarih: 26 Temmuz 2026
 
-Durum: Faz 4.1 tamamlandı; Faz 4.1.1 ve Faz 4.2–4.4 release adayı; Faz 4.5
-sağlayıcı-bağımsız temeli hazır, gerçek sağlayıcı kararı bekliyor.
+Durum: Faz 4.1 tamamlandı; Faz 4.1.1 release adayı; Faz 4.2–4.3 production'da
+tamamlandı; Faz 4.4 kullanıcı kabulü, Faz 4.5 gerçek sağlayıcı kararı
+bekliyor.
 
 Ön koşul: Faz 3.8 production kapanışı tamamlandı (`3a4d66c`).
 
@@ -129,8 +130,8 @@ Rapor: `docs/PHASE_4_1_1_IMPLEMENTATION_REPORT.md`
 
 ### 4.2 — Zamanlanmış operasyon sistemi
 
-Uygulama durumu: Kod, migration ve test kapsamı hazır; toplu kalite kapısı,
-GitHub CI ve production kabulü bekliyor.
+Uygulama durumu: Tamamlandı. Kod, migration, GitHub CI, production cron ve
+idempotency kabulü doğrulandı.
 
 Kapsam:
 
@@ -142,16 +143,17 @@ Kapsam:
 
 Kabul kriterleri:
 
-- [ ] Yetkisiz cron isteği reddedilir.
-- [ ] Aynı zaman aralığı iki kez işlendiğinde yinelenen görev oluşmaz.
-- [ ] Başarılı ve başarısız çalışmalar güvenli operasyon kaydına yazılır.
-- [ ] Görev ekranı hiç açılmadan vadesi gelen görevler oluşur.
-- [ ] Unit, güvenlik, pgTAP ve zamanlanmış iş entegrasyon testleri başarılıdır.
+- [x] Yetkisiz cron isteği reddedilir.
+- [x] Aynı zaman aralığı iki kez işlendiğinde yinelenen görev oluşmaz.
+- [x] Başarılı ve başarısız çalışmalar güvenli operasyon kaydına yazılır.
+- [x] Görev ekranı hiç açılmadan vadesi gelen görevler oluşur.
+- [x] Unit, güvenlik, pgTAP ve zamanlanmış iş entegrasyon testleri başarılıdır.
 
 ### 4.3 — Otomatik, şifreli ve repo dışı yedekleme
 
-Uygulama durumu: Kod, migration, retention ve restore uyumluluğu hazır; toplu
-kalite kapısı ve production ilk zamanlanmış recovery point kanıtı bekliyor.
+Uygulama durumu: Tamamlandı. Production'da şifreli recovery point oluşturuldu,
+checksum doğrulandı, kayıt `verified` oldu ve aynı günlük pencere idempotent
+biçimde atlandı.
 
 Kapsam:
 
@@ -163,11 +165,11 @@ Kapsam:
 
 Kabul kriterleri:
 
-- [ ] Veritabanı ile Storage nesneleri aynı recovery point kaydına bağlanır.
-- [ ] Yedek şifreli, bütünlüğü doğrulanmış ve repo dışındadır.
-- [ ] Saklama politikası otomatik uygulanır.
-- [ ] Başarısız veya gecikmiş yedek admin uyarısı üretir.
-- [ ] İzole restore tatbikatı veri ve Storage bütünlüğünü doğrular.
+- [x] Veritabanı ile Storage nesneleri aynı recovery point kaydına bağlanır.
+- [x] Yedek şifreli, bütünlüğü doğrulanmış ve repo dışındadır.
+- [x] Saklama politikası otomatik uygulanır.
+- [x] Başarısız veya gecikmiş yedek admin uyarısı üretir.
+- [x] İzole restore tatbikatı veri ve Storage bütünlüğünü doğrular.
 
 ### 4.4 — Hesap ve giriş güvenliğinin güçlendirilmesi
 

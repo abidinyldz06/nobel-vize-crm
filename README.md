@@ -103,7 +103,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 1 — Veritabanı standardizasyonu | Production'a uygulandı ve doğrulandı | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
-| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.2–4.4 ve 4.5 sağlayıcı-bağımsız temeli release adayı | `docs/PHASE_4_2_TO_4_5_IMPLEMENTATION_REPORT.md` |
+| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.2–4.3 production'da tamamlandı; 4.4 kullanıcı kabulü ve 4.5 sağlayıcı kararı bekliyor | `docs/PHASE_4_2_TO_4_5_IMPLEMENTATION_REPORT.md` |
 
 Faz 3 alt aşama takibi:
 
@@ -130,10 +130,11 @@ ve veritabanından kaldırıldı; eski yedeklerle uyumluluk korundu. Faz 4.1.1
 stabilizasyon paketi boş evrak seçimi, açık tema, ana etiket kataloğu, görev
 ilk yüklemesi, eksik başvuru verisi görünürlüğü ve mükerrer müşteri
 korumasını kapsar. Faz 4,
-zamanlanmış operasyonlar, otomatik şifreli DB/Storage yedeği ve hesap
-güvenliği için 4.2–4.4 release adayı hazırlanmıştır. Faz 4.5'in izin/outbox,
-retry ve webhook temeli hazırdır; gerçek sağlayıcı entegrasyonu ürün kararı
-verilene kadar kapalıdır. Faz 4 kontrollü KVKK otomasyonu, lead
+zamanlanmış operasyonlar ve otomatik şifreli DB/Storage yedeği için 4.2–4.3
+production kabulü tamamlanmıştır. Faz 4.4 production'a alınmış olup gerçek
+admin TOTP enrollment/oturum kabulü beklemektedir. Faz 4.5'in izin/outbox,
+retry ve webhook temeli production'dadır; gerçek sağlayıcı entegrasyonu ürün
+kararı verilene kadar kapalıdır. Faz 4 kontrollü KVKK otomasyonu, lead
 yönetimi, takvim ve gerçek veriye dayalı raporlamayla devam edecektir.
 Alt aşamalar, bağımlılıklar ve kabul kriterleri `docs/PHASE_4_PLAN.md`
 dosyasındadır. SaaS/tenant ve abonelik özellikleri Faz 4 kapsamında değildir.

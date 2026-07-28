@@ -2,9 +2,10 @@
 
 Tarih: 28 Temmuz 2026
 
-Durum: Kod ve migration paketi hazır; toplu kalite kapısı, GitHub CI ve
-production kabulü bekliyor. Faz 4.5 gerçek sağlayıcı entegrasyonu ürün
-kararı verilene kadar bilinçli olarak kapalıdır.
+Durum: Faz 4.2 ve 4.3 production'da tamamlandı. Faz 4.4 kodu ve migration'ı
+production'da; gerçek admin TOTP enrollment ve oturum iptal kullanıcı kabulü
+bekliyor. Faz 4.5 sağlayıcı-bağımsız temeli production'da, gerçek sağlayıcı
+entegrasyonu ürün kararı verilene kadar bilinçli olarak kapalıdır.
 
 ## 1. Faz 4.2 — Zamanlanmış operasyon sistemi
 
@@ -63,6 +64,7 @@ kararı verilene kadar bilinçli olarak kapalıdır.
 3. `202607280004_phase44_account_security.sql`
 4. `202607280005_phase45_message_outbox_foundation.sql`
 5. `202607280006_phase42_45_backup_compatibility.sql`
+6. `202607280007_phase43_service_backup_resolution.sql`
 
 Migration'lar transaction içinde uygulanır. Production geri dönüşünde önce
 cron'lar durdurulur ve yeni yazmalar kesilir. Şema geri dönüşü yerine
@@ -80,3 +82,29 @@ Toplu final doğrulamasında aşağıdaki kapılar birlikte çalıştırılır:
 - Next.js production build.
 
 Sonuçlar alınmadan commit, push veya production migration yapılmaz.
+
+## 7. Production kabul sonucu
+
+28 Temmuz 2026 tarihinde PR #45 ve production kabulünde bulunan yedek
+doğrulama düzeltmesini içeren PR #46 bütün GitHub kapıları yeşilken merge
+edildi.
+
+- `202607280002`–`202607280007` migration'ları production ile eşleşiyor.
+- Liveness, readiness ve ana sayfa `200` döndü.
+- Üç cron endpoint'i secret olmadan `401` döndü.
+- Operasyon cron'u ilk çağrıda başarılı oldu; aynı saat penceresindeki ikinci
+  çağrı yinelenen iş oluşturmadan atlandı.
+- İlk production yedek kabulünde bulunan service-role olay çözümleme kuralı
+  ve başarısız günlük pencere retry açığı PR #46 ile kapatıldı.
+- Son canlı yedek 269 veritabanı satırı ve 1 private Storage nesnesiyle
+  şifreli recovery point oluşturdu; `backup_runs` kaydı `verified` oldu.
+- Aynı günlük pencerenin ikinci yedek çağrısı
+  `window_already_processed` sonucu verdi.
+- Final yerel doğrulama 60 Node testi, 297 pgTAP, restore drill ve 24
+  Playwright testiyle geçti; GitHub application, database, browser ve Vercel
+  kontrolleri başarılı oldu.
+
+Faz 4.4 tamamlandı olarak kapatılmadan önce gerçek admin hesabında QR/TOTP
+enrollment ve diğer oturumları kapatma kabulü yapılmalıdır. Faz 4.5 ise gerçek
+sağlayıcı, gönderici kimliği, maliyet ve hukuki politika kararı verilene kadar
+yalnız güvenli temel olarak açık tutulur.
