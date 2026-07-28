@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(39);
+SELECT plan(41);
 
 SELECT has_table('public', 'scheduled_job_runs', 'scheduled job history exists');
 SELECT has_table('public', 'security_events', 'security audit history exists');
@@ -116,6 +116,23 @@ SELECT ok((SELECT admin_mfa_required FROM public.tenants LIMIT 1), 'admin MFA po
 SELECT ok(NOT (SELECT consultant_mfa_required FROM public.tenants LIMIT 1), 'consultant MFA policy defaults to optional');
 SELECT col_is_unique('public', 'message_outbox', 'idempotency_key', 'message idempotency key is unique');
 SELECT col_is_unique('public', 'scheduled_job_runs', ARRAY['job_name', 'window_key'], 'job window is unique');
+
+INSERT INTO public.operational_events (
+  event_key, severity, source, status, summary
+) VALUES (
+  'backup.stale', 'warning', 'backup', 'open', 'Service-owned backup warning'
+);
+SELECT lives_ok(
+  $$ UPDATE public.operational_events
+     SET status = 'resolved', resolved_at = now(), resolved_by_staff_id = NULL
+     WHERE summary = 'Service-owned backup warning' $$,
+  'service-owned operational event can resolve without a staff identity'
+);
+SELECT is(
+  (SELECT status FROM public.operational_events WHERE summary = 'Service-owned backup warning'),
+  'resolved',
+  'service-owned operational event persists as resolved'
+);
 
 SELECT * FROM finish();
 ROLLBACK;

@@ -141,24 +141,49 @@ async function verifyPlaintext(plaintext: Uint8Array) {
 export async function runScheduledBackup(now = new Date()) {
   const admin = createSupabaseAdminClient();
   const windowKey = now.toISOString().slice(0, 10);
-  const { data: existing } = await admin
+  const { data: existing, error: existingError } = await admin
     .from("scheduled_job_runs")
-    .select("status")
+    .select("id, status")
     .eq("job_name", "backup")
     .eq("window_key", windowKey)
     .maybeSingle();
-  if (existing) return { status: "skipped" as const, reason: "window_already_processed" };
+  if (existingError) throw existingError;
 
-  const { data: scheduledRun, error: scheduledError } = await admin
-    .from("scheduled_job_runs")
-    .insert({ job_name: "backup", window_key: windowKey })
-    .select("id")
-    .single();
-  if (scheduledError?.code === "23505") {
+  let scheduledRun: { id: string } | null = null;
+  if (existing?.status === "failed") {
+    const { data: retriedRun, error: retryError } = await admin
+      .from("scheduled_job_runs")
+      .update({
+        status: "started",
+        inserted_count: 0,
+        error_code: null,
+        started_at: new Date().toISOString(),
+        completed_at: null,
+      })
+      .eq("id", existing.id)
+      .eq("status", "failed")
+      .select("id")
+      .maybeSingle();
+    if (retryError) throw retryError;
+    if (!retriedRun) {
+      return { status: "skipped" as const, reason: "window_retry_in_progress" };
+    }
+    scheduledRun = retriedRun;
+  } else if (existing) {
     return { status: "skipped" as const, reason: "window_already_processed" };
-  }
-  if (scheduledError || !scheduledRun) {
-    throw scheduledError ?? new Error("backup_schedule_not_started");
+  } else {
+    const { data: insertedRun, error: scheduledError } = await admin
+      .from("scheduled_job_runs")
+      .insert({ job_name: "backup", window_key: windowKey })
+      .select("id")
+      .single();
+    if (scheduledError?.code === "23505") {
+      return { status: "skipped" as const, reason: "window_already_processed" };
+    }
+    if (scheduledError || !insertedRun) {
+      throw scheduledError ?? new Error("backup_schedule_not_started");
+    }
+    scheduledRun = insertedRun;
   }
 
   let backupRunId: string | null = null;
