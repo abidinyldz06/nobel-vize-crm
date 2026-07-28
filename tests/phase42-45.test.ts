@@ -53,6 +53,17 @@ describe("phase 4.3 encrypted continuity backup", () => {
     assert.match(source, /backup_storage_integrity_failed/);
     assert.match(source, /continuity-backups/);
   });
+
+  it("retries failed daily windows and permits service-owned event resolution", async () => {
+    const [source, migration] = await Promise.all([
+      readFile(path.join(root, "src/lib/scheduled-backup.ts"), "utf8"),
+      readFile(path.join(root, "supabase/migrations/202607280007_phase43_service_backup_resolution.sql"), "utf8"),
+    ]);
+    assert.match(source, /existing\?\.status === "failed"/);
+    assert.match(source, /window_retry_in_progress/);
+    assert.match(migration, /status = 'resolved' AND resolved_at IS NOT NULL/);
+    assert.doesNotMatch(migration, /status = 'resolved' AND resolved_at IS NOT NULL AND resolved_by_staff_id IS NOT NULL/);
+  });
 });
 
 describe("phase 4.4 account security", () => {
