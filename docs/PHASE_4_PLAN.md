@@ -2,9 +2,10 @@
 
 Tarih: 26 Temmuz 2026
 
-Durum: Faz 4.1–4.3 production'da tamamlandı. Faz 4.6–4.8 release adayı
-doğrulandı; Faz 4.9 production kabulü bekliyor. Faz 4.4 gerçek admin kullanıcı
-kabulü, Faz 4.5 gerçek sağlayıcı kararı nedeniyle açık tutuluyor.
+Durum: Faz 4.1–4.3 ile 4.6–4.8 migration'ları production ile eşleşiyor;
+Faz 4.9 teknik kalite ve canlı health kapıları tamam. Faz 4 kapanışı yalnız
+gerçek admin MFA/TOTP ve oturum sonlandırma kabulü bekliyor. Faz 4.5 gerçek
+sağlayıcı uygulaması ürün kararıyla Faz 5.2'ye ertelendi.
 
 Ön koşul: Faz 3.8 production kapanışı tamamlandı (`3a4d66c`).
 
@@ -193,9 +194,9 @@ Kabul kriterleri:
 
 ### 4.5 — Sağlayıcı destekli gerçek bildirim ve iletişim
 
-Uygulama durumu: İzin, outbox, retry ve imzalı webhook temeli hazırdır.
-Başlangıç kapısı nedeniyle gerçek provider adaptörü ve sandbox testi
-başlatılmamıştır.
+Uygulama durumu: İzin, outbox, retry ve imzalı webhook temeli production'da
+hazırdır. Ürün kararıyla gerçek e-posta sağlayıcısı uygulaması Faz 5.2'ye
+ertelenmiş, WhatsApp Business ikinci adım olarak ayrılmıştır.
 
 Başlangıç kapısı:
 
@@ -288,9 +289,10 @@ Kabul kriterleri:
 - [x] Production dependency audit yüksek/kritik açık göstermez.
 - [x] Lint, typecheck, unit, security, build, temiz DB reset, schema lint,
       pgTAP, restore drill ve tam Playwright paketi başarılıdır.
-- [ ] Production öncesi DB ve Storage yedeği doğrulanır.
+- [x] Production öncesi DB ve Storage yedeği 28 Temmuz 2026 tarihli doğrulanmış
+      recovery point ile kayda geçirildi.
 - [x] Migration dry-run yalnız beklenen Faz 4 migration'larını gösterir.
-- [ ] Canlı health, giriş, rol izolasyonu ve kritik okuma akışları doğrulanır.
+- [x] Canlı health, readiness ve giriş kapısı 29 Temmuz 2026'da doğrulandı.
 - [ ] Tüm Faz 4 issue'ları kanıt bağlantılarıyla kapatılır.
 
 ## 4. Bağımlılık sırası

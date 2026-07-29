@@ -106,7 +106,8 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 1 — Veritabanı standardizasyonu | Production'a uygulandı ve doğrulandı | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
-| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | 4.6–4.8 release adayı doğrulandı; 4.9 production kabulü, 4.4 kullanıcı kabulü ve 4.5 sağlayıcı kararı bekliyor | `docs/PHASE_4_6_TO_4_9_IMPLEMENTATION_REPORT.md` |
+| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | Migration'lar production ile eşleşiyor; teknik/health kabulü tamam. Kapanış yalnız gerçek admin MFA kabulü sonrasında yapılacak; gerçek mesaj sağlayıcısı Faz 5.2'ye ertelendi. | `docs/PHASE_5_0_CLOSURE_REPORT.md` |
+| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | Planlandı; yalnız 5.0 kapanış/temizlik paketi yürütülüyor. | `docs/PHASE_5_PLAN.md` |
 
 Faz 3 alt aşama takibi:
 
@@ -135,14 +136,14 @@ ilk yüklemesi, eksik başvuru verisi görünürlüğü ve mükerrer müşteri
 korumasını kapsar. Faz 4,
 zamanlanmış operasyonlar ve otomatik şifreli DB/Storage yedeği için 4.2–4.3
 production kabulü tamamlanmıştır. Faz 4.4 production'a alınmış olup gerçek
-admin TOTP enrollment/oturum kabulü beklemektedir. Faz 4.5'in izin/outbox,
-retry ve webhook temeli production'dadır; gerçek sağlayıcı entegrasyonu ürün
-kararı verilene kadar kapalıdır. Faz 4.6–4.8 kontrollü KVKK otomasyonu, lead
-yönetimi, takvim ve gerçek veriye dayalı raporlama olarak release adayı
-seviyesinde tamamlandı. Faz 4.9'un teknik kalite kapıları yeşildir; production
-kabulü ve Faz 4'ün bütünü için açık 4.4/4.5 kararları ayrıca izlenir.
-Alt aşamalar, bağımlılıklar ve kabul kriterleri `docs/PHASE_4_PLAN.md`
-dosyasındadır. SaaS/tenant ve abonelik özellikleri Faz 4 kapsamında değildir.
+admin TOTP enrollment/oturum kabulü beklemektedir. Faz 4.5'in güvenli
+izin/outbox temeli production'dadır; gerçek e-posta sağlayıcısı uygulaması
+Faz 5.2'ye ertelenmiştir. Faz 4.6–4.8 migration'ları production ile eşleşir;
+Faz 4.9'un teknik kalite ve canlı health kapıları yeşildir. Faz 4'ün tek açık
+kapanış kanıtı gerçek admin MFA kabulüdür. Kapanış kaydı
+`docs/PHASE_5_0_CLOSURE_REPORT.md`, sonraki ürün sırası
+`docs/PHASE_5_PLAN.md` dosyasındadır. SaaS/tenant ve abonelik özellikleri Faz
+4 kapsamında değildir.
 
 ### Production hotfix kayıtları
 
