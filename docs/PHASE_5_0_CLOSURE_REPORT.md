@@ -19,11 +19,17 @@ ayırır; kullanıcı kabulü olmadan hiçbir Faz 4 maddesini tamamlandı göste
 
 ## Kontrollü bağımlılık güncellemesi
 
-- Dependabot #49 (`actions/checkout` v6 → v7) yalnız workflow referanslarını
-  değiştirir. PR kalite kapıları ve Vercel preview geçtikten sonra squash merge
-  edildi; ana dal kalite çalışmasının sonucu bu rapora eklenir.
-- Dependabot #50 (`actions/setup-node` v6 → v7), #49 ana dal kalite kapısı
-  başarılı olduktan sonra aynı sırayla ele alınır.
+- Dependabot #49 (`actions/checkout` v6 → v7) ve #50
+  (`actions/setup-node` v6 → v7), kendi application, database, browser ve
+  Vercel preview kapıları geçtikten sonra sırayla squash merge edildi.
+- #50 sonrası ana dalda database ve browser işleri aynı anda Supabase başlattı;
+  Inbucket'in sabit `54324` portu çakıştı. Uygulama ile browser işi geçti;
+  çakışmayı kaldırmak için browser işi database işinden sonra çalışacak şekilde
+  sıralandı.
+- Bu sıralamayla 29 Temmuz 2026'da tam yerel release paketi başarılı oldu:
+  lint, typecheck, 65 uygulama testi, production dependency audit, Next.js
+  build, temiz DB reset, şema lint'i, 324 pgTAP, restore drill ve 26 Playwright
+  testi.
 
 ## Faz 4 açıklarının dürüst durumu
 
@@ -38,7 +44,7 @@ ayırır; kullanıcı kabulü olmadan hiçbir Faz 4 maddesini tamamlandı göste
 
 ## Temizlik sınırı
 
-"15 gereksiz kopya" için repository ve çalışma alanı tarandı; silmeye uygun,
-kesin olarak tanımlanmış 15 dosya/nesne listesi bulunmadı. Git tarafından
-yoksayılan derleme bağımlılıkları veya geçmiş referanslar kaynak kopyası olarak
-yorumlanmadı. Geri döndürülemez silme, kesin hedef listesi olmadan yapılmaz.
+Çalışma alanında adında ` 2` bulunan 15 izlenmeyen dosya tespit edildi. Her biri
+kanonik kaynak dosyasıyla byte düzeyinde aynıydı; kanonik dosyalar korunarak bu
+15 gereksiz kopya temizlendi. Git tarafından yoksayılan derleme bağımlılıkları
+veya geçmiş referanslar kaynak kopyası olarak yorumlanmadı.

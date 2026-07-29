@@ -55,6 +55,7 @@ jobs:
         run: npm run db:stop
 
   browser:
+    needs: database
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

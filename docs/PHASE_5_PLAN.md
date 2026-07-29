@@ -15,8 +15,8 @@ taahhüdü oluşturmaz.
   gerçekleştirmek.
 - Sağlayıcı kararını açıkça kaydetmek, Faz 4 issue ve milestone kapanışını
   yalnız kanıtlar tamamlandığında yapmak.
-- Silinmesi istenen 15 kopya için kesin dosya/nesne listesi olmadan silme
-  işlemi yapmamak.
+- Adında ` 2` bulunan, kanonik dosyalarla birebir aynı 15 izlenmeyen kopya
+  doğrulandı ve kanonik kaynaklar korunarak temizlendi.
 
 ## 5.1 — Veri kalitesi ve ülke kuralları
 
