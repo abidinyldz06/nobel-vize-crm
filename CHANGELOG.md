@@ -2,6 +2,15 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+## [Unreleased] — Faz 5.0 Temizlik ve Faz 4 Kapanışı
+
+- Production migration zinciri, live/readiness health ve giriş kapısı yeniden
+  doğrulandı; açık kullanıcı kabulü ile tamamlanan teknik kanıtlar ayrıştırıldı.
+- Gerçek mesaj sağlayıcısı kararı Faz 5.2'ye ertelendi: e-posta önce, WhatsApp
+  Business ikinci adımdır; güvenli varsayılan `MESSAGE_PROVIDER=disabled`
+  korunur.
+- Faz 5.1–5.3 ürün sırası ve Faz 5.0 kapanış kaydı belgelendi.
+
 ## [Unreleased] — Faz 4.6–4.9 KVKK, Lead, Takvim ve Bakım
 
 ### KVKK ve lead operasyonları

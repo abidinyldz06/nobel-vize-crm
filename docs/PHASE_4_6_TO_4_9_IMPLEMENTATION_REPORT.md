@@ -2,11 +2,12 @@
 
 Tarih: 28 Temmuz 2026
 
-Durum: Faz 4.6, 4.7 ve 4.8 kod, migration, test ve dokümantasyon olarak release
-adayı seviyesinde tamamlandı. Faz 4.9 teknik kalite kapıları tamamlandı;
-production migration/deployment ve canlı kabul kanıtı bu rapora eklendikten
-sonra production kapanışı yapılacaktır. Faz 4.4 gerçek admin TOTP kabulü ile
-Faz 4.5 gerçek mesaj sağlayıcı kararı ayrı açık bağımlılıklardır.
+Durum: Faz 4.6, 4.7 ve 4.8 migration'ları bağlı production veritabanı ile
+eşleşiyor. Faz 4.9 teknik kalite ile live/readiness health kapıları tamamlandı.
+Bu raporun kapsamındaki yönetici kullanıcı kabulü henüz yapılmadığından Faz 4
+kapanışı tamamlandı sayılmaz. Kalan tek Faz 4 güvenlik kabulü gerçek admin
+TOTP enrollment ve diğer oturumları kapatma akışıdır; gerçek mesaj sağlayıcısı
+ürün kararıyla Faz 5.2'ye ertelenmiştir.
 
 ## 1. Faz 4.6 — Kontrollü KVKK yaşam döngüsü
 
@@ -88,12 +89,16 @@ Kontrol sırasında bulunan ve kapatılan regresyonlar:
 
 ## 7. Production kapanış kontrol listesi
 
-- [ ] Production öncesi şifreli DB/Storage recovery point `verified`.
+- [x] 28 Temmuz 2026 tarihli şifreli DB/Storage recovery point `verified`
+      olarak kayda geçti.
 - [x] Uzak migration dry-run yalnız `202607280008`–`202607280011` gösteriyor.
-- [ ] Migration'lar production'a uygulandı.
-- [ ] Vercel deployment başarılı ve production alias güncel.
-- [ ] Liveness/readiness, login ve anonim rol izolasyonu doğrulandı.
+- [x] Migration'lar production'a uygulandı; 29 Temmuz 2026 migration listesi
+      yerel zincirle eşleşti.
+- [ ] Vercel deployment'ın Faz 4.6–4.8 kullanıcı akışlarıyla canlı kabulü
+      yönetici oturumunda doğrulanacak.
+- [x] Liveness/readiness ve login kapısı 29 Temmuz 2026'da doğrulandı.
 - [ ] `/privacy`, `/leads`, `/appointments`, ICS ve rapor export akışları canlı
       kabul edildi.
 - [ ] Faz 4.6–4.8 GitHub issue'ları production kanıtıyla kapatıldı.
-- [ ] Faz 4.9 issue'unda 4.4/4.5 dış bağımlılıkları açıkça korundu.
+- [ ] Faz 4.9 issue'unda yalnız gerçek admin MFA kabulü açık kalacak şekilde
+      kapanış kanıtı eklenecek.
