@@ -2,10 +2,10 @@
 
 Son güncelleme: 2 Ağustos 2026
 
-Durum: Faz 5.0–5.1.3 GitHub CI ve production kabulünden geçti. Faz 5.2 ve
-5.3'ün kod/veritabanı paketi yerel kabulden geçti; GitHub yayın ve production
-migration kanıtı bu paketten sonra ayrı kaydedilir. Dış sağlayıcıların canlı
-aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı kalır.
+Durum: Faz 5.0–5.3 GitHub CI ve production kabulünden geçti. Faz 5.2–5.3
+PR #55 ile ana dala alındı; production migration zinciri ve canlı sağlık
+kontrolü doğrulandı. Dış sağlayıcıların canlı aktivasyonu gerekli secret ve
+sağlayıcı onayı gelene kadar kapalı kalır.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 
@@ -58,7 +58,7 @@ aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı kalır.
 - Arayüzde doğrulama tarihi ve kaynak bağlantısı görünür. Bu aşama gerçek
   e-posta/WhatsApp gönderimini etkinleştirmez.
 
-## 5.2 — Gerçek iletişim sistemi (uygulama tamamlandı; canlı sağlayıcı aktivasyonu bekliyor)
+## 5.2 — Gerçek iletişim sistemi (production'da; canlı sağlayıcı aktivasyonu bekliyor)
 
 - Resend uyumlu gerçek e-posta adaptörü, idempotent outbox teslimatı ve
   imzalı teslim/bounce webhook'u uygulandı.
@@ -67,7 +67,7 @@ aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı kalır.
   e-posta dışarı gönderilmez.
 - WhatsApp Business ayrı ürün/maliyet kararı gerektirdiği için kapsam dışıdır.
 
-## 5.3 — Operasyon geliştirmeleri (uygulama tamamlandı; Google canlı kabulü bekliyor)
+## 5.3 — Operasyon geliştirmeleri (production'da; Google canlı kabulü bekliyor)
 
 - Google Calendar ile bağlı CRM randevuları için iki yönlü senkronizasyon;
   şifreli token saklama, imzalı OAuth state ve günlük cron eklendi. Outlook
@@ -76,6 +76,8 @@ aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı kalır.
   yükleme ve danışman bildirimi eklendi.
 - Danışman kapasite/iş yükü limitleri ile son ödeme tarihli tahsilat ve
   geciken ödeme görevi eklendi.
+- PR #55 ana dala alınmış, GitHub Quality Gates yeşil, production migration
+  zinciri eşleşmiş ve canlı health kontrolü HTTP 200 olarak doğrulanmıştır.
 
 Faz 5.2–5.3'ün ayrıntılı teknik ve aktivasyon kaydı:
 `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`.
