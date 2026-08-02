@@ -27,6 +27,7 @@ let userId: string | null = null;
 let staffId: string | null = null;
 let customerId: string | null = null;
 let applicationId: string | null = null;
+let documentId: string | null = null;
 let countryId: string | null = null;
 let portalToken: string | null = null;
 
@@ -99,8 +100,9 @@ test.beforeAll(async () => {
     document_type: 'Faz 3.5 Pasaport Fotokopisi',
     status: 'bekleniyor',
     is_required: true,
-  });
+  }).select('id').single();
   if (document.error) throw document.error;
+  documentId = document.data.id;
   const payment = await admin.from('payments').insert({
     application_id: applicationId,
     amount: 1500,
@@ -120,8 +122,9 @@ test.afterAll(async () => {
 
 test('admin manages templates, records communication delivery and controls the improved portal', async ({ page }) => {
   test.setTimeout(90_000);
-  if (!customerId || !applicationId || !portalToken) throw new Error('Phase 3.5 fixture was not created.');
+  if (!customerId || !applicationId || !documentId || !portalToken) throw new Error('Phase 3.5 fixture was not created.');
   const currentCustomerId = customerId;
+  const currentDocumentId = documentId;
 
   await page.goto('/');
   await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
@@ -173,6 +176,25 @@ test('admin manages templates, records communication delivery and controls the i
   await expect(page.getByText('Faz 3.5 Konsolosluk Merkezi')).toBeVisible();
   await expect(page.getByTestId('portal-application-history')).toContainText('Eski Başvuru Ülkesi');
   await expect(page.getByText('₺3.500')).toBeVisible();
+  await page.getByTestId(`portal-document-file-${currentDocumentId}`).setInputFiles({
+    name: 'pasaport.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4\n% Faz 5.3 portal test\n'),
+  });
+  await expect(page.getByText('Evrak yüklendi. Danışman incelemesi bekleniyor.')).toBeVisible();
+  await expect.poll(async () => {
+    const result = await admin
+      .from('documents')
+      .select('status, upload_source, file_url, content_type')
+      .eq('id', currentDocumentId)
+      .single();
+    if (result.error) throw result.error;
+    return result.data;
+  }).toMatchObject({
+    status: 'yuklendi',
+    upload_source: 'portal',
+    content_type: 'application/pdf',
+  });
 
   await page.goto(`/customers/${customerId}`);
   await page.getByRole('button', { name: 'Portal Linki' }).click();

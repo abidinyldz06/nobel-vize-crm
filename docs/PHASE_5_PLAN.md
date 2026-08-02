@@ -2,9 +2,10 @@
 
 Son güncelleme: 2 Ağustos 2026
 
-Durum: Faz 5.0, Faz 5.1.1 ve Faz 5.1.2 tamamlandı; Faz 5.1.2 GitHub CI ve
-production kabulünden geçti. Faz 5.1.3 şirket iletişim bilgisi doğrulama
-paketi geliştirme ve kalite kabulündedir.
+Durum: Faz 5.0–5.1.3 GitHub CI ve production kabulünden geçti. Faz 5.2 ve
+5.3'ün kod/veritabanı paketi yerel kabulden geçti; GitHub yayın ve production
+migration kanıtı bu paketten sonra ayrı kaydedilir. Dış sağlayıcıların canlı
+aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı kalır.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 
@@ -48,7 +49,7 @@ paketi geliştirme ve kalite kabulündedir.
 - GitHub PR #53 squash merge ile ana dala alındı. Ana dal Quality Gates ve
   production health kontrolleri başarılıdır; migration production ile eşleşir.
 
-### 5.1.3 — Şirket iletişim bilgisi doğrulama (geliştirme ve kalite kabulünde)
+### 5.1.3 — Şirket iletişim bilgisi doğrulama (tamamlandı ve production'da)
 
 - Şirket adı, e-posta ve telefon yalnızca yönetici doğrulama akışından
   güncellenir; doğrudan istemci yazımı kapalıdır.
@@ -57,15 +58,24 @@ paketi geliştirme ve kalite kabulündedir.
 - Arayüzde doğrulama tarihi ve kaynak bağlantısı görünür. Bu aşama gerçek
   e-posta/WhatsApp gönderimini etkinleştirmez.
 
-## 5.2 — Gerçek iletişim sistemi
+## 5.2 — Gerçek iletişim sistemi (uygulama tamamlandı; canlı sağlayıcı aktivasyonu bekliyor)
 
-- Önce gerçek e-posta gönderimi, doğrulanmış gönderici alan adı, şablonlar,
-  teslim/başarısız webhookları, izin/ret denetimi ve sandbox/retry kabulü.
-- WhatsApp Business ancak e-posta paketi tamamlanıp ayrı ürün kararı verildikten
-  sonra değerlendirilir.
+- Resend uyumlu gerçek e-posta adaptörü, idempotent outbox teslimatı ve
+  imzalı teslim/bounce webhook'u uygulandı.
+- İzin/ret denetimi, kuyruk retry davranışı ve varsayılan kapalı sağlayıcı
+  durumu korunur. Doğrulanmış sender domain ve Vercel secret'ları girilmeden
+  e-posta dışarı gönderilmez.
+- WhatsApp Business ayrı ürün/maliyet kararı gerektirdiği için kapsam dışıdır.
 
-## 5.3 — Operasyon geliştirmeleri
+## 5.3 — Operasyon geliştirmeleri (uygulama tamamlandı; Google canlı kabulü bekliyor)
 
-- Google veya Outlook ile iki yönlü takvim senkronizasyonu.
-- Portal üzerinden güvenli evrak yükleme, süreç/eksik evrak görünürlüğü.
-- Danışman kapasite ve iş yükü planlama ile tahsilat/geciken ödeme takibi.
+- Google Calendar ile bağlı CRM randevuları için iki yönlü senkronizasyon;
+  şifreli token saklama, imzalı OAuth state ve günlük cron eklendi. Outlook
+  kapsam dışıdır.
+- Portal üzerinden private Storage'a imzalı, tür/boyut doğrulamalı evrak
+  yükleme ve danışman bildirimi eklendi.
+- Danışman kapasite/iş yükü limitleri ile son ödeme tarihli tahsilat ve
+  geciken ödeme görevi eklendi.
+
+Faz 5.2–5.3'ün ayrıntılı teknik ve aktivasyon kaydı:
+`docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`.

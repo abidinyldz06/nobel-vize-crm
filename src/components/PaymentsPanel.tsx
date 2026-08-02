@@ -42,6 +42,8 @@ export default function PaymentsPanel({
     type: "upfront",
     method: "nakit",
     currency: "TRY",
+    status: "alindi",
+    dueAt: "",
     note: "",
   });
   const supabase = createSupabaseBrowserClient();
@@ -60,6 +62,10 @@ export default function PaymentsPanel({
       setErrorMsg("Lütfen geçerli bir tutar girin.");
       return;
     }
+    if (form.status === "bekliyor" && !form.dueAt) {
+      setErrorMsg("Bekleyen ödeme için son ödeme tarihini girin.");
+      return;
+    }
     setErrorMsg("");
     setSaving(true);
 
@@ -71,7 +77,10 @@ export default function PaymentsPanel({
         currency: form.currency,
         type: form.type,
         method: form.method,
-        status: "alindi",
+        status: form.status,
+        due_at: form.status === "bekliyor"
+          ? new Date(`${form.dueAt}T23:59:59+03:00`).toISOString()
+          : null,
         note: form.note || null,
       }])
       .select()
@@ -79,13 +88,23 @@ export default function PaymentsPanel({
 
     if (!error && data) {
       setPayments(prev => [data, ...prev]);
-      setForm({ amount: "", type: "upfront", method: "nakit", currency: "TRY", note: "" });
+      setForm({
+        amount: "",
+        type: "upfront",
+        method: "nakit",
+        currency: "TRY",
+        status: "alindi",
+        dueAt: "",
+        note: "",
+      });
       setShowForm(false);
       // Log activity
       const { data: { user } } = await supabase.auth.getUser();
       await supabase.from("activity_log").insert([{
         application_id: applicationId,
-        action: `Ödeme alındı: ₺${amt.toLocaleString('tr-TR')} (${TYPE_LABELS[form.type] || form.type} — ${METHOD_LABELS[form.method] || form.method})`,
+        action: form.status === "alindi"
+          ? `Ödeme alındı: ₺${amt.toLocaleString('tr-TR')} (${TYPE_LABELS[form.type] || form.type} — ${METHOD_LABELS[form.method] || form.method})`
+          : `Ödeme bekleniyor: ₺${amt.toLocaleString('tr-TR')} — son tarih ${new Date(`${form.dueAt}T12:00:00+03:00`).toLocaleDateString('tr-TR')}`,
         performed_by: user?.email || "Danışman",
       }])
       router.refresh();
@@ -210,6 +229,32 @@ export default function PaymentsPanel({
               </select>
             </div>
             <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Durum</label>
+              <select
+                aria-label="Ödeme durumu"
+                value={form.status}
+                onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 appearance-none"
+              >
+                <option value="alindi">Alındı</option>
+                <option value="bekliyor">Bekliyor</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            {form.status === "bekliyor" && (
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Son Ödeme Tarihi *</label>
+                <input
+                  aria-label="Son ödeme tarihi"
+                  type="date"
+                  value={form.dueAt}
+                  onChange={e => setForm(f => ({ ...f, dueAt: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 transition-all"
+                />
+              </div>
+            )}
+            <div className="space-y-1">
               <label className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Not (isteğe bağlı)</label>
               <input
                 aria-label="Ödeme notu"
@@ -258,6 +303,7 @@ export default function PaymentsPanel({
               <p className="text-[10px] text-slate-500">
                 {TYPE_LABELS[p.type] || p.type} · {METHOD_LABELS[p.method ?? ''] || p.method || 'Belirtilmedi'}
                 {` · ${new Date(p.created_at).toLocaleDateString('tr-TR')}`}
+                {p.status === "bekliyor" && p.due_at && ` · Son tarih: ${new Date(p.due_at).toLocaleDateString('tr-TR')}`}
                 {p.note && ` · ${p.note}`}
               </p>
             </div>

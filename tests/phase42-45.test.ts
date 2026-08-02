@@ -90,8 +90,8 @@ describe("phase 4.4 account security", () => {
   });
 });
 
-describe("phase 4.5 provider-neutral messaging foundation", () => {
-  it("defaults to provider-disabled and keeps fallback delivery claims manual", async () => {
+describe("phase 4.5 and 5.2 messaging delivery", () => {
+  it("fails closed by default and keeps actual email delivery behind the queue", async () => {
     const [provider, composer, migration, webhook] = await Promise.all([
       readFile(path.join(root, "src/lib/message-provider.ts"), "utf8"),
       readFile(path.join(root, "src/components/MessageComposer.tsx"), "utf8"),
@@ -99,13 +99,17 @@ describe("phase 4.5 provider-neutral messaging foundation", () => {
       readFile(path.join(root, "src/app/api/webhook/messages/route.ts"), "utf8"),
     ]);
     assert.match(provider, /return null/);
-    assert.match(provider, /message_provider_not_implemented/);
+    assert.match(provider, /createResendMessageProvider/);
+    assert.match(provider, /Idempotency-Key/);
+    assert.match(provider, /RESEND_API_KEY/);
     assert.match(composer, /mailto:/);
+    assert.match(composer, /enqueue_message_v1/);
+    assert.match(composer, /emailDeliveryEnabled/);
     assert.match(composer, /wa\.me/);
     assert.match(migration, /communication_permission_required/);
     assert.match(migration, /marketing_consent_required/);
     assert.match(migration, /UNIQUE/);
-    assert.match(webhook, /verifySignedWebhookWithSecret/);
+    assert.match(webhook, /verifyResendWebhook/);
     assert.match(webhook, /23505/);
   });
 });

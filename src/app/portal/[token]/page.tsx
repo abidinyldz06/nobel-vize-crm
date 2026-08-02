@@ -2,6 +2,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import { Check, Clock, AlertCircle, Calendar, FileText, CreditCard, MapPin, Phone, MessageCircle, CheckCircle2, Globe, Mail } from "lucide-react";
 import PrintButton from "@/components/Portal/PrintButton";
+import PortalDocumentUpload from "@/components/Portal/DocumentUpload";
 import { APPLICATION_STATUS_META, isApplicationStatus } from "@/lib/application-status";
 
 export const revalidate = 0;
@@ -266,6 +267,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                             <Clock className="w-4 h-4" /> Bekliyor
                           </div>
                         )}
+                        {doc.status !== 'onaylandi' && <PortalDocumentUpload token={token} document={doc} />}
                       </div>
                     </div>
                   ))}

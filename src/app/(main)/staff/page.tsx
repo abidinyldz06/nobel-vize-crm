@@ -1,6 +1,7 @@
 import { requireAdminPage } from "@/lib/page-auth";
 import { Users, Plus, Shield, User, Phone, Mail, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
+import StaffCapacityPanel, { type StaffCapacityRow } from "@/components/StaffCapacityPanel";
 
 export const revalidate = 0;
 
@@ -23,6 +24,43 @@ export default async function StaffPage() {
     if (customer.assigned_staff_id) {
       countMap[customer.assigned_staff_id] = (countMap[customer.assigned_staff_id] || 0) + 1;
     }
+  });
+
+  const [{ data: applications }, { data: tasks }, { data: capacities }] = await Promise.all([
+    supabase
+      .from("applications")
+      .select("assigned_staff_id, customer_id, status"),
+    supabase
+      .from("tasks")
+      .select("assigned_staff_id, status"),
+    supabase
+      .from("staff_capacity")
+      .select("staff_id, max_active_applications, max_open_tasks"),
+  ]);
+
+  const activeApplicationsByStaff: Record<string, number> = {};
+  applications?.forEach((application) => {
+    if (!application.assigned_staff_id || ["onaylandi", "reddedildi", "kapandi"].includes(application.status)) return;
+    activeApplicationsByStaff[application.assigned_staff_id] = (activeApplicationsByStaff[application.assigned_staff_id] || 0) + 1;
+  });
+  const openTasksByStaff: Record<string, number> = {};
+  tasks?.forEach((task) => {
+    if (["pending", "in_progress"].includes(task.status)) {
+      openTasksByStaff[task.assigned_staff_id] = (openTasksByStaff[task.assigned_staff_id] || 0) + 1;
+    }
+  });
+  const capacityByStaff = new Map((capacities || []).map(capacity => [capacity.staff_id, capacity]));
+  const capacityRows: StaffCapacityRow[] = (staff || []).map((member) => {
+    const capacity = capacityByStaff.get(member.id);
+    return {
+      id: member.id,
+      fullName: member.full_name,
+      active: member.is_active,
+      activeApplications: activeApplicationsByStaff[member.id] || 0,
+      openTasks: openTasksByStaff[member.id] || 0,
+      maxActiveApplications: capacity?.max_active_applications ?? 25,
+      maxOpenTasks: capacity?.max_open_tasks ?? 40,
+    };
   });
 
   const adminCount = staff?.filter(s => s.role === 'admin').length || 0;
@@ -151,6 +189,7 @@ export default async function StaffPage() {
             </div>
           )}
         </div>
+        <StaffCapacityPanel initialRows={capacityRows} />
       </div>
     </div>
   );

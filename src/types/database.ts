@@ -355,6 +355,116 @@ export type Database = {
           },
         ]
       }
+      calendar_connections: {
+        Row: {
+          access_token_ciphertext: string
+          access_token_expires_at: string
+          calendar_id: string
+          created_at: string
+          id: string
+          last_sync_error: string | null
+          last_synced_at: string | null
+          provider: string
+          refresh_token_ciphertext: string
+          staff_id: string
+          sync_enabled: boolean
+          sync_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token_ciphertext: string
+          access_token_expires_at: string
+          calendar_id?: string
+          created_at?: string
+          id?: string
+          last_sync_error?: string | null
+          last_synced_at?: string | null
+          provider?: string
+          refresh_token_ciphertext: string
+          staff_id: string
+          sync_enabled?: boolean
+          sync_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token_ciphertext?: string
+          access_token_expires_at?: string
+          calendar_id?: string
+          created_at?: string
+          id?: string
+          last_sync_error?: string | null
+          last_synced_at?: string | null
+          provider?: string
+          refresh_token_ciphertext?: string
+          staff_id?: string
+          sync_enabled?: boolean
+          sync_token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_connections_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calendar_event_links: {
+        Row: {
+          application_id: string
+          connection_id: string
+          created_at: string
+          google_event_etag: string | null
+          google_event_id: string
+          id: string
+          last_synced_at: string
+          remote_deleted_at: string | null
+          remote_updated_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          connection_id: string
+          created_at?: string
+          google_event_etag?: string | null
+          google_event_id: string
+          id?: string
+          last_synced_at?: string
+          remote_deleted_at?: string | null
+          remote_updated_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          connection_id?: string
+          created_at?: string
+          google_event_etag?: string | null
+          google_event_id?: string
+          id?: string
+          last_synced_at?: string
+          remote_deleted_at?: string | null
+          remote_updated_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_event_links_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_event_links_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communication_preferences: {
         Row: {
           allowed: boolean
@@ -922,44 +1032,59 @@ export type Database = {
         Row: {
           application_id: string
           category: string
+          content_type: string | null
           created_at: string
           description: string | null
           document_type: string
+          file_size_bytes: number | null
           file_url: string | null
           id: string
           is_required: boolean
+          original_file_name: string | null
           requested_at: string
           status: string
           storage_deleted_at: string | null
           updated_at: string
+          upload_source: string | null
+          uploaded_at: string | null
         }
         Insert: {
           application_id: string
           category?: string
+          content_type?: string | null
           created_at?: string
           description?: string | null
           document_type: string
+          file_size_bytes?: number | null
           file_url?: string | null
           id?: string
           is_required?: boolean
+          original_file_name?: string | null
           requested_at?: string
           status?: string
           storage_deleted_at?: string | null
           updated_at?: string
+          upload_source?: string | null
+          uploaded_at?: string | null
         }
         Update: {
           application_id?: string
           category?: string
+          content_type?: string | null
           created_at?: string
           description?: string | null
           document_type?: string
+          file_size_bytes?: number | null
           file_url?: string | null
           id?: string
           is_required?: boolean
+          original_file_name?: string | null
           requested_at?: string
           status?: string
           storage_deleted_at?: string | null
           updated_at?: string
+          upload_source?: string | null
+          uploaded_at?: string | null
         }
         Relationships: [
           {
@@ -1515,6 +1640,7 @@ export type Database = {
           application_id: string
           created_at: string
           currency: string
+          due_at: string | null
           id: string
           method: string | null
           note: string | null
@@ -1526,6 +1652,7 @@ export type Database = {
           application_id: string
           created_at?: string
           currency?: string
+          due_at?: string | null
           id?: string
           method?: string | null
           note?: string | null
@@ -1537,6 +1664,7 @@ export type Database = {
           application_id?: string
           created_at?: string
           currency?: string
+          due_at?: string | null
           id?: string
           method?: string | null
           note?: string | null
@@ -1908,6 +2036,45 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      staff_capacity: {
+        Row: {
+          max_active_applications: number
+          max_open_tasks: number
+          staff_id: string
+          updated_at: string
+          updated_by_staff_id: string | null
+        }
+        Insert: {
+          max_active_applications?: number
+          max_open_tasks?: number
+          staff_id: string
+          updated_at?: string
+          updated_by_staff_id?: string | null
+        }
+        Update: {
+          max_active_applications?: number
+          max_open_tasks?: number
+          staff_id?: string
+          updated_at?: string
+          updated_by_staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_capacity_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: true
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_capacity_updated_by_staff_id_fkey"
+            columns: ["updated_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tags: {
         Row: {
@@ -2283,6 +2450,16 @@ export type Database = {
           match_reason: string
         }[]
       }
+      get_google_calendar_connection_status_v1: {
+        Args: never
+        Returns: {
+          calendar_id: string
+          connected: boolean
+          last_sync_error: string
+          last_synced_at: string
+          sync_enabled: boolean
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
       list_appointment_conflicts_v1: {
         Args: {
@@ -2393,6 +2570,17 @@ export type Database = {
         Args: { p_event_type: string; p_outcome?: string }
         Returns: string
       }
+      record_portal_document_upload_v1: {
+        Args: {
+          p_content_type: string
+          p_customer_id: string
+          p_document_id: string
+          p_file_name: string
+          p_file_size_bytes: number
+          p_storage_path: string
+        }
+        Returns: string
+      }
       reject_privacy_action_v1: {
         Args: { p_action_id: string; p_reason: string }
         Returns: boolean
@@ -2467,6 +2655,26 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_staff_capacity_v1: {
+        Args: {
+          p_max_active_applications: number
+          p_max_open_tasks: number
+          p_staff_id: string
+        }
+        Returns: {
+          max_active_applications: number
+          max_open_tasks: number
+          staff_id: string
+          updated_at: string
+          updated_by_staff_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "staff_capacity"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       set_task_assignee_v1: {
         Args: { p_assigned_staff_id: string; p_task_id: string }
         Returns: boolean
@@ -2487,6 +2695,7 @@ export type Database = {
       sync_data_quality_tasks_v1: { Args: never; Returns: Json }
       sync_lead_followup_tasks_v1: { Args: never; Returns: number }
       sync_operational_tasks_v1: { Args: never; Returns: number }
+      sync_staff_capacity_alerts_v1: { Args: never; Returns: number }
       update_application_status_v1: {
         Args: {
           p_action?: string
