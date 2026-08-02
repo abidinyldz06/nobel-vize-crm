@@ -1,10 +1,10 @@
 "use client"
 import { useState } from "react";
-import { Activity, Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database, MessagesSquare, ScrollText, Info } from "lucide-react";
+import { Activity, Building2, Save, Shield, ChevronRight, Loader2, Check, AlertCircle, ClipboardList, Database, MessagesSquare, ScrollText, Info, BadgeCheck, ExternalLink } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import AuditLog from "@/components/AuditLog";
 import BackupPanel from "@/components/BackupPanel";
-import type { Tables, TablesUpdate } from "@/types/database";
+import type { Tables } from "@/types/database";
 import MessageTemplatesSettings from "@/components/MessageTemplatesSettings";
 import PrivacyNoticeSettings from "@/components/PrivacyNoticeSettings";
 import PrivacyLifecycleSettings from "@/components/PrivacyLifecycleSettings";
@@ -19,6 +19,8 @@ const TABS = [
   { id: "operations", label: "Operasyon", icon: Activity },
   { id: "backup", label: "Veri Yedekleme", icon: Database },
 ];
+
+const OFFICIAL_CONTACT_SOURCE_URL = "https://www.nobelvize.com/iletisim/";
 
 type SettingsClientProps = {
   company: Tables<"tenants">;
@@ -51,6 +53,8 @@ export default function SettingsClient({
   const [companyName, setCompanyName] = useState(company.company_name);
   const [email, setEmail] = useState(company.email || "");
   const [phone, setPhone] = useState(company.phone || "");
+  const [contactSourceUrl, setContactSourceUrl] = useState(company.contact_source_url);
+  const [contactVerifiedAt, setContactVerifiedAt] = useState(company.contact_verified_at);
 
   // Security State
   const [currentPassword, setCurrentPassword] = useState("");
@@ -58,28 +62,33 @@ export default function SettingsClient({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [consultantMfaRequired, setConsultantMfaRequired] = useState(company.consultant_mfa_required);
 
-  const saveCompanyData = async (payload: TablesUpdate<'tenants'>) => {
-    const { error } = await supabase.from('tenants').update(payload).eq('id', company.id);
-    if (error) throw new Error(error.message);
-  };
-
   const handleSaveCompany = async () => {
     const normalizedCompanyName = companyName.trim();
     if (!normalizedCompanyName) throw new Error("Şirket adı boş bırakılamaz.");
 
-    await saveCompanyData({
-      company_name: normalizedCompanyName,
-      email: email.trim() || null,
-      phone: phone.trim() || null,
+    const { data, error } = await supabase.rpc("verify_company_contact_v1", {
+      p_company_name: normalizedCompanyName,
+      p_email: email,
+      p_phone: phone,
+      p_source_url: OFFICIAL_CONTACT_SOURCE_URL,
     });
-    setCompanyName(normalizedCompanyName);
+    if (error) throw new Error(error.message);
+
+    const verifiedContact = data?.[0];
+    if (!verifiedContact) throw new Error("Şirket iletişim bilgileri doğrulanamadı.");
+
+    setCompanyName(verifiedContact.company_name);
+    setEmail(verifiedContact.email);
+    setPhone(verifiedContact.phone);
+    setContactSourceUrl(verifiedContact.contact_source_url);
+    setContactVerifiedAt(verifiedContact.contact_verified_at);
   };
 
   const handleSaveSecurity = async () => {
-    await saveCompanyData({
-      admin_mfa_required: true,
-      consultant_mfa_required: consultantMfaRequired,
+    const { error: securitySettingsError } = await supabase.rpc("update_tenant_security_settings_v1", {
+      p_consultant_mfa_required: consultantMfaRequired,
     });
+    if (securitySettingsError) throw new Error(securitySettingsError.message);
 
     if (!currentPassword && !newPassword && !confirmPassword) return;
     if (!currentPassword) throw new Error("Mevcut şifrenizi girmelisiniz.");
@@ -186,39 +195,65 @@ export default function SettingsClient({
               <p className="text-xs text-slate-500 mt-0.5">Nobel Vize tek şirket kaydı ve iletişim bilgileri.</p>
             </div>
             <div className="px-6 py-5 space-y-4">
-              {(!email.trim() || !phone.trim()) && (
+              {!contactVerifiedAt && (
                 <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-300">
                   <Info className="mt-0.5 h-4 w-4 shrink-0" />
                   <p className="text-xs">
-                    Şirket e-posta veya telefon bilgisi henüz kaydedilmedi.
-                    Buradaki örnek metinler kayıtlı iletişim bilgisi değildir.
+                    Şirket iletişim bilgileri henüz resmî kaynakla doğrulanmadı.
+                    Kaydetme işlemi e-posta, telefon, kaynak ve doğrulama zamanını birlikte kaydeder.
                   </p>
+                </div>
+              )}
+              {contactVerifiedAt && contactSourceUrl && (
+                <div data-testid="company-contact-verification" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3 text-emerald-800 dark:text-emerald-200">
+                  <div className="flex items-start gap-3">
+                    <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold">Resmî kaynakla doğrulandı</p>
+                      <p className="mt-0.5 text-xs text-emerald-700 dark:text-emerald-300">
+                        Son doğrulama: {new Date(contactVerifiedAt).toLocaleString("tr-TR")}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href={contactSourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-2"
+                  >
+                    Kaynağı aç <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Şirket Adı</label>
+                  <label htmlFor="company-name" className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Şirket Adı</label>
                   <input
+                    id="company-name"
                     value={companyName}
                     onChange={e => setCompanyName(e.target.value)}
                     className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-posta</label>
+                  <label htmlFor="company-email" className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-posta</label>
                   <input
+                    id="company-email"
+                    type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="info@nobelvize.com"
+                    placeholder="ornek@firma.com"
                     className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Telefon</label>
+                  <label htmlFor="company-phone" className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Telefon</label>
                   <input
+                    id="company-phone"
+                    type="tel"
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
-                    placeholder="+90 (212) 000 00 00"
+                    placeholder="0 (5XX) XXX XX XX"
                     className="w-full px-4 py-2.5 bg-white dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
@@ -320,7 +355,7 @@ export default function SettingsClient({
             className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30 disabled:opacity-60"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-            {saving ? "Kaydediliyor..." : saved ? "Kaydedildi!" : "Değişiklikleri Kaydet"}
+            {saving ? "Kaydediliyor..." : saved ? "Kaydedildi!" : activeTab === "company" ? "Doğrula ve Kaydet" : "Değişiklikleri Kaydet"}
           </button>
         </div>
         )}

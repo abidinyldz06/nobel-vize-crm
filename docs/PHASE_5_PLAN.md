@@ -2,9 +2,9 @@
 
 Son güncelleme: 2 Ağustos 2026
 
-Durum: Faz 5.0 ve Faz 5.1.1 tamamlandı. Faz 5.1.2'nin veri eksikliği görev
-kuyruğu yerel kalite kapılarından geçti; GitHub yayın, CI ve production kabulü
-henüz tamamlanmadı.
+Durum: Faz 5.0, Faz 5.1.1 ve Faz 5.1.2 tamamlandı; Faz 5.1.2 GitHub CI ve
+production kabulünden geçti. Faz 5.1.3 şirket iletişim bilgisi doğrulama
+paketi geliştirme ve kalite kabulündedir.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 
@@ -33,7 +33,7 @@ henüz tamamlanmadı.
 - Eksik verinin otomatik doldurulmayacağı; yalnızca sorumluya takip görevi
   açılacağı netleştirildi.
 
-### 5.1.2 — Veri eksikliği görev kuyruğu (yerel kalite kabulü tamamlandı)
+### 5.1.2 — Veri eksikliği görev kuyruğu (tamamlandı ve production'da)
 
 - Yönetici, Görevler ekranındaki Veri Kontrolü ile eksik iletişim, pasaport,
   ülke, vize türü, sorumlu ve başvuru profil bilgilerini tarar.
@@ -45,8 +45,17 @@ henüz tamamlanmadı.
   göndermez.
 - Yerel kabulde lint, tip denetimi, 66 birim/güvenlik testi, 339 PostgreSQL/RLS
   testi, geri yükleme tatbikatı ve 27 Chromium senaryosu başarıyla geçti.
-- GitHub PR/CI ve production kabulü tamamlanmadan bu aşama yayınlandı olarak
-  işaretlenmez.
+- GitHub PR #53 squash merge ile ana dala alındı. Ana dal Quality Gates ve
+  production health kontrolleri başarılıdır; migration production ile eşleşir.
+
+### 5.1.3 — Şirket iletişim bilgisi doğrulama (geliştirme ve kalite kabulünde)
+
+- Şirket adı, e-posta ve telefon yalnızca yönetici doğrulama akışından
+  güncellenir; doğrudan istemci yazımı kapalıdır.
+- Her doğrulamada resmî kaynak bağlantısı, zaman damgası ve doğrulayan
+  personel tek şirket kaydında saklanır; sistem loguna denetim olayı eklenir.
+- Arayüzde doğrulama tarihi ve kaynak bağlantısı görünür. Bu aşama gerçek
+  e-posta/WhatsApp gönderimini etkinleştirmez.
 
 ## 5.2 — Gerçek iletişim sistemi
 
