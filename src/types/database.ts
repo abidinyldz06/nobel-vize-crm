@@ -2024,6 +2024,9 @@ export type Database = {
           admin_mfa_required: boolean
           company_name: string
           consultant_mfa_required: boolean
+          contact_source_url: string | null
+          contact_verified_at: string | null
+          contact_verified_by_staff_id: string | null
           created_at: string
           email: string | null
           id: string
@@ -2033,6 +2036,9 @@ export type Database = {
           admin_mfa_required?: boolean
           company_name?: string
           consultant_mfa_required?: boolean
+          contact_source_url?: string | null
+          contact_verified_at?: string | null
+          contact_verified_by_staff_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -2042,12 +2048,23 @@ export type Database = {
           admin_mfa_required?: boolean
           company_name?: string
           consultant_mfa_required?: boolean
+          contact_source_url?: string | null
+          contact_verified_at?: string | null
+          contact_verified_by_staff_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
           phone?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tenants_contact_verified_by_staff_fk"
+            columns: ["contact_verified_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       visa_history: {
         Row: {
@@ -2495,6 +2512,10 @@ export type Database = {
         Args: { p_payload: Json }
         Returns: boolean
       }
+      update_tenant_security_settings_v1: {
+        Args: { p_consultant_mfa_required: boolean }
+        Returns: boolean
+      }
       upsert_data_quality_task_v1: {
         Args: {
           p_application_id: string
@@ -2520,6 +2541,21 @@ export type Database = {
       verify_backup_run_v1: {
         Args: { p_checksum_sha256: string; p_run_id: string }
         Returns: boolean
+      }
+      verify_company_contact_v1: {
+        Args: {
+          p_company_name: string
+          p_email: string
+          p_phone: string
+          p_source_url: string
+        }
+        Returns: {
+          company_name: string
+          contact_source_url: string
+          contact_verified_at: string
+          email: string
+          phone: string
+        }[]
       }
     }
     Enums: {
