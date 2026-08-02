@@ -17,6 +17,7 @@ import CustomerActionMenu from "@/components/CustomerActionMenu";
 import PortalShareButton from "@/components/PortalShareButton";
 import CustomerPrivacyPanel from "@/components/CustomerPrivacyPanel";
 import SensitiveValue from "@/components/SensitiveValue";
+import { messageProviderStatus } from "@/lib/message-provider";
 import {
   ACCOMMODATION_OPTIONS,
   NATIONALITY_OPTIONS,
@@ -58,6 +59,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     .order('created_at', { ascending: false });
 
   const activeApp = applications?.[0];
+  const emailDeliveryEnabled = messageProviderStatus().emailDeliveryEnabled;
 
   const [{ data: messageTemplates }, { data: company }, { data: privacyNotices }, { data: privacyDeliveries }, { data: customerConsents }, { data: communicationPreferences }, { data: dataRequests }] = await Promise.all([
     supabase.from('message_templates').select('*').eq('is_active', true).order('channel').order('name'),
@@ -341,7 +343,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
               {/* Yönetilebilir WhatsApp / e-posta mesaj şablonları */}
               {activeApp && company && (
                 <div className="px-4 py-3 border-t border-slate-200 dark:border-[#1f2937] flex flex-wrap gap-2">
-                  <MessageComposer customer={customer} application={activeApp} documents={documents || []} payments={payments || []} templates={messageTemplates ?? []} company={company} />
+                  <MessageComposer customer={customer} application={activeApp} documents={documents || []} payments={payments || []} templates={messageTemplates ?? []} company={company} emailDeliveryEnabled={emailDeliveryEnabled} />
                 </div>
               )}
             </div>

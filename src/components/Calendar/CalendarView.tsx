@@ -7,6 +7,7 @@ import MonthGrid from "./MonthGrid";
 import DaySidebar from "./DaySidebar";
 import type { CalendarAppointment } from "@/types/calendar";
 import AppointmentActions from "@/components/AppointmentActions";
+import CalendarIntegrationControl from "@/components/Calendar/CalendarIntegrationControl";
 
 type ViewMode = "month" | "list";
 
@@ -41,6 +42,7 @@ export default function CalendarView({ appointments }: { appointments: CalendarA
         </div>
 
         <div className="flex items-center gap-4">
+          <CalendarIntegrationControl />
           {/* Legend */}
           <div className="hidden lg:flex items-center gap-3 text-[10px] font-medium px-4 py-2 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-xl shadow-sm">
             <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Yaklaşan</div>

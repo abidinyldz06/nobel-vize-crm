@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Mail, MessageCircle, Send, X } from "lucide-react";
 import { toast } from "sonner";
 import { APPLICATION_STATUS_META, isApplicationStatus } from "@/lib/application-status";
@@ -17,6 +17,7 @@ interface MessageComposerProps {
   payments: Pick<Tables<"payments">, "status" | "amount">[];
   templates: MessageTemplate[];
   company: Pick<Tables<"tenants">, "company_name">;
+  emailDeliveryEnabled: boolean;
 }
 
 function whatsappNumber(phone: string) {
@@ -26,12 +27,13 @@ function whatsappNumber(phone: string) {
   return `90${digits}`;
 }
 
-export default function MessageComposer({ customer, application, documents, payments, templates, company }: MessageComposerProps) {
+export default function MessageComposer({ customer, application, documents, payments, templates, company, emailDeliveryEnabled }: MessageComposerProps) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const activeTemplates = templates.filter(template => template.is_active);
   const [open, setOpen] = useState(false);
   const [templateId, setTemplateId] = useState(activeTemplates[0]?.id ?? "");
   const [sending, setSending] = useState(false);
+  const emailIdempotencyKey = useRef<string | null>(null);
 
   const selected = activeTemplates.find(template => template.id === templateId) ?? activeTemplates[0];
   const totalPaid = payments.filter(payment => payment.status === "alindi").reduce((sum, payment) => sum + Number(payment.amount), 0);
@@ -56,6 +58,11 @@ export default function MessageComposer({ customer, application, documents, paym
   const body = selected ? renderMessageTemplate(selected.body_template, context) : "";
   const recipient = selected?.channel === "whatsapp" ? customer.phone : customer.email;
 
+  const closeComposer = () => {
+    emailIdempotencyKey.current = null;
+    setOpen(false);
+  };
+
   const prepare = async () => {
     if (!selected) return;
     if (!recipient) {
@@ -73,6 +80,34 @@ export default function MessageComposer({ customer, application, documents, paym
         },
       });
       toast.error(selected.channel === "whatsapp" ? "Müşterinin telefon numarası yok." : "Müşterinin e-posta adresi yok.");
+      return;
+    }
+
+    if (selected.channel === "email" && emailDeliveryEnabled) {
+      setSending(true);
+      emailIdempotencyKey.current ??= `email:${application.id}:${selected.id}:${crypto.randomUUID()}`;
+      const { error } = await supabase.rpc("enqueue_message_v1", {
+        p_payload: {
+          customer_id: customer.id,
+          application_id: application.id,
+          template_id: selected.id,
+          channel: "email",
+          purpose: "transactional",
+          recipient,
+          subject: subject || null,
+          body,
+          idempotency_key: emailIdempotencyKey.current,
+        },
+      });
+      setSending(false);
+      if (error) {
+        toast.error(error.message === "communication_permission_required"
+          ? "E-posta izni kaydedilmeden gönderim kuyruğuna alınamaz."
+          : error.message);
+        return;
+      }
+      toast.success("E-posta güvenli gönderim kuyruğuna alındı.");
+      closeComposer();
       return;
     }
 
@@ -107,7 +142,7 @@ export default function MessageComposer({ customer, application, documents, paym
       window.open(`mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, "_self");
     }
     toast.success("Mesaj hazırlandı ve iletişim geçmişine kaydedildi.");
-    setOpen(false);
+    closeComposer();
   };
 
   if (activeTemplates.length === 0) return null;
@@ -123,13 +158,17 @@ export default function MessageComposer({ customer, application, documents, paym
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-[#1f2937]">
               <div>
                 <h3 className="font-semibold text-slate-900 dark:text-white">Mesaj Hazırla</h3>
-                <p className="text-xs text-slate-500">Mesaj harici uygulamada açılır; teslim durumu sonradan işaretlenir.</p>
+                <p className="text-xs text-slate-500">
+                  {selected?.channel === "email" && emailDeliveryEnabled
+                    ? "E-posta izin kontrolünden sonra güvenli gönderim kuyruğuna alınır."
+                    : "Mesaj harici uygulamada açılır; teslim durumu sonradan işaretlenir."}
+                </p>
               </div>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Mesaj penceresini kapat"><X className="h-4 w-4 text-slate-500" /></button>
+              <button type="button" onClick={closeComposer} aria-label="Mesaj penceresini kapat"><X className="h-4 w-4 text-slate-500" /></button>
             </div>
             <div className="space-y-4 p-6">
               <label className="block space-y-1.5 text-xs font-semibold text-slate-500">Şablon
-                <select value={selected?.id ?? ""} onChange={event => setTemplateId(event.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 dark:border-[#1f2937] dark:bg-[#060d1a] dark:text-slate-200">
+                <select value={selected?.id ?? ""} onChange={event => { emailIdempotencyKey.current = null; setTemplateId(event.target.value); }} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 dark:border-[#1f2937] dark:bg-[#060d1a] dark:text-slate-200">
                   {activeTemplates.map(template => <option key={template.id} value={template.id}>{template.channel === "whatsapp" ? "WhatsApp" : "E-posta"} — {template.name}</option>)}
                 </select>
               </label>
@@ -143,7 +182,7 @@ export default function MessageComposer({ customer, application, documents, paym
               </div>
               <div className="flex justify-end">
                 <button type="button" onClick={prepare} disabled={sending} className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
-                  <Send className="h-4 w-4" /> {sending ? "Kaydediliyor..." : "Kaydet ve Uygulamada Aç"}
+                  <Send className="h-4 w-4" /> {sending ? "İşleniyor..." : selected?.channel === "email" && emailDeliveryEnabled ? "Kuyruğa Al ve Gönder" : "Kaydet ve Uygulamada Aç"}
                 </button>
               </div>
             </div>

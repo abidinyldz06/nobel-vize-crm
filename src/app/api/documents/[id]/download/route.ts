@@ -5,6 +5,7 @@ import { observedRoute } from "@/lib/observability";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
 function extractStoragePath(value: string) {
+  if (/^(portal|staff)\/[0-9a-f-]{36}\/[0-9a-f-]{36}\//i.test(value)) return value;
   if (!value.startsWith("http://") && !value.startsWith("https://")) return value;
 
   try {

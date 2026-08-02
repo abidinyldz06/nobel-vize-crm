@@ -7,18 +7,18 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 - **Akıllı Evrak Seçim Sistemi (Kosmosvize Modeli)**: Müşterinin seyahat aracı, konaklama tipi, mesleği ve çocuk durumuna göre dinamik evrak listeleri üretimi.
 - **Kapsamlı Müşteri Yönetimi**: Kişisel bilgiler, pasaport, iletişim geçmişi (arama, e-posta, WhatsApp) ve vize geçmişi takibi.
 - **Gelişmiş Başvuru Takibi**: Süreç boyunca durum güncellemeleri, randevu yönetimi, kargo ve sonuçlandırma takibi.
-- **Finansal Yönetim**: Vize harcı, ofis hizmet bedeli ve ödeme takibi (kısmi ödemeler, para birimi desteği).
+- **Finansal Yönetim**: Vize harcı, ofis hizmet bedeli ve ödeme takibi; bekleyen ödemede son tarih ile gecikme görevi.
 - **Rol Bazlı Yetkilendirme**: Yönetici (Admin) ve Danışman erişim yetkileri. Danışmanlar sadece kendi müşterilerini görebilirken yöneticiler tüm sistemi görebilir.
-- **Müşteri Portalı (Extranet)**: Müşterilerin kendilerine özel güvenli (token tabanlı) link üzerinden başvuru süreçlerini canlı takip edebilmeleri.
+- **Müşteri Portalı (Extranet)**: Süreli bağlantıdan süreç takibi ve private Storage'a imzalı, doğrulamalı evrak yükleme.
 - **Audit Log (Sistem Logu)**: Hangi personelin hangi müşteri üzerinde ne zaman değişiklik yaptığının detaylı kaydı.
 - **Görev ve Gerçek Bildirimler**: Personel bazlı manuel görevler; randevu, geciken evrak, bekleyen ödeme ve hareketsiz başvuru hatırlatmaları; kişiye özel okundu durumu.
 - **Zamanlanmış Operasyonlar**: Vercel Cron ile pasaport, randevu, evrak, ödeme ve hareketsiz başvuru görevlerini kullanıcı sayfa açmadan üretme.
 - **Lead Yönetimi**: Kaynak, kampanya, yönlendirme, sorumlu, SLA, mükerrer tespiti ve kontrollü müşteri dönüşümü.
 - **Kontrollü KVKK Otomasyonu**: Dry-run adayları, hukuki saklama, yönetici/çift onay, doğrulanmış yedek kapısı ve değiştirilemez audit izi.
-- **Takvim ve Dışa Aktarım**: Randevu çakışması ve durum geçmişi, Europe/Istanbul uyumlu ICS ile filtre tutarlı CSV/PDF raporları.
+- **Takvim ve Dışa Aktarım**: Randevu çakışması/durum geçmişi, isteğe bağlı Google Calendar çift yönlü eşitlemesi, Europe/Istanbul uyumlu ICS ile filtre tutarlı CSV/PDF raporları.
 - **Başvuru Süreç Panosu**: Kontrollü durum geçişleri, personel/ülke/tarih/gecikme filtreleri ve atomik audit kaydı.
 - **Müşteri Deneyimi**: Kanonik başvuru bilgileri, renkli etiketler, hızlı iletişim/not eylemleri ve birleşik müşteri timeline'ı.
-- **Yönetilebilir İletişim**: WhatsApp/e-posta şablonları, değişkenli mesaj hazırlama, iletişim durumları ve audit izi.
+- **Yönetilebilir İletişim**: İzin denetimli e-posta outbox'ı, Resend teslim/bounce webhook'u, WhatsApp/e-posta şablonları ve audit izi.
 - **Kontrollü Müşteri Portalı**: Süreli bağlantı yenileme/iptal akışı ile başvuru, evrak, randevu, ödeme ve geçmiş özeti.
 - **KVKK ve Veri Yaşam Döngüsü**: Sürümlü aydınlatma/rıza kanıtı, ilgili kişi talepleri, veri paketi, saklama kilidi, Storage temizliği ve kontrollü anonimleştirme.
 - **İzleme ve İş Sürekliliği**: Request ID ile yapılandırılmış güvenli loglar, liveness/readiness kontrolleri, admin operasyon uyarıları, doğrulanmış yedek geçmişi ve izole geri yükleme tatbikatı.
@@ -49,7 +49,11 @@ npm install
 # GOOGLE_FORM_WEBHOOK_SECRET=...      # yalnızca sunucu
 # CRON_SECRET=...                     # yalnızca sunucu, en az 32 bayt
 # BACKUP_ENCRYPTION_KEY=...           # yalnızca sunucu, 32 bayt base64
-# MESSAGE_PROVIDER=disabled           # sağlayıcı kararı verilene kadar
+# MESSAGE_PROVIDER=disabled           # Resend canlı aktivasyonu yapılana kadar
+# RESEND_API_KEY=...                  # yalnızca Vercel server secret
+# EMAIL_FROM=...                      # Resend'de doğrulanmış gönderici
+# GOOGLE_CALENDAR_CLIENT_SECRET=...   # yalnızca Vercel server secret
+# CALENDAR_TOKEN_ENCRYPTION_KEY=...   # yalnızca Vercel server secret, 32 bayt base64
 # ENABLE_ATOMIC_RESTORE=false          # normal çalışma için kapalı
 
 # Geliştirme sunucusunu başlatın
@@ -107,7 +111,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
 | Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | Tamamlandı; gerçek admin MFA kabulü, oturum kapatma, production doğrulaması ve kapanış kaydı tamamlandı. Gerçek mesaj sağlayıcısı Faz 5.2'ye ertelendi. | `docs/PHASE_5_0_CLOSURE_REPORT.md` |
-| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.1.1 keşfi ile 5.1.2 veri eksikliği görev kuyruğu GitHub CI ve production kabulünden geçti. 5.1.3 şirket iletişim bilgisi doğrulama paketi geliştirme ve kalite kabulündedir. | `docs/PHASE_5_PLAN.md` |
+| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.1.1–5.1.3 production kabulünden geçti. 5.2–5.3; Resend e-posta, güvenli portal evrak yükleme, tahsilat/kapasite ve Google Calendar altyapısıyla yerel kabulden geçti; gerçek sağlayıcı aktivasyonu Vercel secret'ları ve kullanıcı kabulünü bekler. | `docs/PHASE_5_PLAN.md`, `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md` |
 
 Faz 3 alt aşama takibi:
 
