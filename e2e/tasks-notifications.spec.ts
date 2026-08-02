@@ -7,6 +7,9 @@ import type { Database } from '../src/types/database';
 const testEmail = 'phase3-tasks@example.test';
 const testPassword = process.env.E2E_STAFF_PASSWORD ?? 'E2E-only-Tasks!2026';
 const taskTitle = 'Faz 3.3 tarayıcı görevi';
+const qualityCustomerId = '51000000-0000-0000-0000-000000000101';
+const qualityApplicationId = '51000000-0000-0000-0000-000000000102';
+const qualityTaskTitle = 'İletişim bilgisi eksik: Veri Kalitesi';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -53,9 +56,38 @@ test.beforeAll(async () => {
     .single();
   if (staffError) throw staffError;
   testStaffId = staff.id;
+
+  await admin.from('tasks').delete().eq('customer_id', qualityCustomerId);
+  await admin.from('applications').delete().eq('id', qualityApplicationId);
+  await admin.from('customers').delete().eq('id', qualityCustomerId);
+
+  const { error: customerError } = await admin
+    .from('customers')
+    .insert({
+      id: qualityCustomerId,
+      first_name: 'Veri',
+      last_name: 'Kalitesi',
+      assigned_staff_id: testStaffId,
+    });
+  if (customerError) throw customerError;
+
+  const { error: applicationError } = await admin
+    .from('applications')
+    .insert({
+      id: qualityApplicationId,
+      customer_id: qualityCustomerId,
+      country: 'Kalite Test Ülkesi',
+      visa_type: 'turistik',
+      status: 'profil_analizi',
+      assigned_staff_id: testStaffId,
+    });
+  if (applicationError) throw applicationError;
 });
 
 test.afterAll(async () => {
+  await admin.from('tasks').delete().eq('customer_id', qualityCustomerId);
+  await admin.from('applications').delete().eq('id', qualityApplicationId);
+  await admin.from('customers').delete().eq('id', qualityCustomerId);
   if (testStaffId) await admin.from('tasks').delete().eq('assigned_staff_id', testStaffId);
   if (testStaffId) await admin.from('staff').delete().eq('id', testStaffId);
   if (testUserId) await admin.auth.admin.deleteUser(testUserId);
@@ -119,4 +151,31 @@ test('staff creates, receives and completes a personal task', async ({ page }) =
     notificationRead: true,
     hasReadAt: true,
   });
+});
+
+test('admin turns incomplete records into visible data-quality tasks', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
+  await page.getByLabel('Şifre').fill(testPassword);
+  await page.getByRole('button', { name: 'Giriş Yap' }).click();
+  await expect(page).toHaveURL('/dashboard');
+
+  await page.goto('/tasks');
+  await page.getByTestId('sync-data-quality').click();
+  await page.getByRole('button', { name: 'Yaklaşan' }).click();
+
+  const taskRow = page.locator('article').filter({ hasText: qualityTaskTitle });
+  await expect(taskRow).toBeVisible();
+  await expect(taskRow.getByText('Veri Eksikliği', { exact: true })).toBeVisible();
+
+  await expect.poll(async () => {
+    const { count, error } = await admin
+      .from('tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('customer_id', qualityCustomerId)
+      .eq('source_type', 'data_quality')
+      .in('status', ['pending', 'in_progress']);
+    if (error) throw error;
+    return count;
+  }).toBe(5);
 });

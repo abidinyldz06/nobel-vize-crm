@@ -80,6 +80,20 @@ async function createTask(request: Request) {
   }
 
   const payload = body as Record<string, unknown>;
+  if (payload.action === "sync_data_quality") {
+    if (context.staff.role !== "admin") {
+      return NextResponse.json({ error: "Veri kontrolünü yalnız yöneticiler çalıştırabilir." }, { status: 403 });
+    }
+
+    const { data, error } = await context.supabase.rpc("sync_data_quality_tasks_v1");
+    if (error) {
+      const status = error.code === "42501" ? 403 : 400;
+      return NextResponse.json({ error: error.message }, { status });
+    }
+
+    return NextResponse.json({ summary: data ?? { open_tasks: 0 } });
+  }
+
   if (typeof payload.title !== "string" || payload.title.trim().length === 0 || payload.title.length > 160) {
     return NextResponse.json({ error: "Görev başlığı 1-160 karakter olmalıdır." }, { status: 400 });
   }
@@ -127,9 +141,40 @@ async function updateTask(request: Request) {
     return NextResponse.json({ error: "Geçersiz görev güncellemesi." }, { status: 400 });
   }
 
-  const { id, status } = body as { id?: unknown; status?: unknown };
-  if (typeof id !== "string" || typeof status !== "string" || !TASK_STATUSES.has(status)) {
-    return NextResponse.json({ error: "Geçersiz görev veya durum." }, { status: 400 });
+  const { id, status, assigned_staff_id: assignedStaffId } = body as {
+    id?: unknown;
+    status?: unknown;
+    assigned_staff_id?: unknown;
+  };
+  if (typeof id !== "string") {
+    return NextResponse.json({ error: "Geçersiz görev bilgisi." }, { status: 400 });
+  }
+
+  if (assignedStaffId !== undefined) {
+    if (typeof assignedStaffId !== "string" || assignedStaffId.length === 0) {
+      return NextResponse.json({ error: "Geçerli bir personel seçmelisiniz." }, { status: 400 });
+    }
+    if (context.staff.role !== "admin") {
+      return NextResponse.json({ error: "Görev devretme yetkiniz yok." }, { status: 403 });
+    }
+
+    const { data, error } = await context.supabase.rpc("set_task_assignee_v1", {
+      p_task_id: id,
+      p_assigned_staff_id: assignedStaffId,
+    });
+    if (error) {
+      const responseStatus = error.code === "42501" ? 403 : 400;
+      return NextResponse.json({ error: error.message }, { status: responseStatus });
+    }
+    if (!data) {
+      return NextResponse.json({ error: "Görev bulunamadı." }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
+  }
+
+  if (typeof status !== "string" || !TASK_STATUSES.has(status)) {
+    return NextResponse.json({ error: "Geçersiz görev durumu." }, { status: 400 });
   }
 
   const { data, error } = await context.supabase.rpc("set_task_status_v1", {

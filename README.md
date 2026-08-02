@@ -106,8 +106,8 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 1 — Veritabanı standardizasyonu | Production'a uygulandı ve doğrulandı | `docs/PHASE_1_IMPLEMENTATION_REPORT.md` |
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
-| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | Migration'lar production ile eşleşiyor; teknik/health kabulü tamam. Kapanış yalnız gerçek admin MFA kabulü sonrasında yapılacak; gerçek mesaj sağlayıcısı Faz 5.2'ye ertelendi. | `docs/PHASE_5_0_CLOSURE_REPORT.md` |
-| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | Planlandı; yalnız 5.0 kapanış/temizlik paketi yürütülüyor. | `docs/PHASE_5_PLAN.md` |
+| Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | Tamamlandı; gerçek admin MFA kabulü, oturum kapatma, production doğrulaması ve kapanış kaydı tamamlandı. Gerçek mesaj sağlayıcısı Faz 5.2'ye ertelendi. | `docs/PHASE_5_0_CLOSURE_REPORT.md` |
+| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.1.1 keşfi ve 5.1.2 veri eksikliği görev kuyruğunun yerel kalite kabulü tamamlandı. GitHub CI ve production kabulü henüz tamamlanmadı. | `docs/PHASE_5_PLAN.md` |
 
 Faz 3 alt aşama takibi:
 

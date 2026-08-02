@@ -2450,6 +2450,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_task_assignee_v1: {
+        Args: { p_assigned_staff_id: string; p_task_id: string }
+        Returns: boolean
+      }
       set_task_status_v1: {
         Args: { p_status: string; p_task_id: string }
         Returns: boolean
@@ -2463,6 +2467,7 @@ export type Database = {
         Returns: string
       }
       storage_document_id: { Args: { object_name: string }; Returns: string }
+      sync_data_quality_tasks_v1: { Args: never; Returns: Json }
       sync_lead_followup_tasks_v1: { Args: never; Returns: number }
       sync_operational_tasks_v1: { Args: never; Returns: number }
       update_application_status_v1: {
@@ -2489,6 +2494,20 @@ export type Database = {
       update_privacy_settings_v1: {
         Args: { p_payload: Json }
         Returns: boolean
+      }
+      upsert_data_quality_task_v1: {
+        Args: {
+          p_application_id: string
+          p_assigned_staff_id: string
+          p_customer_id: string
+          p_description: string
+          p_due_at: string
+          p_idempotency_key: string
+          p_priority: string
+          p_source_id: string
+          p_title: string
+        }
+        Returns: string
       }
       upsert_message_template_v1: {
         Args: { p_payload: Json; p_template_id: string }

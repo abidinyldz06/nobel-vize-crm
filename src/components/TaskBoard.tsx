@@ -8,9 +8,11 @@ import {
   CheckCircle2,
   CirclePlay,
   Clock3,
+  ListChecks,
   Loader2,
   Plus,
   RefreshCw,
+  UserRound,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -91,6 +93,7 @@ export default function TaskBoard({
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [syncingQuality, setSyncingQuality] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -152,6 +155,45 @@ export default function TaskBoard({
     }
   };
 
+  const reassignTask = async (task: TaskItem, assignedStaffId: string) => {
+    setProcessingId(task.id);
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: task.id, assigned_staff_id: assignedStaffId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Görev devredilemedi.");
+      toast.success("Görev yeni sorumluya devredildi.");
+      await loadTasks();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Görev devredilemedi.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const syncDataQuality = async () => {
+    setSyncingQuality(true);
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync_data_quality" }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Veri kontrolü tamamlanamadı.");
+      const openCount = typeof payload.summary?.open_tasks === "number" ? payload.summary.open_tasks : 0;
+      toast.success(`Veri kontrolü tamamlandı. ${openCount} açık tamamlama görevi var.`);
+      await loadTasks();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Veri kontrolü tamamlanamadı.");
+    } finally {
+      setSyncingQuality(false);
+    }
+  };
+
   const createTask = async () => {
     setCreating(true);
     try {
@@ -200,12 +242,17 @@ export default function TaskBoard({
           <h1 className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
             <CalendarClock className="h-5 w-5 text-blue-500" /> Görevler
           </h1>
-          <p className="mt-0.5 text-xs text-slate-500">Randevu, evrak, ödeme ve takip işlerinizi tek ekrandan yönetin.</p>
+          <p className="mt-0.5 text-xs text-slate-500">Randevu, evrak, ödeme, veri eksikliği ve takip işlerinizi tek ekrandan yönetin.</p>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={() => void loadTasks()} disabled={loading} className="rounded-xl border border-slate-200 p-2.5 text-slate-500 hover:bg-slate-50 disabled:opacity-50 dark:border-[#1f2937] dark:hover:bg-[#1a2232]" aria-label="Görevleri yenile">
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </button>
+          {isAdmin && (
+            <button type="button" data-testid="sync-data-quality" onClick={() => void syncDataQuality()} disabled={syncingQuality} className="inline-flex items-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-500/20 disabled:opacity-50 dark:text-blue-300">
+              {syncingQuality ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListChecks className="h-4 w-4" />} Veri Kontrolü
+            </button>
+          )}
           <button type="button" onClick={() => setShowCreate(true)} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
             <Plus className="h-4 w-4" /> Yeni Görev
           </button>
@@ -258,12 +305,21 @@ export default function TaskBoard({
                         {activeTab === "overdue" && <AlertTriangle className="h-4 w-4 text-red-500" />}
                         <h2 className="font-semibold text-slate-900 dark:text-white">{task.title}</h2>
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${config.className}`}>{config.label}</span>
+                        {task.source_type === "data_quality" && <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold text-cyan-600 dark:text-cyan-300"><ListChecks className="h-3 w-3" /> Veri Eksikliği</span>}
                         {task.status === "in_progress" && <span className="rounded-full bg-purple-500/10 px-2 py-0.5 text-[10px] font-bold text-purple-500">Devam Ediyor</span>}
                       </div>
                       {task.description && <p className="text-xs text-slate-500">{task.description}</p>}
                       <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
                         <span className="inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" /> {new Date(task.due_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}</span>
-                        <span>{task.staff?.full_name || "Atanmamış"}</span>
+                        {isAdmin && task.source_type === "data_quality" ? (
+                          <label className="inline-flex items-center gap-1.5">
+                            <UserRound className="h-3.5 w-3.5" />
+                            <span className="sr-only">{task.title} görevini ata</span>
+                            <select aria-label={`${task.title} görevini ata`} value={task.assigned_staff_id} onChange={event => void reassignTask(task, event.target.value)} disabled={processingId === task.id} className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-700 outline-none disabled:opacity-50 dark:border-[#1f2937] dark:bg-[#060c18] dark:text-slate-200">
+                              {staffOptions.map(option => <option key={option.id} value={option.id}>{option.full_name}</option>)}
+                            </select>
+                          </label>
+                        ) : <span>{task.staff?.full_name || "Atanmamış"}</span>}
                         {task.customer_id && task.customers && (
                           <Link href={`/customers/${task.customer_id}`} className="font-semibold text-blue-500 hover:underline">
                             {task.customers.first_name} {task.customers.last_name}
