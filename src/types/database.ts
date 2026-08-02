@@ -2056,7 +2056,15 @@ export type Database = {
           id?: string
           phone?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tenants_contact_verified_by_staff_fk"
+            columns: ["contact_verified_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       visa_history: {
         Row: {
