@@ -1,16 +1,16 @@
 # Faz 5.0 — Temizlik ve Faz 4 Kapanış Kaydı
 
-Tarih: 29 Temmuz 2026
+Tarih: 2 Ağustos 2026
 
-Durum: Devam ediyor. Bu kayıt, tamamlanmış production kanıtlarını açıkça
-ayırır; kullanıcı kabulü olmadan hiçbir Faz 4 maddesini tamamlandı göstermez.
+Durum: Tamamlandı. Bu kayıt, teknik kontroller ile gerçek kullanıcı kabulünü
+ayrı kanıtlarla kapatır.
 
 ## Doğrulanmış production durumu
 
 - Bağlı Supabase projesinde yerel migration zinciri `202607190001` ile
   `202607280011` arasında uzaktaki zincirle eşleşiyor.
 - `https://abidinyildiz.com/api/health/live` `ok`,
-  `/api/health/ready` `ready` ve giriş sayfası 29 Temmuz 2026'da `200`
+  `/api/health/ready` `ready` ve giriş sayfası 2 Ağustos 2026'da `200`
   döndü.
 - Production bağımlılık denetimi yüksek/kritik açık bulmadı.
 - Faz 4.3 kanıtında 28 Temmuz 2026'da doğrulanmış şifreli recovery point
@@ -31,16 +31,19 @@ ayırır; kullanıcı kabulü olmadan hiçbir Faz 4 maddesini tamamlandı göste
   build, temiz DB reset, şema lint'i, 324 pgTAP, restore drill ve 26 Playwright
   testi.
 
-## Faz 4 açıklarının dürüst durumu
+## Faz 4 kapanış kararları
 
-- #34: Admin MFA/TOTP enrollment ve "diğer oturumları kapat" canlı kabulü
-  gerektirir. Kod/migration production'dadır; bu iki gerçek kullanıcı akışı
-  kanıtlanmadan issue ve milestone kapanmaz.
+- #34: Gerçek yönetici kabulü 2 Ağustos 2026'da tamamlandı. Hesap Güvenliği
+  ekranında Authenticator `Etkin` ve yönetici için zorunlu/kaldırılamaz olarak
+  doğrulandı. Üç aktif oturumdan mevcut cihaz dışındaki iki oturum kapatıldı;
+  yalnız mevcut cihaz kaldı. Kullanıcı ardından çıkış yapıp MFA ile yeniden
+  giriş yaparak Dashboard'a döndü.
 - #35: Ürün kararı **ertele**. `MESSAGE_PROVIDER=disabled` güvenli varsayılanı
   korunur. Gerçek e-posta sağlayıcısı, gönderici alan adı, şablonlar, webhook
   ve sandbox/retry kabulü Faz 5.2 kapsamına taşınır; WhatsApp Business ikinci
   adım olarak değerlendirilir.
-- #39 ve Faz 4 milestone'u, #34 canlı kabulü tamamlanana kadar açık kalır.
+- #39 ve Faz 4 milestone'u, #34 canlı kabulü tamamlandığı için kapatılmaya
+  uygundur.
 
 ## Temizlik sınırı
 

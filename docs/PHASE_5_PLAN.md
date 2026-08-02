@@ -1,20 +1,21 @@
 # Faz 5 — Veri Kalitesi, Gerçek İletişim ve Operasyon Geliştirmeleri
 
-Tarih: 29 Temmuz 2026
+Son güncelleme: 2 Ağustos 2026
 
-Durum: Yalnız Faz 5.0 yürütülüyor. Faz 5.1, 5.2 ve 5.3 planlanmıştır; bu
-belge sonraki iş sırasını kaydeder, henüz bu paketlerde kod veya production
-taahhüdü oluşturmaz.
+Durum: Faz 5.0 tamamlandı. Faz 5.1, 5.2 ve 5.3 planlanmıştır; bu belge sonraki
+iş sırasını kaydeder, henüz bu paketlerde kod veya production taahhüdü
+oluşturmaz.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 
-- Faz 4 production kanıtlarını güncel ve doğrulanabilir halde toplamak.
-- Dependabot Actions güncellemelerini birer birer kalite kapılarından sonra
-  birleştirmek.
-- Gerçek admin MFA/TOTP enrollment ve diğer oturumları kapatma kabulünü
-  gerçekleştirmek.
-- Sağlayıcı kararını açıkça kaydetmek, Faz 4 issue ve milestone kapanışını
-  yalnız kanıtlar tamamlandığında yapmak.
+- Faz 4 production kanıtları güncel ve doğrulanabilir halde toplandı.
+- Dependabot Actions güncellemeleri kalite kapılarından sonra sırayla
+  birleştirildi.
+- 2 Ağustos 2026'da gerçek yönetici MFA/TOTP kabulü tamamlandı: doğrulayıcı
+  etkin ve zorunlu olarak görüldü, iki diğer oturum kapatıldı, kullanıcı çıkış
+  yapıp yeniden girişten sonra Dashboard'a döndü.
+- Sağlayıcı kararı açıkça kaydedildi; Faz 4 issue ve milestone kapanışı kanıt
+  tamamlandıktan sonra gerçekleştirildi.
 - Adında ` 2` bulunan, kanonik dosyalarla birebir aynı 15 izlenmeyen kopya
   doğrulandı ve kanonik kaynaklar korunarak temizlendi.
 
