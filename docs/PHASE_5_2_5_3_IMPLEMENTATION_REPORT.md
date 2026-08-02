@@ -2,10 +2,10 @@
 
 Tarih: 2 Ağustos 2026
 
-Durum: Uygulama, migration ve yerel kabul tamamlandı. GitHub yayın/CI ile
-production deployment bu rapordan sonra ayrı kanıtlarla tamamlanır. Gerçek
-e-posta gönderimi ile Google OAuth bağlantısı, gerekli Vercel secret'ları ve
-yetkili sağlayıcı ayarları girilmediği için kasıtlı olarak etkin değildir.
+Durum: Uygulama, migration, GitHub CI ve production deployment tamamlandı.
+Gerçek e-posta gönderimi ile Google OAuth bağlantısı, gerekli Vercel
+secret'ları ve yetkili sağlayıcı ayarları girilmediği için kasıtlı olarak
+etkin değildir.
 
 ## 5.2 — Gerçek e-posta teslimatı
 
@@ -82,3 +82,15 @@ yetkili sağlayıcı ayarları girilmediği için kasıtlı olarak etkin değild
 - İzole restore drill başarılı.
 - 28 Chromium Playwright akışı başarılı; portal yükleme senaryosu dahildir.
 - Production bağımlılık denetiminde yüksek/kritik açık bulunmadı.
+
+## GitHub ve production kabul kanıtı
+
+- PR #55 doğrulanan `4bbbdd72b941d02a7f149869b8829040248634dc`
+  baş commit'i ile kontrollü squash merge edildi.
+- Ana dal commit'i `894974940bea5fb91ccd6e3dd52a0e12e2968108` için
+  GitHub Quality Gates uygulama, veritabanı ve 28 tarayıcı testiyle yeşildir.
+- Vercel production deployment aynı ana dal commit'i için başarılıdır.
+- Production Supabase migration geçmişi `202608020003`, `202608020004` ve
+  `202608020005` dahil yerel zincirle eşleşir.
+- `https://abidinyildiz.com/api/health/live` canlı kontrolde HTTP 200 ve
+  `status: ok` döndürmüştür.
