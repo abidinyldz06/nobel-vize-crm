@@ -135,6 +135,24 @@ describe("security regression guards", () => {
     assert.match(migration, /REVOKE INSERT, UPDATE, DELETE ON TABLE public\.tasks, public\.notifications FROM authenticated/);
   });
 
+  it("keeps data-quality tasks admin-triggered, idempotent and scoped to their queue", async () => {
+    const [taskRoute, board, migration] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/tasks/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/components/TaskBoard.tsx"), "utf8"),
+      readFile(path.join(projectRoot, "supabase/migrations/202608020001_phase51_data_quality_tasks.sql"), "utf8"),
+    ]);
+
+    assert.match(migration, /'data_quality'/);
+    assert.match(migration, /IF NOT public\.is_admin\(\) THEN/);
+    assert.match(migration, /ON CONFLICT \(idempotency_key\)/);
+    assert.match(migration, /GRANT EXECUTE ON FUNCTION public\.sync_data_quality_tasks_v1\(\) TO authenticated/);
+    assert.match(migration, /REVOKE ALL ON FUNCTION public\.sync_data_quality_tasks_v1\(\) FROM PUBLIC, anon/);
+    assert.match(taskRoute, /sync_data_quality_tasks_v1/);
+    assert.match(taskRoute, /set_task_assignee_v1/);
+    assert.match(board, /data-testid="sync-data-quality"/);
+    assert.match(board, /isAdmin && task\.source_type === "data_quality"/);
+  });
+
   it("keeps application status changes behind controlled audited workflows", async () => {
     const [statusRoute, bulkRoute, appointmentAction, migration] = await Promise.all([
       readFile(path.join(projectRoot, "src/app/api/applications/status/route.ts"), "utf8"),

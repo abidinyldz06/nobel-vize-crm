@@ -2,9 +2,9 @@
 
 Son güncelleme: 2 Ağustos 2026
 
-Durum: Faz 5.0 tamamlandı. Faz 5.1, 5.2 ve 5.3 planlanmıştır; bu belge sonraki
-iş sırasını kaydeder, henüz bu paketlerde kod veya production taahhüdü
-oluşturmaz.
+Durum: Faz 5.0 ve Faz 5.1.1 tamamlandı. Faz 5.1.2'nin veri eksikliği görev
+kuyruğu yerel kalite kapılarından geçti; GitHub yayın, CI ve production kabulü
+henüz tamamlanmadı.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 
@@ -26,6 +26,27 @@ oluşturmaz.
 - Ülke/vize evrak kuralında kaynak, son güncelleme ve geçerlilik tarihi.
 - Süresi geçmiş kurallarda yönetici uyarısı ile eksik/çelişkili kayıtlar için
   veri kalitesi paneli.
+
+### 5.1.1 — Kapsam ve veri keşfi (tamamlandı)
+
+- Müşteri, başvuru, görev ve ayar şeması incelendi.
+- Eksik verinin otomatik doldurulmayacağı; yalnızca sorumluya takip görevi
+  açılacağı netleştirildi.
+
+### 5.1.2 — Veri eksikliği görev kuyruğu (yerel kalite kabulü tamamlandı)
+
+- Yönetici, Görevler ekranındaki Veri Kontrolü ile eksik iletişim, pasaport,
+  ülke, vize türü, sorumlu ve başvuru profil bilgilerini tarar.
+- Her eksik için tek, idempotent ve yeniden açılabilen görev oluşturulur;
+  veri tamamlanınca ilgili görev otomatik tamamlanır.
+- Görevler müşterinin aktif sorumlusuna, yoksa yöneticiye düşer. Yönetici
+  yalnız bu görevleri aktif personele devredebilir.
+- Bu işlem müşteri veya başvuru kaydını değiştirmez, silmez ve dışarıya mesaj
+  göndermez.
+- Yerel kabulde lint, tip denetimi, 66 birim/güvenlik testi, 339 PostgreSQL/RLS
+  testi, geri yükleme tatbikatı ve 27 Chromium senaryosu başarıyla geçti.
+- GitHub PR/CI ve production kabulü tamamlanmadan bu aşama yayınlandı olarak
+  işaretlenmez.
 
 ## 5.2 — Gerçek iletişim sistemi
 
