@@ -1,9 +1,15 @@
 "use client"
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { Plus, Save, Trash2, Settings, Globe, Loader2, Info, FileText, Edit } from "lucide-react";
+import { Plus, Save, Trash2, Settings, Globe, Loader2, Info, FileText, Edit, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { VISA_TYPE_LABELS, DOCUMENT_CATEGORIES } from "@/lib/visa-types";
+import {
+  getVisaRuleSourceStatus,
+  parseVisaRuleSources,
+  VISA_RULE_SOURCE_STATUS_LABELS,
+  type VisaRuleSource,
+} from "@/lib/visa-rule-sources";
 import type { Json, Tables } from "@/types/database";
 
 // Dropdown options
@@ -35,6 +41,9 @@ type VisaRule = {
   max_stay: string | null;
   multiple_entry: boolean;
   notes: string | null;
+  sources: VisaRuleSource[];
+  sources_last_reviewed_at: string | null;
+  sources_reviewed_by_staff_id: string | null;
 };
 
 function parseDocuments(value: Json): VisaDocumentRule[] {
@@ -54,8 +63,20 @@ function parseDocuments(value: Json): VisaDocumentRule[] {
 }
 
 function toVisaRule(rule: Tables<'country_visa_rules'>): VisaRule {
-  return { ...rule, documents: parseDocuments(rule.documents) };
+  return {
+    ...rule,
+    documents: parseDocuments(rule.documents),
+    sources: parseVisaRuleSources(rule.sources),
+  };
 }
+
+const SOURCE_STATUS_STYLES = {
+  verified: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+  review_due: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
+  secondary: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
+  review_pending: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
+  unverified: "bg-slate-500/10 text-slate-600 dark:text-slate-300 border-slate-500/20",
+} as const;
 
 type Country = {
   id: string;
@@ -96,11 +117,13 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
   // Rule Editor state
   const [editingRule, setEditingRule] = useState<VisaRule | null>(null);
   const [savingRule, setSavingRule] = useState(false);
+  const [confirmSources, setConfirmSources] = useState(false);
 
   const handleSelectCountry = (c: Country) => {
     setSelectedCountry(c);
     setMode("genel");
     setEditingRule(null);
+    setConfirmSources(false);
   };
 
   const handleSaveCountry = async () => {
@@ -145,8 +168,17 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
       validity: "",
       max_stay: "",
       multiple_entry: true,
-      notes: ""
+      notes: "",
+      sources: [],
+      sources_last_reviewed_at: null,
+      sources_reviewed_by_staff_id: null,
     });
+    setConfirmSources(false);
+  };
+
+  const openExistingRule = (rule: VisaRule) => {
+    setEditingRule(rule);
+    setConfirmSources(false);
   };
 
   const handleSaveRule = async () => {
@@ -167,24 +199,20 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
       max_stay: editingRule.max_stay || null,
       multiple_entry: editingRule.multiple_entry,
       notes: editingRule.notes || null,
+      sources: editingRule.sources,
     };
 
-    let error;
     const supabase = createSupabaseBrowserClient();
-    if (editingRule.id) {
-      const res = await supabase.from("country_visa_rules").update(payload).eq("id", editingRule.id).select().single();
-      error = res.error;
-      if (!error && res.data) {
-        setEditingRule(null);
-        updateLocalRule(toVisaRule(res.data));
-      }
-    } else {
-      const res = await supabase.from("country_visa_rules").insert([payload]).select().single();
-      error = res.error;
-      if (!error && res.data) {
-        setEditingRule(null);
-        updateLocalRule(toVisaRule(res.data), true);
-      }
+    const { data, error } = await supabase.rpc("save_country_visa_rule_v1", {
+      ...(editingRule.id ? { p_rule_id: editingRule.id } : {}),
+      p_payload: payload,
+      p_confirm_sources: confirmSources,
+    });
+
+    if (!error && data) {
+      setEditingRule(null);
+      setConfirmSources(false);
+      updateLocalRule(toVisaRule(data), !editingRule.id);
     }
 
     if (!error) {
@@ -203,7 +231,7 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
   const handleDeleteRule = async (id: string) => {
     if(!confirm("Bu kuralı silmek istediğinize emin misiniz?")) return;
     const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.from("country_visa_rules").delete().eq("id", id);
+    const { error } = await supabase.rpc("delete_country_visa_rule_v1", { p_rule_id: id });
     if (!error) {
       const updatedCountries = [...countries];
       const cIndex = updatedCountries.findIndex(c => c.id === selectedCountry?.id);
@@ -259,6 +287,44 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
     });
   };
 
+  const addSource = () => {
+    if (!editingRule) return;
+    const reviewDate = new Date();
+    reviewDate.setDate(reviewDate.getDate() + 90);
+    setEditingRule({
+      ...editingRule,
+      sources: [...editingRule.sources, {
+        title: "Yeni Kaynak",
+        url: "https://",
+        kind: "official",
+        review_due_at: reviewDate.toISOString().slice(0, 10),
+      }],
+    });
+    setConfirmSources(false);
+  };
+
+  const updateSource = <K extends keyof VisaRuleSource>(
+    index: number,
+    field: K,
+    value: VisaRuleSource[K],
+  ) => {
+    if (!editingRule) return;
+    const sources = [...editingRule.sources];
+    sources[index] = { ...sources[index], [field]: value };
+    delete sources[index].checked_at;
+    setEditingRule({ ...editingRule, sources });
+    setConfirmSources(false);
+  };
+
+  const removeSource = (index: number) => {
+    if (!editingRule) return;
+    setEditingRule({
+      ...editingRule,
+      sources: editingRule.sources.filter((_, sourceIndex) => sourceIndex !== index),
+    });
+    setConfirmSources(false);
+  };
+
   const groupedDocs = editingRule?.documents?.reduce((acc, doc, index) => {
     const cat = doc.category || 'diger';
     if (!acc[cat]) acc[cat] = [];
@@ -297,7 +363,7 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
           
           {/* Mode Tabs */}
           <div className="flex bg-slate-100 dark:bg-[#0a101a] p-1 rounded-xl w-fit">
-            <button onClick={() => { setMode("genel"); setEditingRule(null); }} className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${mode === "genel" ? "bg-white dark:bg-[#1f2937] shadow text-blue-600 dark:text-blue-400" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}>
+            <button onClick={() => { setMode("genel"); setEditingRule(null); setConfirmSources(false); }} className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${mode === "genel" ? "bg-white dark:bg-[#1f2937] shadow text-blue-600 dark:text-blue-400" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}>
               Genel Ayarlar
             </button>
             <button onClick={() => setMode("kurallar")} className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${mode === "kurallar" ? "bg-white dark:bg-[#1f2937] shadow text-blue-600 dark:text-blue-400" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}>
@@ -366,11 +432,14 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
                         <th className="p-3 font-semibold">Seyahat / Konaklama</th>
                         <th className="p-3 font-semibold">Profil (Meslek/Çocuk/Uyruk)</th>
                         <th className="p-3 font-semibold">Evraklar</th>
+                        <th className="p-3 font-semibold">Kaynak Durumu</th>
                         <th className="p-3 font-semibold rounded-tr-lg text-right">Aksiyon</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-[#1f2937]">
-                      {selectedCountry.rules.map(rule => (
+                      {selectedCountry.rules.map(rule => {
+                        const sourceStatus = getVisaRuleSourceStatus(rule.sources);
+                        return (
                         <tr key={rule.id} className="hover:bg-slate-50 dark:hover:bg-[#151b28] transition-colors group border-b border-slate-100 dark:border-[#1f2937] last:border-0">
                           <td className="p-3 font-semibold text-slate-700 dark:text-slate-200">
                             {VISA_TYPE_LABELS[rule.visa_category as keyof typeof VISA_TYPE_LABELS] || rule.visa_category}
@@ -393,18 +462,24 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
                           <td className="p-3 text-slate-600 dark:text-slate-400">
                             <span className="px-2 py-1 bg-slate-100 dark:bg-[#1a2232] rounded text-[10px] font-semibold">{rule.documents?.length || 0} Evrak</span>
                           </td>
+                          <td className="p-3">
+                            <span className={`inline-flex px-2 py-1 rounded border text-[10px] font-semibold ${SOURCE_STATUS_STYLES[sourceStatus]}`}>
+                              {VISA_RULE_SOURCE_STATUS_LABELS[sourceStatus]}
+                            </span>
+                          </td>
                           <td className="p-3 text-right">
                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => setEditingRule(rule)} className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-md transition-colors">
+                              <button aria-label="Kuralı düzenle" onClick={() => openExistingRule(rule)} className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-md transition-colors">
                                 <Edit className="w-4 h-4" />
                               </button>
-                              <button onClick={() => handleDeleteRule(rule.id!)} className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-md transition-colors">
+                              <button aria-label="Kuralı sil" onClick={() => handleDeleteRule(rule.id!)} className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-md transition-colors">
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -420,7 +495,7 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
                   <Settings className="w-4 h-4 text-blue-500" /> Kural Düzenleyici
                 </h3>
                 <div className="flex gap-2">
-                  <button onClick={() => setEditingRule(null)} className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-[#1f2937] rounded-lg transition-colors">
+                  <button onClick={() => { setEditingRule(null); setConfirmSources(false); }} className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-[#1f2937] rounded-lg transition-colors">
                     İptal
                   </button>
                   <button onClick={handleSaveRule} disabled={savingRule} className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-all disabled:opacity-50">
@@ -489,6 +564,93 @@ export default function CountriesManager({ initialCountries }: { initialCountrie
                       <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Çoklu Giriş (Multiple)</span>
                     </label>
                   </div>
+                </div>
+
+                {/* Source verification */}
+                <div className="mb-6 p-4 bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-xl">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">Kaynak ve Doğrulama</h4>
+                        {(() => {
+                          const status = getVisaRuleSourceStatus(editingRule.sources);
+                          return (
+                            <span className={`inline-flex px-2 py-1 rounded border text-[10px] font-semibold ${SOURCE_STATUS_STYLES[status]}`}>
+                              {VISA_RULE_SOURCE_STATUS_LABELS[status]}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Konsolosluk/başvuru merkezi için “Resmî”, danışmanlık siteleri için “İkincil” seçin.
+                      </p>
+                    </div>
+                    <button onClick={addSource} type="button" className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-lg border border-blue-600/20">
+                      <Plus className="w-3.5 h-3.5" /> Kaynak Ekle
+                    </button>
+                  </div>
+
+                  {editingRule.sources.length === 0 ? (
+                    <div className="p-4 border border-dashed border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-500 text-center">
+                      Bu kuralın kaynağı henüz kayıtlı değil.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {editingRule.sources.map((source, sourceIndex) => (
+                        <div key={`${source.url}-${sourceIndex}`} className="grid grid-cols-12 gap-3 p-3 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] rounded-lg">
+                          <div className="col-span-12 md:col-span-4 space-y-1">
+                            <label className="text-[9px] text-slate-400 font-semibold uppercase">Kaynak Başlığı</label>
+                            <input aria-label="Kaynak Başlığı" value={source.title} onChange={event => updateSource(sourceIndex, "title", event.target.value)} className="w-full px-2 py-1.5 bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-md text-xs outline-none focus:border-blue-500" />
+                          </div>
+                          <div className="col-span-12 md:col-span-4 space-y-1">
+                            <label className="text-[9px] text-slate-400 font-semibold uppercase">HTTPS Adresi</label>
+                            <div className="flex gap-1">
+                              <input aria-label="HTTPS Adresi" value={source.url} onChange={event => updateSource(sourceIndex, "url", event.target.value)} className="min-w-0 flex-1 px-2 py-1.5 bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-md text-xs outline-none focus:border-blue-500" />
+                              {source.url.startsWith("https://") && (
+                                <a href={source.url} target="_blank" rel="noreferrer" aria-label="Kaynağı yeni sekmede aç" className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-md">
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                          <div className="col-span-6 md:col-span-2 space-y-1">
+                            <label className="text-[9px] text-slate-400 font-semibold uppercase">Kaynak Türü</label>
+                            <select aria-label="Kaynak Türü" value={source.kind} onChange={event => updateSource(sourceIndex, "kind", event.target.value as VisaRuleSource["kind"])} className="w-full px-2 py-1.5 bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-md text-xs outline-none focus:border-blue-500">
+                              <option value="official">Resmî</option>
+                              <option value="secondary">İkincil</option>
+                            </select>
+                          </div>
+                          <div className="col-span-5 md:col-span-2 space-y-1">
+                            <label className="text-[9px] text-slate-400 font-semibold uppercase">Yeniden Kontrol</label>
+                            <input aria-label="Yeniden Kontrol" type="date" value={source.review_due_at || ""} onChange={event => updateSource(sourceIndex, "review_due_at", event.target.value || undefined)} className="w-full px-2 py-1.5 bg-slate-50 dark:bg-[#060d1a] border border-slate-200 dark:border-[#1f2937] rounded-md text-xs outline-none focus:border-blue-500" />
+                          </div>
+                          <div className="col-span-1 flex items-end justify-end">
+                            <button type="button" onClick={() => removeSource(sourceIndex)} aria-label="Kaynağı kaldır" className="p-1.5 text-slate-400 hover:bg-red-500/10 hover:text-red-500 rounded-md">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                          <div className="col-span-12 text-[10px] text-slate-500">
+                            {source.checked_at
+                              ? `Son kontrol: ${new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(source.checked_at))}`
+                              : "Bu kaynak henüz doğrulanmadı."}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <label className={`mt-4 flex items-start gap-2 p-3 rounded-lg border ${editingRule.sources.length === 0 ? "opacity-50 cursor-not-allowed" : "cursor-pointer bg-emerald-500/5 border-emerald-500/20"}`}>
+                    <input
+                      type="checkbox"
+                      disabled={editingRule.sources.length === 0}
+                      checked={confirmSources}
+                      onChange={event => setConfirmSources(event.target.checked)}
+                      className="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span className="text-xs text-slate-600 dark:text-slate-300">
+                      <strong>Kaynakları şimdi kontrol ettim.</strong> İşaretlenirse kontrol zamanı ve yönetici audit kaydı birlikte yazılır. Kural içeriği değişip bu kutu işaretlenmezse eski doğrulama otomatik kaldırılır.
+                    </span>
+                  </label>
                 </div>
 
                 {/* Documents Builder */}

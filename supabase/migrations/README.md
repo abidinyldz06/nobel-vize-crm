@@ -62,3 +62,16 @@ Production uygulamasından önce `202607280008`–`202607280011` dry-run çıkt�
 kontrol edilmeli, mevcut DB/Storage recovery point doğrulanmalı ve migration
 sonrası `/privacy`, `/leads`, `/appointments`, `/reports` kabul akışları
 çalıştırılmalıdır.
+
+## Faz 5.4 ülke/vize kataloğu
+
+`202608060001` migration'ı ülke/vize evrak kurallarına çoklu kaynak ve kontrol
+bilgisi ekler. Uygulama kullanıcısının doğrudan kural yazma yetkisini kaldırır;
+yönetici ekleme, güncelleme, kaynak doğrulama ve silme işlemleri kontrollü RPC
+ve audit log üzerinden yürür.
+
+İlk içerik paketi yalnız resmî kaynakla doğrulanan Almanya iş seyahati
+kuralını günceller. Fransa turistik ve öğrenci bağlantıları kontrol kuyruğuna
+eklenir; profile özel France-Visas Assistant çıktısı görülmeden doğrulanmış
+sayılmaz. Production'a uygulamadan önce migration reset, pgTAP, üretilmiş tip
+karşılaştırması ve tam release kapısı çalıştırılmalıdır.
