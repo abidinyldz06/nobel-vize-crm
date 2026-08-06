@@ -75,3 +75,17 @@ kuralını günceller. Fransa turistik ve öğrenci bağlantıları kontrol kuyr
 eklenir; profile özel France-Visas Assistant çıktısı görülmeden doğrulanmış
 sayılmaz. Production'a uygulamadan önce migration reset, pgTAP, üretilmiş tip
 karşılaştırması ve tam release kapısı çalıştırılmalıdır.
+
+## Faz 5.5 ülke ve evrak omurgası
+
+`202608060002` migration'ı tek kural seçimi yerine genel kural ile açıkça
+eşleşen profil eklerini birleştiren sunucu tarafı resolver'ı ve başvuruda
+`matched_rule_ids` izini ekler. Profil düzenlendiğinde yeni gereken evraklar
+eklenir; mevcut yükleme ve manuel evraklar korunur.
+
+`202608060003` migration'ı Almanya, Fransa ve İtalya için turistik, iş,
+öğrenci ve aile ziyareti temel listelerini; meslek, çocuk ve uyruk eklerini
+kaynak statüsüyle birlikte oluşturur. Fransa'nın dört kategorisi ve İtalya iş
+listesi kesin resmî profil çıktısı beklediği için doğrulanmış işaretlenmez.
+Ayrıntılı kaynak matrisi ve kapanış kapıları
+`docs/PHASE_5_5_COUNTRY_DOCUMENT_CORE.md` dosyasındadır.

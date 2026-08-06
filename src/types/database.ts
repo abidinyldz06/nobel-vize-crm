@@ -107,6 +107,7 @@ export type Database = {
           created_at: string
           customer_id: string
           id: string
+          matched_rule_ids: string[] | null
           nationality: string | null
           occupation: string | null
           rejection_reason: string | null
@@ -132,6 +133,7 @@ export type Database = {
           created_at?: string
           customer_id: string
           id?: string
+          matched_rule_ids?: string[] | null
           nationality?: string | null
           occupation?: string | null
           rejection_reason?: string | null
@@ -157,6 +159,7 @@ export type Database = {
           created_at?: string
           customer_id?: string
           id?: string
+          matched_rule_ids?: string[] | null
           nationality?: string | null
           occupation?: string | null
           rejection_reason?: string | null
@@ -2441,6 +2444,10 @@ export type Database = {
         Args: { p_payload: Json }
         Returns: Json
       }
+      create_customer_application_v1_single_rule_core: {
+        Args: { p_payload: Json }
+        Returns: Json
+      }
       create_data_subject_request_v1: {
         Args: { p_payload: Json }
         Returns: string
@@ -2605,6 +2612,18 @@ export type Database = {
         Args: { p_action_id: string; p_reason: string }
         Returns: boolean
       }
+      resolve_country_visa_documents_v1: {
+        Args: {
+          p_accommodation?: string
+          p_country_id: string
+          p_nationality?: string
+          p_occupation?: string
+          p_travel_method?: string
+          p_visa_category: string
+          p_with_children?: boolean
+        }
+        Returns: Json
+      }
       resolve_operational_event_v1: {
         Args: { p_event_id: string }
         Returns: boolean
@@ -2760,6 +2779,14 @@ export type Database = {
         Returns: Json
       }
       update_customer_application_v1: {
+        Args: {
+          p_application_id: string
+          p_customer_id: string
+          p_payload: Json
+        }
+        Returns: Json
+      }
+      update_customer_application_v1_profile_core: {
         Args: {
           p_application_id: string
           p_customer_id: string
