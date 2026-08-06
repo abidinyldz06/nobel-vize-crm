@@ -2,13 +2,10 @@
 
 Son güncelleme: 6 Ağustos 2026
 
-Durum: Faz 5.0–5.3 GitHub CI ve production kabulünden geçti. Faz 5.2–5.3
-PR #55 ile ana dala alındı; production migration zinciri ve canlı sağlık
-kontrolü doğrulandı. Dış sağlayıcıların canlı aktivasyonu gerekli secret ve
-sağlayıcı onayı gelene kadar kapalı kalır.
-
-Faz 5.4 ülke/vize evrak kataloğunun yerel uygulama ve tam release doğrulaması
-tamamlandı; GitHub ve production kabulü tamamlanmadan production'da sayılmaz.
+Durum: Faz 5.0–5.4 GitHub CI ve production kabulünden geçti. Faz 5.2–5.3
+PR #55, Faz 5.4 ise PR #58 ile ana dala alındı; production migration zinciri,
+canlı sağlık kontrolü ve ülke kataloğu arayüzü doğrulandı. Dış sağlayıcıların
+canlı aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı kalır.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 

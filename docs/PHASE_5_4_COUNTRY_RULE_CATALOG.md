@@ -2,9 +2,9 @@
 
 Tarih: 6 Ağustos 2026
 
-Durum: Yerel uygulama ve tam release doğrulaması tamamlandı. GitHub PR, ana
-dal CI, production migration ve canlı kabul tamamlanmadan bu faz
-production'da sayılmaz.
+Durum: Tamamlandı ve production'da doğrulandı. PR #58 kontrollü squash merge
+ile ana dala alındı; ana dal CI, production migration, sağlık uçları ve canlı
+katalog arayüzü kabulü geçti.
 
 ## Amaç
 
@@ -111,3 +111,24 @@ alınır.
 - production build tamamlandı;
 - izole backup/restore tatbikatı başarıyla rollback edildi;
 - kaynak ekleme/doğrulama senaryosu dahil 29 Chromium testi geçti.
+
+## GitHub ve production kapanışı
+
+- Uygulama commit'i `bf368d4` GitHub'a gönderildi ve PR #58 üzerinden
+  incelendi.
+- PR Quality Gates içinde application, database ve browser işleri ile Vercel
+  önizlemesi başarılı oldu.
+- PR #58, beklenen baş commit doğrulandıktan sonra kontrollü squash merge ile
+  birleştirildi; ana dal merge commit'i `af9d971` oldu.
+- Ana dal Quality Gates çalışması `31077706481` içinde application, database
+  ve browser işleri yeniden başarıyla tamamlandı; Vercel production dağıtımı
+  başarılı oldu.
+- `202608060001_phase54_country_rule_catalog.sql` production Supabase'e
+  uygulandı ve yerel/uzak migration geçmişinin eşit olduğu doğrulandı.
+- `/api/health/live`, `/api/health/ready` ve `/` uçları HTTP 200 döndürdü.
+- Production veri doğrulamasında Almanya'nın iki resmî kaynağı ve 3GEN ikincil
+  kaynağı; Fransa'nın resmî kaynakları ve iki kategoriye eklenmiş 3GEN
+  referansları bulundu.
+- Canlı yönetici arayüzünde Almanya İş kuralı 22 evrakla “Resmî kaynak
+  doğrulandı”; Fransa Turistik ve Öğrenci kuralları ise bilinçli olarak
+  “Kaynak kontrolü bekliyor” durumunda görüntülendi.
