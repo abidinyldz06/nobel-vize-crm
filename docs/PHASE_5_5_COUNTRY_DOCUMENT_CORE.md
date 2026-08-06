@@ -2,8 +2,8 @@
 
 Tarih: 6 Ağustos 2026
 
-Durum: Uygulama, kaynak matrisi ve yerel toplu doğrulama tamamlandı; GitHub ve
-production kapanışı Faz 5.5.4 kapsamında yapılacak.
+Durum: Tamamlandı; GitHub kalite kapıları, production migration, Vercel yayını
+ve canlı yönetici kabulü doğrulandı.
 
 ## Amaç
 
@@ -106,6 +106,34 @@ Tek toplu doğrulamada:
 Yerel kapanışta lint ve TypeScript kontrolü, 77 birim/güvenlik testi, 431
 pgTAP testi, production bağımlılık denetimi, production build, izole restore
 tatbikatı ve 30 Chromium senaryosu başarıyla tamamlandı.
+
+### GitHub ve production kapanışı
+
+- Uygulama commit'i `fa24884` GitHub'a gönderildi ve
+  [PR #60](https://github.com/abidinyldz06/nobel-vize-crm/pull/60)
+  üzerinden incelendi.
+- PR'daki application, database ve browser işleri ile Vercel önizlemesi
+  başarılı olduktan sonra beklenen baş commit doğrulanarak kontrollü squash
+  merge yapıldı; ana dal merge commit'i `f9eb520` oldu.
+- Ana dal Quality Gates çalışması `31083897680` içinde application, database
+  ve browser işleri yeniden geçti; browser işi 30/30 Chromium senaryosunu
+  tamamladı.
+- Production geçişinden önce roller, `auth/public/storage` şema ve verileri ile
+  private `documents` nesnesini içeren repo dışı AES-256-CBC/PBKDF2 recovery
+  paketi oluşturuldu. Ayrı macOS Keychain anahtarıyla şifre çözme ve arşiv
+  bütünlüğü doğrulandı; düz metin geçici dosyalar temizlendi.
+- Dry-run yalnız `202608060002_phase55_document_rule_layers.sql` ve
+  `202608060003_phase55_first_country_document_pack.sql` migration'larını
+  gösterdi. İkisi production Supabase'e uygulandı; yerel/uzak migration geçmişi
+  eşitlendi ve uzak şema lint sonucu 0 hata verdi.
+- Production verisinde 3 hedef ülke, 12 genel kural ve 91 profil eki bulundu.
+  Yedi genel kural resmî kaynak doğrulamalı, beş genel kural bilinçli olarak
+  kaynak kontrolü bekliyor durumundadır.
+- Vercel production dağıtımı merge commit'i için başarılı oldu;
+  `/api/health/live`, `/api/health/ready` ve `/` uçları HTTP 200 döndürdü.
+- Canlı yönetici arayüzünde Almanya'nın 31 kuralı ve dört doğrulanmış genel
+  listesi; Fransa'nın 36 kuralı, bekleyen kaynak etiketleri ve profil ekleri
+  görüntülendi. Tarayıcı konsolunda hata oluşmadı.
 
 ## Sonraki içerik sırası
 
