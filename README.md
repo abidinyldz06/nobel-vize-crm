@@ -111,7 +111,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
 | Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | Tamamlandı; gerçek admin MFA kabulü, oturum kapatma, production doğrulaması ve kapanış kaydı tamamlandı. Gerçek mesaj sağlayıcısı Faz 5.2'ye ertelendi. | `docs/PHASE_5_0_CLOSURE_REPORT.md` |
-| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.1.1–5.3 production kabulünden geçti. 5.4 kaynak izlenebilir ülke/vize kataloğunun yerel release doğrulaması tamamlandı; GitHub/production kabulü bekliyor. Resend e-posta ve Google Calendar canlı sağlayıcı aktivasyonu bekler. | `docs/PHASE_5_PLAN.md`, `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`, `docs/PHASE_5_4_COUNTRY_RULE_CATALOG.md` |
+| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.1.1–5.4 GitHub CI ve production kabulünden geçti. Kaynak izlenebilir ülke/vize kataloğu PR #58 ile yayınlandı; migration, health ve canlı arayüz doğrulandı. Resend e-posta ve Google Calendar canlı sağlayıcı aktivasyonu bekler. | `docs/PHASE_5_PLAN.md`, `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`, `docs/PHASE_5_4_COUNTRY_RULE_CATALOG.md` |
 
 Faz 3 alt aşama takibi:
 
