@@ -3,7 +3,10 @@ import { useState, useMemo } from "react";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import { AlertCircle, FileText, CheckCircle2 } from "lucide-react";
 import type { Json, Tables } from "@/types/database";
-import { selectBestDocumentRule } from "@/lib/document-rule-matcher";
+import {
+  resolveDocumentRules,
+  type DocumentRuleEntry,
+} from "@/lib/document-rule-matcher";
 
 const TRAVEL_METHODS = { ucak: "Uçak", tur_paketi: "Tur Paketi", gemi: "Gemi", kendi_araci: "Kendi Aracı" };
 const ACCOMMODATIONS = { otel: "Otel", aile_arkadas: "Aile/Arkadaş Yanı", diger: "Diğer" };
@@ -11,16 +14,16 @@ const OCCUPATIONS = { calisan: "Çalışan", memur: "Memur", emekli: "Emekli", o
 const WITH_CHILDREN = { "true": "Evet", "false": "Hayır" };
 const NATIONALITIES = { tc: "TC Vatandaşı", diger: "Diğer" };
 
-type DocumentRule = { name: string; required: boolean; description?: string };
-type SmartRule = Tables<'country_visa_rules'> & { parsedDocuments: DocumentRule[] };
+type SmartRule = Tables<'country_visa_rules'> & { parsedDocuments: DocumentRuleEntry[] };
 
-function parseDocuments(value: Json): DocumentRule[] {
+function parseDocuments(value: Json): DocumentRuleEntry[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((entry) => {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry) || typeof entry.name !== 'string') return [];
     return [{
       name: entry.name,
       required: entry.required !== false,
+      category: typeof entry.category === 'string' ? entry.category : undefined,
       description: typeof entry.description === 'string' ? entry.description : undefined,
     }];
   });
@@ -41,8 +44,8 @@ export default function SmartDocumentSelector({
   const [withChildren, setWithChildren] = useState<string>("");
   const [nationality, setNationality] = useState<string>("");
 
-  // Compute matching rule
-  const matchingRule = useMemo(() => {
+  // Compute the general rule plus every explicitly matching profile overlay.
+  const ruleResolution = useMemo(() => {
     if (!selectedCountry || !selectedVisaType) return null;
 
     const countryRules: SmartRule[] = allRules
@@ -50,7 +53,7 @@ export default function SmartDocumentSelector({
       .map(rule => ({ ...rule, parsedDocuments: parseDocuments(rule.documents) }));
     if (countryRules.length === 0) return null;
 
-    return selectBestDocumentRule(countryRules, {
+    return resolveDocumentRules(countryRules, {
       travel_method: travelMethod,
       accommodation,
       occupation,
@@ -58,6 +61,10 @@ export default function SmartDocumentSelector({
       nationality,
     });
   }, [selectedCountry, selectedVisaType, travelMethod, accommodation, occupation, withChildren, nationality, allRules]);
+
+  const matchingRule = ruleResolution?.rules[0] ?? null;
+  const matchingRules = ruleResolution?.rules ?? [];
+  const resolvedDocuments = ruleResolution?.documents ?? [];
 
   return (
     <div className="space-y-6">
@@ -155,15 +162,15 @@ export default function SmartDocumentSelector({
           ) : (
             <div className="p-4">
               <div className="mb-4 text-[10px] flex gap-2 flex-wrap text-slate-500">
-                <span className="bg-slate-200 dark:bg-[#1f2937] px-2 py-0.5 rounded">Eşleşen Kural ID: {matchingRule.id?.split('-')[0]}</span>
-                <span className="bg-slate-200 dark:bg-[#1f2937] px-2 py-0.5 rounded">{matchingRule.parsedDocuments.length} Evrak Bulundu</span>
+                <span className="bg-slate-200 dark:bg-[#1f2937] px-2 py-0.5 rounded">{matchingRules.length} Kural Birleştirildi</span>
+                <span className="bg-slate-200 dark:bg-[#1f2937] px-2 py-0.5 rounded">{resolvedDocuments.length} Evrak Bulundu</span>
               </div>
-              {matchingRule.parsedDocuments.length === 0 ? (
+              {resolvedDocuments.length === 0 ? (
                 <p className="text-xs text-slate-500">Bu kurala henüz evrak eklenmemiş.</p>
               ) : (
                 <ul className="space-y-2">
-                  {matchingRule.parsedDocuments.map((doc, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs">
+                  {resolvedDocuments.map((doc) => (
+                    <li key={doc.name.toLocaleLowerCase('tr-TR')} className="flex items-start gap-2 text-xs">
                       <CheckCircle2 className={`w-4 h-4 shrink-0 ${doc.required ? 'text-emerald-500' : 'text-slate-400'}`} />
                       <div>
                         <span className={`font-semibold ${doc.required ? 'text-slate-700 dark:text-slate-200' : 'text-slate-500'}`}>{doc.name}</span>

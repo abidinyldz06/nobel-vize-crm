@@ -164,16 +164,13 @@ SELECT results_eq(
     JOIN public.customers AS customer ON customer.id = application.customer_id
     JOIN public.documents AS document ON document.application_id = application.id
     WHERE customer.phone = '05554110002'
+    ORDER BY document.document_type
   $$,
-  $$ VALUES (
-    'ucak'::TEXT,
-    'otel'::TEXT,
-    'calisan'::TEXT,
-    false,
-    'tc'::TEXT,
-    'Uçak Evrakı'::TEXT
-  ) $$,
-  'profile values persist and select the exact rule'
+  $$ VALUES
+    ('ucak'::TEXT, 'otel'::TEXT, 'calisan'::TEXT, false, 'tc'::TEXT, 'Genel Evrak'::TEXT),
+    ('ucak'::TEXT, 'otel'::TEXT, 'calisan'::TEXT, false, 'tc'::TEXT, 'Uçak Evrakı'::TEXT)
+  $$,
+  'profile values persist and merge general plus exact rules'
 );
 
 SELECT * FROM finish();
