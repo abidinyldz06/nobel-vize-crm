@@ -1,11 +1,14 @@
 # Faz 5 — Veri Kalitesi, Gerçek İletişim ve Operasyon Geliştirmeleri
 
-Son güncelleme: 2 Ağustos 2026
+Son güncelleme: 6 Ağustos 2026
 
 Durum: Faz 5.0–5.3 GitHub CI ve production kabulünden geçti. Faz 5.2–5.3
 PR #55 ile ana dala alındı; production migration zinciri ve canlı sağlık
 kontrolü doğrulandı. Dış sağlayıcıların canlı aktivasyonu gerekli secret ve
 sağlayıcı onayı gelene kadar kapalı kalır.
+
+Faz 5.4 ülke/vize evrak kataloğunun yerel uygulama ve tam release doğrulaması
+tamamlandı; GitHub ve production kabulü tamamlanmadan production'da sayılmaz.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 
@@ -57,6 +60,20 @@ sağlayıcı onayı gelene kadar kapalı kalır.
   personel tek şirket kaydında saklanır; sistem loguna denetim olayı eklenir.
 - Arayüzde doğrulama tarihi ve kaynak bağlantısı görünür. Bu aşama gerçek
   e-posta/WhatsApp gönderimini etkinleştirmez.
+
+## 5.4 — Kaynak izlenebilir ülke/vize evrak kataloğu (yerel doğrulama tamamlandı)
+
+- Kural başına resmî ve ikincil kaynaklar, kontrol zamanı ve yeniden kontrol
+  tarihi saklanır; kaynak durumu arayüzde rozetle gösterilir.
+- Doğrudan tarayıcı yazımı kapalıdır. Yönetici kayıt/doğrulama/silme işlemleri
+  kontrollü RPC ve audit log üzerinden çalışır.
+- İlk doğrulanmış paket Almanya iş seyahatidir. Fransa turistik ve öğrenci
+  kayıtları France-Visas'ın profile göre ürettiği kesin listeyle
+  karşılaştırılana kadar kontrol bekliyor olarak tutulur.
+- 3GEN Vize ülke ve profil kapsamı için ikincil referanstır; resmî kaynakla
+  çelişkide resmî kaynak esas alınır.
+- Ayrıntılı kapsam ve kabul kapıları:
+  `docs/PHASE_5_4_COUNTRY_RULE_CATALOG.md`.
 
 ## 5.2 — Gerçek iletişim sistemi (production'da; canlı sağlayıcı aktivasyonu bekliyor)
 

@@ -645,6 +645,9 @@ export type Database = {
           notes: string | null
           occupation: string | null
           processing_time: string | null
+          sources: Json | null
+          sources_last_reviewed_at: string | null
+          sources_reviewed_by_staff_id: string | null
           travel_method: string | null
           updated_at: string
           validity: string | null
@@ -663,6 +666,9 @@ export type Database = {
           notes?: string | null
           occupation?: string | null
           processing_time?: string | null
+          sources?: Json | null
+          sources_last_reviewed_at?: string | null
+          sources_reviewed_by_staff_id?: string | null
           travel_method?: string | null
           updated_at?: string
           validity?: string | null
@@ -681,6 +687,9 @@ export type Database = {
           notes?: string | null
           occupation?: string | null
           processing_time?: string | null
+          sources?: Json | null
+          sources_last_reviewed_at?: string | null
+          sources_reviewed_by_staff_id?: string | null
           travel_method?: string | null
           updated_at?: string
           validity?: string | null
@@ -688,6 +697,13 @@ export type Database = {
           with_children?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "country_visa_rules_sources_reviewer_fk"
+            columns: ["sources_reviewed_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rules_country_fk"
             columns: ["country_id"]
@@ -2432,6 +2448,10 @@ export type Database = {
       create_lead_v1: { Args: { p_payload: Json }; Returns: string }
       create_task_v1: { Args: { p_payload: Json }; Returns: string }
       current_staff_id: { Args: never; Returns: string }
+      delete_country_visa_rule_v1: {
+        Args: { p_rule_id: string }
+        Returns: boolean
+      }
       enqueue_message_v1: { Args: { p_payload: Json }; Returns: string }
       execute_privacy_action_v1: {
         Args: { p_action_id: string }
@@ -2609,6 +2629,40 @@ export type Database = {
       run_scheduled_operations_v1: {
         Args: { p_window_key: string }
         Returns: Json
+      }
+      save_country_visa_rule_v1: {
+        Args: {
+          p_confirm_sources?: boolean
+          p_payload?: Json
+          p_rule_id?: string
+        }
+        Returns: {
+          accommodation: string | null
+          country_id: string
+          created_at: string
+          documents: Json
+          id: string
+          max_stay: string | null
+          multiple_entry: boolean
+          nationality: string | null
+          notes: string | null
+          occupation: string | null
+          processing_time: string | null
+          sources: Json | null
+          sources_last_reviewed_at: string | null
+          sources_reviewed_by_staff_id: string | null
+          travel_method: string | null
+          updated_at: string
+          validity: string | null
+          visa_category: string
+          with_children: boolean | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "country_visa_rules"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       set_application_appointment_v1: {
         Args: {
