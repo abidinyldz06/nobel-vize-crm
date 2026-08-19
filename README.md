@@ -49,9 +49,10 @@ npm install
 # GOOGLE_FORM_WEBHOOK_SECRET=...      # yalnızca sunucu
 # CRON_SECRET=...                     # yalnızca sunucu, en az 32 bayt
 # BACKUP_ENCRYPTION_KEY=...           # yalnızca sunucu, 32 bayt base64
-# MESSAGE_PROVIDER=disabled           # Resend canlı aktivasyonu yapılana kadar
+# MESSAGE_PROVIDER=resend             # production e-posta sağlayıcısı
 # RESEND_API_KEY=...                  # yalnızca Vercel server secret
 # EMAIL_FROM=...                      # Resend'de doğrulanmış gönderici
+# NEXT_PUBLIC_APP_URL=https://abidinyildiz.com
 # GOOGLE_CALENDAR_CLIENT_SECRET=...   # yalnızca Vercel server secret
 # CALENDAR_TOKEN_ENCRYPTION_KEY=...   # yalnızca Vercel server secret, 32 bayt base64
 # ENABLE_ATOMIC_RESTORE=false          # normal çalışma için kapalı
@@ -64,6 +65,8 @@ npm run dev
 
 - `SUPABASE_SERVICE_ROLE_KEY`, webhook, cron ve yedek anahtarları hiçbir zaman `NEXT_PUBLIC_` önekiyle tanımlanmamalıdır.
 - Müşteri evrakları private Supabase Storage bucket'ında tutulur ve uygulama kısa süreli imzalı bağlantı üretir.
+- Google ile giriş yalnızca mevcut ve aktif `staff.user_id` kaydıyla eşleşen hesapları kabul eder; rol bazlı MFA politikası sosyal girişten sonra da uygulanır.
+- Google ile giriş ve Google Takvim izinleri ayrı OAuth akışlarıdır. Takvim tokenları yalnız sunucuda şifreli tutulur.
 - Google Form webhook istekleri `x-webhook-timestamp`, benzersiz UUID biçiminde `x-webhook-id` ve `x-webhook-signature` başlıklarını göndermelidir. İmza, `${timestamp}.${eventId}.${hamJsonGövdesi}` metninin `GOOGLE_FORM_WEBHOOK_SECRET` ile HMAC-SHA256 özetidir.
 - Veritabanı migration'ları önce staging ortamında uygulanmalıdır. Ayrıntılar `supabase/migrations/README.md` dosyasındadır.
 
@@ -111,7 +114,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
 | Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | Tamamlandı; gerçek admin MFA kabulü, oturum kapatma, production doğrulaması ve kapanış kaydı tamamlandı. Gerçek mesaj sağlayıcısı Faz 5.2'ye ertelendi. | `docs/PHASE_5_0_CLOSURE_REPORT.md` |
-| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.1.1–5.5.4 GitHub CI ve production kabulünden geçti. Ülke/evrak omurgası genel liste + profil eki modeliyle PR #60 üzerinden yayınlandı; ilk paket Almanya, Fransa ve İtalya için 12 genel liste ve 91 profil eki içerir. Fransa kesin Visa Assistant çıktıları ile İtalya güncel ticari listesi doğrulama kuyruğundadır. Resend e-posta ve Google Calendar canlı sağlayıcı aktivasyonu bekler. | `docs/PHASE_5_PLAN.md`, `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`, `docs/PHASE_5_4_COUNTRY_RULE_CATALOG.md`, `docs/PHASE_5_5_COUNTRY_DOCUMENT_CORE.md` |
+| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.1.1–5.5.4 GitHub CI ve production kabulünden geçti. Ülke/evrak omurgası genel liste + profil eki modeliyle PR #60 üzerinden yayınlandı; ilk paket Almanya, Fransa ve İtalya için 12 genel liste ve 91 profil eki içerir. Fransa kesin Visa Assistant çıktıları ile İtalya güncel ticari listesi doğrulama kuyruğundadır. Resend e-posta gönderimi ve teslimat webhook'u production'da aktiftir; Google ile giriş ve Google Calendar canlı sağlayıcı ayarları bekler. | `docs/PHASE_5_PLAN.md`, `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`, `docs/PHASE_5_4_COUNTRY_RULE_CATALOG.md`, `docs/PHASE_5_5_COUNTRY_DOCUMENT_CORE.md` |
 
 Faz 3 alt aşama takibi:
 
