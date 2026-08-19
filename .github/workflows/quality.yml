@@ -68,7 +68,8 @@ jobs:
       - name: Disable Supabase CLI telemetry
         run: npx supabase telemetry disable
       - run: npm run db:start
-      - run: npx playwright install --with-deps chromium
+      - name: Verify runner Chrome
+        run: google-chrome --version
       - run: npm run test:e2e:local
       - if: always()
         run: npm run db:stop
