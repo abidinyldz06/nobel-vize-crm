@@ -91,13 +91,12 @@ export default function CalendarIntegrationControl() {
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => { window.location.assign("/api/integrations/google-calendar/connect"); }}
+        <a
+          href="/api/integrations/google-calendar/connect"
           className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-500/15 dark:text-blue-300"
         >
           <Link2 className="h-3.5 w-3.5" /> Google Takvim’i bağla
-        </button>
+        </a>
       )}
       {status.connected && !message && (
         <p className="flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-300">

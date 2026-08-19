@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
@@ -14,6 +15,7 @@ export default function MfaChallenge({
   enrollmentRequired?: boolean;
   onVerified?: () => void;
 }) {
+  const router = useRouter();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const enrollStarted = useRef(false);
   const [factorId, setFactorId] = useState(initialFactorId ?? null);
@@ -63,7 +65,7 @@ export default function MfaChallenge({
       p_outcome: "success",
     });
     if (onVerified) onVerified();
-    else window.location.assign("/dashboard");
+    else router.replace("/dashboard");
   };
 
   return (

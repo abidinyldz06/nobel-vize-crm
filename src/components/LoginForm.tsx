@@ -2,10 +2,12 @@
 import { useState } from "react"
 import { loginAction } from "@/app/actions/auth"
 import { Globe, Mail, Lock, ArrowRight, Shield, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 import MfaChallenge from "@/components/MfaChallenge"
 
 export default function LoginForm() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mfa, setMfa] = useState<{ enrollmentRequired: boolean; factorId: string | null } | null>(null)
@@ -32,7 +34,7 @@ export default function LoginForm() {
         setLoading(false)
         return
       }
-      window.location.assign("/dashboard")
+      router.replace("/dashboard")
     }
   }
 
