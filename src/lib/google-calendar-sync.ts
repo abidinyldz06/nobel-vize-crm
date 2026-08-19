@@ -434,15 +434,39 @@ async function syncConnection(connection: CalendarConnection): Promise<CalendarS
   const admin = createSupabaseAdminClient();
   try {
     const accessToken = await getFreshAccessToken(connection);
-    const [appointments, linksResult] = await Promise.all([
+    const [appointmentsBeforeImport, linksBeforeImportResult] = await Promise.all([
       activeAppointmentsForStaff(connection.staff_id),
       admin.from("calendar_event_links").select("*").eq("connection_id", connection.id),
     ]);
-    if (linksResult.error) throw linksResult.error;
-    const links = linksResult.data || [];
-    const exported = await exportAppointments(connection, accessToken, appointments, links);
+    if (linksBeforeImportResult.error) throw linksBeforeImportResult.error;
+    const linksBeforeImport = linksBeforeImportResult.data || [];
+
+    // Import remote edits before exporting CRM state. Exporting first would
+    // overwrite a Google-side reschedule with the older CRM values before the
+    // change reader could observe it. When both sides changed between syncs,
+    // the linked Google event is therefore the deterministic winner.
     const changes = await readCalendarChanges(connection, accessToken);
-    const incoming = await importCalendarChanges(connection, appointments, links, changes.events);
+    const incoming = await importCalendarChanges(
+      connection,
+      appointmentsBeforeImport,
+      linksBeforeImport,
+      changes.events,
+    );
+
+    // Import may have changed appointment fields, cancellation state and link
+    // metadata. Reload both sets so the following export mirrors that current
+    // state instead of the stale snapshot from the beginning of the sync.
+    const [appointmentsAfterImport, linksAfterImportResult] = await Promise.all([
+      activeAppointmentsForStaff(connection.staff_id),
+      admin.from("calendar_event_links").select("*").eq("connection_id", connection.id),
+    ]);
+    if (linksAfterImportResult.error) throw linksAfterImportResult.error;
+    const exported = await exportAppointments(
+      connection,
+      accessToken,
+      appointmentsAfterImport,
+      linksAfterImportResult.data || [],
+    );
     const { error: connectionError } = await admin
       .from("calendar_connections")
       .update({

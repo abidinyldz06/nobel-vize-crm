@@ -36,5 +36,12 @@ describe("phase 5.3 portal and operations", () => {
     assert.match(calendarSync, /encryptCalendarToken/);
     assert.match(calendarSync, /nobel_application_id/);
     assert.match(calendarSync, /Google Takvim değişikliği CRM'e işlendi/);
+
+    const readRemoteChanges = calendarSync.indexOf("const changes = await readCalendarChanges");
+    const importRemoteChanges = calendarSync.indexOf("const incoming = await importCalendarChanges");
+    const exportCurrentState = calendarSync.indexOf("const exported = await exportAppointments");
+    assert.ok(readRemoteChanges >= 0);
+    assert.ok(importRemoteChanges > readRemoteChanges);
+    assert.ok(exportCurrentState > importRemoteChanges);
   });
 });
