@@ -1,5 +1,20 @@
 # Google ile Giriş ve Google Takvim Canlıya Alma Kaydı
 
+## Canlı durum — 19 Ağustos 2026
+
+- Google ile giriş production'da aktiftir. Yönetici Google hesabıyla giriş
+  yaptı; mevcut MFA politikası sonrasında Dashboard'a ulaştı.
+- Google Calendar API etkin, OAuth uygulaması `In production` durumunda ve
+  yöneticinin birincil takvimi CRM'e bağlıdır.
+- CRM → Google ve Google → CRM yönleri sentetik randevuyla canlı kabulden
+  geçti. Google'da yapılan saat ve konum değişikliği CRM'e `rescheduled`
+  olarak işlendi; randevu geçmişi ve audit kaydı oluştu.
+- İlk kabulte bulunan eşitleme sırası kusuru PR #66 ile düzeltildi ve production
+  deployment sonrasında aynı senaryo başarıyla yeniden çalıştırıldı.
+- Test etkinliği iptal eşitlemesiyle Google'dan kaldırıldı; sentetik müşteri
+  geri yüklenebilir arşive taşındı ve aktif production listesinde test verisi
+  bırakılmadı.
+
 ## Kapsam ve güvenlik sınırı
 
 - Google ile giriş, Supabase Auth PKCE akışını kullanır.
@@ -56,3 +71,23 @@ Takvim bağlantısı açılmadan önce aşağıdaki değişkenler production ort
 8. Production health kontrolleri, ana dal CI ve Vercel deployment sonucu yeşildir.
 
 Canlı kabul tamamlanmadan bu özellikler “production aktif” olarak işaretlenmez.
+
+19 Ağustos sonucu:
+
+- Kriter 1, 2, 5, 6 ve 8 production'da doğrulandı.
+- Tanımsız hesap erişimi ve yeni kullanıcı engeli (kriter 3–4) otomatik
+  güvenlik testleriyle doğrulandı; production'da sahte personel hesabı
+  oluşturulmadı.
+- Bağlantı kaldırma (kriter 7) çalışan production bağlantısını ve yenileme
+  tokenını bilerek bozacağı için canlıda uygulanmadı; silme davranışı otomatik
+  testlerle korunur.
+
+## Kalan dış yönetişim işi
+
+OAuth uygulaması production modunda olmakla birlikte Google'ın hassas Takvim
+kapsamı için henüz doğrulanmış yayıncı değildir ve 100 kullanıcı sınırı taşır.
+Daha geniş personel yayılımı öncesinde `abidinyildiz.com` üzerinde public
+gizlilik politikası ve kullanım şartları yayımlanmalı, OAuth consent screen
+alanları bu sayfalara bağlanmalı ve Google hassas kapsam doğrulamasına
+gönderilmelidir. Bu eksik mevcut bağlı yöneticinin çalışmasını engellemez;
+ölçekli yayılım ve güven ekranı için yönetişim kapısıdır.

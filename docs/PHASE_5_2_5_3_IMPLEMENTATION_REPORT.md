@@ -1,11 +1,12 @@
 # Faz 5.2–5.3 — İletişim ve Operasyon Paketi
 
 Tarih: 2 Ağustos 2026
+Canlı aktivasyon güncellemesi: 19 Ağustos 2026
 
-Durum: Uygulama, migration, GitHub CI ve production deployment tamamlandı.
-Gerçek e-posta gönderimi ile Google OAuth bağlantısı, gerekli Vercel
-secret'ları ve yetkili sağlayıcı ayarları girilmediği için kasıtlı olarak
-etkin değildir.
+Durum: Uygulama, migration, GitHub CI, production deployment ve dış sağlayıcı
+canlı kabulü tamamlandı. Resend gerçek teslimat webhook'u ile; Google ile giriş,
+MFA sonrasında Dashboard erişimi ve Google Takvim gidiş-dönüş eşitlemesiyle
+production'da doğrulandı.
 
 ## 5.2 — Gerçek e-posta teslimatı
 
@@ -56,23 +57,23 @@ etkin değildir.
   oluşturulmaz; yanlış müşteri eşlemesini önleyen bilinçli güvenlik sınırıdır.
 - `/api/cron/calendar` günlük eşitleme için Vercel Cron'a eklenmiştir; çalışan
   personel ayrıca ekrandan manuel eşitleme yapabilir.
+- Senkronizasyon önce bağlı Google etkinliğindeki değişiklikleri CRM'e alır,
+  sonra yenilenmiş CRM durumunu Google'a gönderir. Aynı iki eşitleme arasında
+  iki taraf da değişmişse bağlı Google etkinliği belirleyici kabul edilir.
 
-## Production aktivasyon listesi
+## Production aktivasyon sonucu
 
-1. Resend'de gönderici alanını doğrula; Vercel'e `MESSAGE_PROVIDER=resend`,
-   `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO` ve
-   `RESEND_WEBHOOK_SECRET` ekle. Resend webhook hedefi
-   `/api/webhook/messages` olmalıdır.
-2. Google Cloud'da Calendar API etkin bir OAuth Web client oluştur; izinli
-   redirect URI olarak
-   `https://abidinyildiz.com/api/integrations/google-calendar/callback`
-   gir. Vercel'e `NEXT_PUBLIC_APP_URL`,
-   `GOOGLE_CALENDAR_CLIENT_ID`, `GOOGLE_CALENDAR_CLIENT_SECRET`,
-   `GOOGLE_CALENDAR_STATE_SECRET` ve
-   `CALENDAR_TOKEN_ENCRYPTION_KEY` ekle.
-3. Deployment sonrasında bir yönetici/danışman Google Takvim'i bağlar ve bir
-   test randevusunda gidiş–dönüş eşitlemeyi kabul eder. Bu, gerçek sağlayıcı
-   kabulünün son adımıdır.
+1. Resend sender ve production değişkenleri etkinleştirildi. 19 Ağustos 2026
+   canlı test iletisi `resend` sağlayıcısı tarafından kabul edildi ve delivery
+   webhook'u outbox kaydını `delivered` durumuna taşıdı.
+2. Google Cloud Calendar API, production OAuth istemcisi, Vercel secret'ları,
+   Supabase Google provider ve production dönüş adresleri yapılandırıldı.
+3. Yönetici birincil Google Takvimini bağladı. Sentetik randevu CRM'den
+   Google'a çıktı; Google'da 14:30'dan 15:15'e alınan saat ve değiştirilen konum
+   CRM'e geri işlendi. Randevu geçmişi ve audit kaydı oluştu.
+4. Canlı kabulte görülen “dışa aktarımın Google değişikliğini ezmesi” kusuru
+   PR #66 ile düzeltildi. Kabul yeniden çalıştırıldıktan sonra test etkinliği
+   silindi ve test müşterisi geri yüklenebilir arşive taşındı.
 
 ## Yerel kabul kanıtı
 
@@ -94,3 +95,21 @@ etkin değildir.
   `202608020005` dahil yerel zincirle eşleşir.
 - `https://abidinyildiz.com/api/health/live` canlı kontrolde HTTP 200 ve
   `status: ok` döndürmüştür.
+
+## 19 Ağustos canlı kabul kanıtı
+
+- Google aktivasyonu: PR #65, merge commit
+  `13f1b3bef3e97fef238b21122b091d09cf3ea15c`.
+- İki yönlü eşitleme düzeltmesi: PR #66, doğrulanan baş commit
+  `506da2c6742e2b13a36b35fa6c6c22d1c9a636e7`, merge commit
+  `4ea59ebf2ab1991df02d512fd536ac14f7026bf9`.
+- PR #66 Quality Gates run `32257231531`: application, database ve browser
+  işleri başarılı; Vercel preview başarılıdır.
+- PR #66 merge commit'i için ana dal Quality Gates run `32258157344`:
+  application, database ve 30 browser senaryosu başarılıdır.
+- Production deployment `dpl_Eh9sGkNNvzK7zYSqS4CSDcc9Qbbv`,
+  `abidinyildiz.com` alias'ında `READY` durumundadır.
+- Production bağlantısında `sync_enabled=true`, `last_sync_error=null` ve son
+  temizleme eşitlemesi `2026-08-19T13:30:18.023Z` olarak doğrulandı.
+- Ayrıntılı canlı test ve temizlik kaydı:
+  `docs/PHASE_5_6_LIVE_ACCEPTANCE.md`.
