@@ -34,9 +34,6 @@ export default function LoginForm() {
         setLoading(false)
         return
       }
-      if (document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur()
-      }
       router.replace("/dashboard")
     }
   }
