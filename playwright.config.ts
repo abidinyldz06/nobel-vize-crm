@@ -20,7 +20,12 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // GitHub-hosted Ubuntu runners already provide Google Chrome. Using
+        // that channel avoids a large, failure-prone browser download in CI.
+        channel: process.env.CI ? 'chrome' : undefined,
+      },
     },
   ],
   webServer: externalBaseUrl
