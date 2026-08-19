@@ -1,11 +1,13 @@
 # Faz 5 — Veri Kalitesi, Gerçek İletişim ve Operasyon Geliştirmeleri
 
-Son güncelleme: 6 Ağustos 2026
+Son güncelleme: 19 Ağustos 2026
 
-Durum: Faz 5.0–5.4 GitHub CI ve production kabulünden geçti. Faz 5.2–5.3
-PR #55, Faz 5.4 ise PR #58 ile ana dala alındı; production migration zinciri,
-canlı sağlık kontrolü ve ülke kataloğu arayüzü doğrulandı. Dış sağlayıcıların
-canlı aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı kalır.
+Durum: Faz 5.0–5.6 uygulama, GitHub CI ve production kabulünden geçti. Resend
+üzerinden gerçek e-posta teslimi ve Google Takvim gidiş-dönüş eşitlemesi canlıda
+doğrulandı. Google ile giriş, yönetici MFA politikasıyla production'da aktiftir.
+Daha geniş Google kullanıcı yayılımı öncesinde public gizlilik/şartlar sayfaları
+ve hassas kapsam doğrulama başvurusu tamamlanmalıdır; WhatsApp Business ayrı
+ürün ve maliyet kararı olarak kapsam dışındadır.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 
@@ -55,10 +57,12 @@ canlı aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı ka
   güncellenir; doğrudan istemci yazımı kapalıdır.
 - Her doğrulamada resmî kaynak bağlantısı, zaman damgası ve doğrulayan
   personel tek şirket kaydında saklanır; sistem loguna denetim olayı eklenir.
-- Arayüzde doğrulama tarihi ve kaynak bağlantısı görünür. Bu aşama gerçek
-  e-posta/WhatsApp gönderimini etkinleştirmez.
+- Arayüzde doğrulama tarihi ve kaynak bağlantısı görünür. Bu doğrulama akışı
+  tek başına e-posta/WhatsApp gönderimini etkinleştirmez.
+- 19 Ağustos 2026'da `bilgi@nobelvize.com` ve `+90 533 499 57 50`, Nobel
+  Vize'nin resmî iletişim sayfası kaynak gösterilerek production'da kaydedildi.
 
-## 5.4 — Kaynak izlenebilir ülke/vize evrak kataloğu (yerel doğrulama tamamlandı)
+## 5.4 — Kaynak izlenebilir ülke/vize evrak kataloğu (production'da)
 
 - Kural başına resmî ve ikincil kaynaklar, kontrol zamanı ve yeniden kontrol
   tarihi saklanır; kaynak durumu arayüzde rozetle gösterilir.
@@ -72,16 +76,19 @@ canlı aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı ka
 - Ayrıntılı kapsam ve kabul kapıları:
   `docs/PHASE_5_4_COUNTRY_RULE_CATALOG.md`.
 
-## 5.2 — Gerçek iletişim sistemi (production'da; canlı sağlayıcı aktivasyonu bekliyor)
+## 5.2 — Gerçek iletişim sistemi (production'da ve canlı)
 
 - Resend uyumlu gerçek e-posta adaptörü, idempotent outbox teslimatı ve
   imzalı teslim/bounce webhook'u uygulandı.
 - İzin/ret denetimi, kuyruk retry davranışı ve varsayılan kapalı sağlayıcı
   durumu korunur. Doğrulanmış sender domain ve Vercel secret'ları girilmeden
   e-posta dışarı gönderilmez.
+- Resend production sağlayıcısı etkinleştirildi. 19 Ağustos 2026 tarihli canlı
+  kabul iletisi sağlayıcı tarafından kabul edildi ve delivery webhook'u
+  outbox kaydını `delivered` durumuna getirdi; son hata kodu yoktur.
 - WhatsApp Business ayrı ürün/maliyet kararı gerektirdiği için kapsam dışıdır.
 
-## 5.3 — Operasyon geliştirmeleri (production'da; Google canlı kabulü bekliyor)
+## 5.3 — Operasyon geliştirmeleri (production'da ve canlı)
 
 - Google Calendar ile bağlı CRM randevuları için iki yönlü senkronizasyon;
   şifreli token saklama, imzalı OAuth state ve günlük cron eklendi. Outlook
@@ -92,6 +99,23 @@ canlı aktivasyonu gerekli secret ve sağlayıcı onayı gelene kadar kapalı ka
   geciken ödeme görevi eklendi.
 - PR #55 ana dala alınmış, GitHub Quality Gates yeşil, production migration
   zinciri eşleşmiş ve canlı health kontrolü HTTP 200 olarak doğrulanmıştır.
+- Google ile giriş ve Takvim activation paketi PR #65 ile ana dala alındı.
+  Production yöneticisi Google hesabıyla giriş yaptı, MFA sonrasında Dashboard'a
+  ulaştı ve kendi birincil takvimini bağladı.
+- Canlı gidiş-dönüş kabulünde yakalanan eşitleme sırası kusuru PR #66 ile
+  düzeltildi. CRM randevusu Google'a yazıldı; Google'da 15:15'e alınan randevu
+  yeni konumuyla CRM'e `rescheduled` olarak döndü ve Google tarafında korunarak
+  yeniden eşitlendi.
+
+## 5.6 — Canlı sağlayıcı kabulü ve dürüst kapanış
+
+- Resmî şirket iletişim alanları production'da kaynakla doğrulandı.
+- Resend gerçek delivery webhook'u ve Google Takvim iki yönlü kabulü geçti.
+- Kabul sırasında oluşturulan sentetik müşteri arşivlendi, test randevusu iptal
+  edildi ve bağlı Google etkinliği kaldırıldı; production'da aktif test müşteri
+  bırakılmadı.
+- Ayrıntılı kanıt ve kalan dış yönetişim işi:
+  `docs/PHASE_5_6_LIVE_ACCEPTANCE.md`.
 
 Faz 5.2–5.3'ün ayrıntılı teknik ve aktivasyon kaydı:
 `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`.
