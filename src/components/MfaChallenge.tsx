@@ -65,7 +65,12 @@ export default function MfaChallenge({
       p_outcome: "success",
     });
     if (onVerified) onVerified();
-    else router.replace("/dashboard");
+    else {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      router.replace("/dashboard");
+    }
   };
 
   return (
