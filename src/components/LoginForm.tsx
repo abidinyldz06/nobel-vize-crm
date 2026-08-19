@@ -179,12 +179,12 @@ export default function LoginForm({ initialError = null }: { initialError?: stri
               className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-600 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <span aria-hidden="true" className="text-base font-bold text-blue-600">G</span>}
-              Google ile giriş yap
+              Google ile devam et
             </button>
 
             <div className="flex items-center gap-3" aria-hidden="true">
               <span className="h-px flex-1 bg-slate-700" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">veya</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">veya</span>
               <span className="h-px flex-1 bg-slate-700" />
             </div>
 
