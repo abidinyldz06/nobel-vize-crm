@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation"
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 import MfaChallenge from "@/components/MfaChallenge"
 
-export default function LoginForm() {
+export default function LoginForm({ initialError = null }: { initialError?: string | null }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(initialError)
   const [mfa, setMfa] = useState<{ enrollmentRequired: boolean; factorId: string | null } | null>(null)
   
   const [isResetMode, setIsResetMode] = useState(false)
@@ -57,6 +57,23 @@ export default function LoginForm() {
       setResetEmail("")
     }
     setLoading(false)
+  }
+
+  async function handleGoogleLogin() {
+    setLoading(true)
+    setError(null)
+    const supabase = createSupabaseBrowserClient()
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { prompt: "select_account" },
+      },
+    })
+    if (oauthError) {
+      setError("Google ile giriş başlatılamadı. Lütfen tekrar deneyin.")
+      setLoading(false)
+    }
   }
 
   return (
@@ -155,6 +172,22 @@ export default function LoginForm() {
           )}
 
           <div className="space-y-4">
+            <button
+              type="button"
+              onClick={() => void handleGoogleLogin()}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-600 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <span aria-hidden="true" className="text-base font-bold text-blue-600">G</span>}
+              Google ile devam et
+            </button>
+
+            <div className="flex items-center gap-3" aria-hidden="true">
+              <span className="h-px flex-1 bg-slate-700" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">veya</span>
+              <span className="h-px flex-1 bg-slate-700" />
+            </div>
+
             <div className="space-y-1.5">
               <label htmlFor="login-email" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">E-posta Adresi</label>
               <div className="relative">
