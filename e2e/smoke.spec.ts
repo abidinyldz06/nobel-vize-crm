@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('login page exposes the staff sign-in form', async ({ page }) => {
-  const response = await page.goto('/');
+  const response = await page.goto('/login');
 
   await expect(page.getByRole('heading', { name: 'Nobel Vize CRM' })).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'E-posta Adresi' })).toBeVisible();
@@ -12,7 +12,7 @@ test('login page exposes the staff sign-in form', async ({ page }) => {
 test('anonymous users are redirected away from protected pages', async ({ page }) => {
   await page.goto('/dashboard');
 
-  await expect(page).toHaveURL('/');
+  await expect(page).toHaveURL('/login');
   await expect(page.getByRole('heading', { name: 'Hoş Geldiniz' })).toBeVisible();
 });
 

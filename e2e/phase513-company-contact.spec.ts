@@ -91,7 +91,7 @@ test.afterAll(async () => {
 });
 
 test("admin verifies company contact from the official source", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/login");
   await page.getByRole("textbox", { name: "E-posta Adresi" }).fill(testEmail);
   await page.getByLabel("Şifre").fill(testPassword);
   await page.getByRole("button", { name: "Giriş Yap" }).click();

@@ -55,14 +55,14 @@ export async function proxy(request: NextRequest) {
 
   if (!user && isProtected) {
     const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = '/'
+    loginUrl.pathname = '/login'
     const response = NextResponse.redirect(loginUrl)
     response.headers.set(REQUEST_ID_HEADER, requestId)
     return response
   }
 
   // If already logged in and trying to access login page → redirect to dashboard
-  if (user && pathname === '/') {
+  if (user && pathname === '/login') {
     const dashboardUrl = request.nextUrl.clone()
     dashboardUrl.pathname = '/dashboard'
     const response = NextResponse.redirect(dashboardUrl)

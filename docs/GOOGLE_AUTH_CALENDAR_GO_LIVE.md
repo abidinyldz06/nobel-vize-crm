@@ -42,7 +42,7 @@ Supabase Auth URL Configuration:
 1. Google Auth Platform içinde Nobel Vize CRM için bir proje seçilir veya oluşturulur.
 2. Audience, yalnız kullanılacak Google hesaplarını kabul edecek biçimde yapılandırılır. Test modunda gerçek yönetici Google hesabı test kullanıcısı olarak eklenir.
 3. Data Access bölümünde giriş için `openid`, `userinfo.email` ve `userinfo.profile` kapsamları tanımlanır.
-4. Google Calendar API etkinleştirilir ve Takvim bağlantısı için `https://www.googleapis.com/auth/calendar.events` kapsamı eklenir.
+4. Google Calendar API etkinleştirilir ve Takvim bağlantısı için yalnız kullanıcının sahibi olduğu takvimlerde etkinlik okuma/yazma sağlayan `https://www.googleapis.com/auth/calendar.events.owned` kapsamı eklenir.
 5. Web application türünde OAuth istemcisi oluşturulur; iki production dönüş adresi istemciye eklenir.
 6. İstemci kimliği ve istemci sırrı Supabase Google provider ayarına girilir.
 7. CRM yalnız yönetici davetiyle personel açtığı için Supabase'de “Allow new users to sign up” kapatılır; mevcut kullanıcıların girişi ve yönetici davetleri korunur.
@@ -67,7 +67,7 @@ Takvim bağlantısı açılmadan önce aşağıdaki değişkenler production ort
 4. Yeni kullanıcı kaydı kapalıdır; tanımsız Google hesabı Auth kullanıcısı oluşturamaz.
 5. Randevular sayfasındaki “Google Takvim'i bağla” akışı izin ekranını açar ve başarıyla CRM'e döner.
 6. CRM randevusu Google Takvim'e yazılır; Google tarafındaki kontrollü değişiklik CRM'e geri alınır.
-7. Bağlantı kaldırıldığında saklanan Takvim tokenları silinir.
+7. Bağlantı kaldırıldığında Google OAuth yetkisi iptal edilir; saklanan Takvim tokenları ve bağlı etkinlik eşlemeleri silinir.
 8. Production health kontrolleri, ana dal CI ve Vercel deployment sonucu yeşildir.
 
 Canlı kabul tamamlanmadan bu özellikler “production aktif” olarak işaretlenmez.
@@ -79,15 +79,19 @@ Canlı kabul tamamlanmadan bu özellikler “production aktif” olarak işaretl
   güvenlik testleriyle doğrulandı; production'da sahte personel hesabı
   oluşturulmadı.
 - Bağlantı kaldırma (kriter 7) çalışan production bağlantısını ve yenileme
-  tokenını bilerek bozacağı için canlıda uygulanmadı; silme davranışı otomatik
-  testlerle korunur.
+  tokenını bilerek bozacağı için canlıda uygulanmadı. Google revoke isteği,
+  yerel şifreli token silme ve bağlı etkinlik eşlemelerinin cascade silinmesi
+  otomatik testlerle korunur; yıkıcı video kabulü ayrı test kullanıcısında
+  yapılmalıdır.
 
 ## Kalan dış yönetişim işi
 
 OAuth uygulaması production modunda olmakla birlikte Google'ın hassas Takvim
 kapsamı için henüz doğrulanmış yayıncı değildir ve 100 kullanıcı sınırı taşır.
-Daha geniş personel yayılımı öncesinde `abidinyildiz.com` üzerinde public
-gizlilik politikası ve kullanım şartları yayımlanmalı, OAuth consent screen
-alanları bu sayfalara bağlanmalı ve Google hassas kapsam doğrulamasına
-gönderilmelidir. Bu eksik mevcut bağlı yöneticinin çalışmasını engellemez;
-ölçekli yayılım ve güven ekranı için yönetişim kapısıdır.
+20 Ağustos 2026 Faz 5.7 paketi public ürün ana sayfası, gizlilik politikası,
+kullanım şartları, daha dar `calendar.events.owned` kapsamı ve Google yetkisi
+iptalli bağlantı kaldırma davranışını hazırlar. Production yayını sonrasında
+OAuth Branding alanları bu sayfalara bağlanmalı, marka doğrulaması
+yayımlanmalı ve hassas kapsam başvurusu İngilizce akışlı Unlisted YouTube
+kanıtıyla gönderilmelidir. Bu dış inceleme mevcut bağlı yöneticinin çalışmasını
+engellemez; ölçekli yayılım ve güven ekranı için yönetişim kapısıdır.

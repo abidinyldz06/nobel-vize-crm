@@ -2,7 +2,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET search_path TO public, extensions;
-SELECT plan(19);
+SELECT plan(21);
 
 SELECT has_table('public', 'staff_capacity', 'staff capacity limits exist');
 SELECT has_table('public', 'calendar_connections', 'encrypted calendar connections exist');
@@ -55,17 +55,38 @@ SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
 SET LOCAL ROLE service_role;
 SELECT lives_ok(
   $$ INSERT INTO public.calendar_connections (
-       staff_id, provider, calendar_id, access_token_ciphertext, refresh_token_ciphertext, access_token_expires_at
+       id, staff_id, provider, calendar_id, access_token_ciphertext, refresh_token_ciphertext, access_token_expires_at
      ) VALUES (
-       '52530000-0000-0000-0000-000000000002', 'google', 'primary', repeat('A', 64), repeat('B', 64), now() + interval '1 hour'
+       '52530000-0000-0000-0000-000000000007', '52530000-0000-0000-0000-000000000002', 'google', 'primary', repeat('A', 64), repeat('B', 64), now() + interval '1 hour'
      ) $$,
   'only the service role can store encrypted calendar connection records'
+);
+INSERT INTO public.calendar_event_links (
+  id, connection_id, application_id, google_event_id
+) VALUES (
+  '52530000-0000-0000-0000-000000000008',
+  '52530000-0000-0000-0000-000000000007',
+  '52530000-0000-0000-0000-000000000004',
+  'phase53-e2e-calendar-event'
 );
 SELECT lives_ok(
   $$ SELECT public.run_scheduled_operations_v1('2026-08-02T10:00:00Z') $$,
   'operations cron processes due payments and capacity alerts'
 );
+DELETE FROM public.calendar_connections
+WHERE id = '52530000-0000-0000-0000-000000000007';
 RESET ROLE;
+
+SELECT is(
+  (SELECT count(*)::BIGINT FROM public.calendar_connections WHERE id = '52530000-0000-0000-0000-000000000007'),
+  0::BIGINT,
+  'disconnect removes the encrypted Google token record'
+);
+SELECT is(
+  (SELECT count(*)::BIGINT FROM public.calendar_event_links WHERE connection_id = '52530000-0000-0000-0000-000000000007'),
+  0::BIGINT,
+  'disconnect cascades to linked Google event metadata'
+);
 
 SELECT is(
   (SELECT due_at FROM public.tasks WHERE idempotency_key = 'payment:52530000-0000-0000-0000-000000000006:pending'),

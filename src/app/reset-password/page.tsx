@@ -40,7 +40,7 @@ export default function ResetPasswordPage() {
     } else {
       setSuccess(true);
       setTimeout(() => {
-        router.push("/");
+        router.push("/login");
       }, 3000);
     }
   };

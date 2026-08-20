@@ -4,6 +4,11 @@ Son inceleme: 26 Temmuz 2026
 
 İncelenen production sürümü: `3a4d66c`
 
+> **Tarihsel kayıt:** Bu belge 26 Temmuz 2026 tarihli teknik anlık görüntüdür.
+> Faz 4 ve Faz 5 sonrasındaki güncel durum ve plan için
+> `PROJECT_REPORT_INDEX.md` ile `PROJECT_ROADMAP_FROM_2026_08_20.md`
+> dosyaları esas alınır.
+
 ## Amaç
 
 Bu belge Nobel Vize CRM'in yaşayan teknik durum kaydıdır. Ayrıntılı uygulama

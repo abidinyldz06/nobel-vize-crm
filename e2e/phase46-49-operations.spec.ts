@@ -9,7 +9,7 @@ test("new privacy cron is secret protected", async ({ request }) => {
 test("anonymous users cannot access lead, privacy or appointment operations", async ({ page, request }) => {
   for (const path of ["/leads", "/privacy", "/appointments"]) {
     await page.goto(path);
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/login");
   }
   expect((await request.get("/api/reports/export.csv")).status()).toBe(401);
   expect((await request.get("/api/reports/export.pdf")).status()).toBe(401);

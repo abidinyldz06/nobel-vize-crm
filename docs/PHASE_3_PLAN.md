@@ -2,7 +2,9 @@
 
 Başlangıç: 20 Temmuz 2026
 Ürün kararı: Nobel Vize için tek şirketli iç CRM
-Durum: Devam ediyor
+Durum: **Tamamlandı — 26 Temmuz 2026.** Faz 3.1–3.8 ve production kapanış
+kapıları tamamlandı; ayrıntılı kanıt `PHASE_3_8_RELEASE_AND_CLOSURE.md`
+dosyasındadır.
 
 ## Amaç
 

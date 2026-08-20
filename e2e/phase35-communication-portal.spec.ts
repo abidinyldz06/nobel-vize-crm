@@ -126,7 +126,7 @@ test('admin manages templates, records communication delivery and controls the i
   const currentCustomerId = customerId;
   const currentDocumentId = documentId;
 
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
   await page.getByLabel('Şifre').fill(testPassword);
   await page.getByRole('button', { name: 'Giriş Yap' }).click();

@@ -8,7 +8,7 @@ export async function requireStaffPage() {
     return await requireStaff();
   } catch (error) {
     if (error instanceof MfaRequiredError) redirect("/mfa");
-    if (error instanceof AuthorizationError) redirect("/");
+    if (error instanceof AuthorizationError) redirect("/login");
     throw error;
   }
 }

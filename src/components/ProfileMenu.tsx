@@ -37,7 +37,7 @@ export default function ProfileMenu({ profile }: { profile: CurrentStaffProfile 
     setIsSigningOut(true);
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
-    router.push("/");
+    router.push("/login");
     router.refresh();
   };
 

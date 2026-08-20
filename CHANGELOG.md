@@ -2,6 +2,22 @@
 
 Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler ve değişiklikler yer almaktadır.
 
+> Not: Aşağıdaki eski `[Unreleased]` başlıkları, ilgili değişiklik paketlerinin
+> hazırlandığı tarihteki durumunu koruyan tarihsel kayıtlardır. Bu paketlerin
+> production durumu için `docs/PROJECT_REPORT_INDEX.md` esas alınır.
+
+## [Unreleased] — Faz 5.7 Google Doğrulama Hazırlığı ve Proje Raporları
+
+- Public ürün ana sayfası, ayrı personel giriş sayfası, gizlilik politikası ve
+  kullanım şartları eklendi.
+- Google Takvim izni `calendar.events.owned` kapsamına daraltıldı; eşitleme
+  yalnız CRM bağlantılı etkinlikleri okur.
+- Google yetkisini iptal eden ve yerel şifreli bağlantı verisini temizleyen
+  kontrollü bağlantı kaldırma akışı eklendi.
+- Başlangıçtan bugüne proje geçmişi, doğrulanmış güncel durum, GitHub kayıt
+  dökümü ve öncelikli gelecek yol haritası ayrı raporlarda toplandı.
+- WhatsApp Business ürün kararı `ertele` olarak kaydedildi.
+
 ## [Unreleased] — Faz 5.0 Temizlik ve Faz 4 Kapanışı
 
 - Production migration zinciri, live/readiness health ve giriş kapısı yeniden

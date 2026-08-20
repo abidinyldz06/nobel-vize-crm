@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { CheckCircle2, Link2, Loader2, RefreshCw, Unplug } from "lucide-react";
 
 type CalendarStatus = {
@@ -50,6 +51,7 @@ export default function CalendarIntegrationControl() {
   };
 
   const disconnect = async () => {
+    if (!window.confirm("Google Takvim bağlantısı, CRM'de saklanan anahtarlar ve Google erişim yetkisi kaldırılacak. Devam edilsin mi?")) return;
     setBusy(true);
     setMessage("");
     try {
@@ -91,12 +93,17 @@ export default function CalendarIntegrationControl() {
           </button>
         </div>
       ) : (
-        <a
-          href="/api/integrations/google-calendar/connect"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-500/15 dark:text-blue-300"
-        >
-          <Link2 className="h-3.5 w-3.5" /> Google Takvim’i bağla
-        </a>
+        <div className="max-w-md rounded-xl border border-blue-500/20 bg-blue-500/5 p-3 text-right">
+          <p className="text-[11px] leading-5 text-slate-600 dark:text-slate-300">
+            Bağlantı isteğe bağlıdır. CRM yalnız sahibi olduğunuz birincil Google Takvimindeki CRM bağlantılı randevuları oluşturur, okur, günceller ve kaldırır. Veriler reklam veya yapay zekâ modeli eğitimi için kullanılmaz. Ayrıntılar için <Link href="/privacy-policy" className="font-semibold text-blue-700 underline underline-offset-2 dark:text-blue-300">Gizlilik Politikası</Link>.
+          </p>
+          <a
+            href="/api/integrations/google-calendar/connect"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-500/15 dark:text-blue-300"
+          >
+            <Link2 className="h-3.5 w-3.5" /> Açıklamayı okudum, Google Takvim’i bağla
+          </a>
+        </div>
       )}
       {status.connected && !message && (
         <p className="flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-300">

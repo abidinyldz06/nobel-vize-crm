@@ -101,9 +101,12 @@ Chromium smoke testlerini ayrı kalite kapıları olarak çalıştırır.
 Faz 1 staging/production adımları ve geri dönüş planı
 `docs/PHASE_1_DEPLOYMENT_RUNBOOK.md` dosyasındadır.
 
-## Teknik yol haritası
+## Proje raporları ve teknik yol haritası
 
-Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADMAP.md` dosyasına bakın.
+Başlangıçtan bugüne proje geçmişi, doğrulanmış güncel durum ve sıradaki işlerin
+tek giriş noktası `docs/PROJECT_REPORT_INDEX.md` dosyasıdır. 26 Temmuz 2026
+tarihli `docs/TECHNICAL_AUDIT_AND_ROADMAP.md` tarihsel teknik inceleme olarak
+korunur; güncel plan yerine kullanılmaz.
 
 ### Faz durumu
 
@@ -114,7 +117,7 @@ Güncel güvenlik incelemesi ve faz planı için `docs/TECHNICAL_AUDIT_AND_ROADM
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
 | Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | Tamamlandı; gerçek admin MFA kabulü, oturum kapatma, production doğrulaması ve kapanış kaydı tamamlandı. Gerçek mesaj sağlayıcısı Faz 5.2'ye ertelendi. | `docs/PHASE_5_0_CLOSURE_REPORT.md` |
-| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.1.1–5.5.4 GitHub CI ve production kabulünden geçti. Ülke/evrak omurgası genel liste + profil eki modeliyle PR #60 üzerinden yayınlandı; ilk paket Almanya, Fransa ve İtalya için 12 genel liste ve 91 profil eki içerir. Fransa kesin Visa Assistant çıktıları ile İtalya güncel ticari listesi doğrulama kuyruğundadır. Resend e-posta gönderimi ve teslimat webhook'u production'da aktiftir; Google ile giriş ve Google Calendar canlı sağlayıcı ayarları bekler. | `docs/PHASE_5_PLAN.md`, `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`, `docs/PHASE_5_4_COUNTRY_RULE_CATALOG.md`, `docs/PHASE_5_5_COUNTRY_DOCUMENT_CORE.md` |
+| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.0–5.6 production kabulünden geçti. Veri kalite kuyruğu, şirket iletişim doğrulaması, kaynaklı ülke/evrak kataloğu, Resend gerçek teslimi, Google ile giriş ve Google Takvim gidiş-dönüş kabulü canlıda doğrulandı. Faz 5.7 public doğrulama yüzeyi ve daraltılmış Google kapsamıyla yayın adayıdır; Google yayıncı/hassas kapsam doğrulaması dış yönetişim işi olarak devam eder. WhatsApp Business ertelendi. | `docs/PHASE_5_PLAN.md`, `docs/PHASE_5_6_LIVE_ACCEPTANCE.md`, `docs/PHASE_5_7_GOOGLE_VERIFICATION_READINESS.md` |
 
 Faz 3 alt aşama takibi:
 
@@ -136,21 +139,14 @@ Ayrıntılı kapsam ve kabul ölçütleri `docs/PHASE_3_PLAN.md`; Faz 3.1 ve 3.2
 kanıtları ilgili uygulama raporlarındadır. Bir aşama
 staging/production kanıtı tamamlanmadan `Tamamlandı` olarak işaretlenmez.
 
-Faz 4.1'de yanıltıcı müşteri profil puanlaması uygulama, rapor, dışa aktarma
-ve veritabanından kaldırıldı; eski yedeklerle uyumluluk korundu. Faz 4.1.1
-stabilizasyon paketi boş evrak seçimi, açık tema, ana etiket kataloğu, görev
-ilk yüklemesi, eksik başvuru verisi görünürlüğü ve mükerrer müşteri
-korumasını kapsar. Faz 4,
-zamanlanmış operasyonlar ve otomatik şifreli DB/Storage yedeği için 4.2–4.3
-production kabulü tamamlanmıştır. Faz 4.4 production'a alınmış olup gerçek
-admin TOTP enrollment/oturum kabulü beklemektedir. Faz 4.5'in güvenli
-izin/outbox temeli production'dadır; gerçek e-posta sağlayıcısı uygulaması
-Faz 5.2'ye ertelenmiştir. Faz 4.6–4.8 migration'ları production ile eşleşir;
-Faz 4.9'un teknik kalite ve canlı health kapıları yeşildir. Faz 4'ün tek açık
-kapanış kanıtı gerçek admin MFA kabulüdür. Kapanış kaydı
-`docs/PHASE_5_0_CLOSURE_REPORT.md`, sonraki ürün sırası
-`docs/PHASE_5_PLAN.md` dosyasındadır. SaaS/tenant ve abonelik özellikleri Faz
-4 kapsamında değildir.
+Faz 4 bütünüyle kapanmıştır. Gerçek admin TOTP/MFA kabulü ve diğer oturumları
+sonlandırma testi 2 Ağustos 2026'da tamamlanmış; issue #34, #35 ve #39 ile Faz
+4 milestone'u kanıtlarıyla kapatılmıştır. Faz 4.5'te ertelenen gerçek e-posta
+sağlayıcısı Faz 5.2'de Resend ile production'a alınmış ve canlı delivery
+webhook'u 19 Ağustos 2026'da doğrulanmıştır. Kapanış kaydı
+`docs/PHASE_5_0_CLOSURE_REPORT.md`, güncel ürün sırası
+`docs/PROJECT_ROADMAP_FROM_2026_08_20.md` dosyasındadır. SaaS/tenant ve
+abonelik özellikleri halen kapsam dışıdır.
 
 ### Production hotfix kayıtları
 

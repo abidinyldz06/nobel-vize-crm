@@ -4,7 +4,9 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 const GOOGLE_OAUTH_AUTHORIZE_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token";
-const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+// The CRM only synchronizes the signed-in staff member's primary calendar.
+// Request the narrower owned-events permission instead of all accessible calendars.
+const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events.owned";
 
 export type GoogleCalendarConfig = {
   clientId: string;

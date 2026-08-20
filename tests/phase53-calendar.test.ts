@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { decryptCalendarToken, encryptCalendarToken, parseCalendarTokenEncryptionKey } from "../src/lib/calendar-token-crypto.ts";
+import { revokeGoogleOAuthToken } from "../src/lib/google-oauth-revocation.ts";
 
 const root = process.cwd();
 
@@ -22,6 +23,24 @@ describe("phase 5.3 Google Calendar security boundary", () => {
     assert.match(source, /timingSafeEqual/);
     assert.match(source, /Date\.now\(\) \+ 10 \* 60_000/);
     assert.match(source, /access_type: "offline"/);
-    assert.match(source, /https:\/\/www\.googleapis\.com\/auth\/calendar\.events/);
+    assert.match(source, /https:\/\/www\.googleapis\.com\/auth\/calendar\.events\.owned/);
+    assert.doesNotMatch(source, /calendar\.events"/);
+  });
+
+  it("revokes Google access with a form-encoded server request", async () => {
+    let requestUrl = "";
+    let requestInit: RequestInit | undefined;
+    const revoked = await revokeGoogleOAuthToken(
+      "refresh-token-for-revocation",
+      (async (url, init) => {
+        requestUrl = String(url);
+        requestInit = init;
+        return new Response(null, { status: 200 });
+      }) as typeof fetch,
+    );
+    assert.equal(revoked, true);
+    assert.equal(requestUrl, "https://oauth2.googleapis.com/revoke");
+    assert.equal(requestInit?.method, "POST");
+    assert.equal(requestInit?.body, "token=refresh-token-for-revocation");
   });
 });

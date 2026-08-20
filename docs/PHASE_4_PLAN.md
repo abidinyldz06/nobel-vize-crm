@@ -2,10 +2,11 @@
 
 Tarih: 26 Temmuz 2026
 
-Durum: Faz 4.1–4.3 ile 4.6–4.8 migration'ları production ile eşleşiyor;
-Faz 4.9 teknik kalite ve canlı health kapıları tamam. Faz 4 kapanışı yalnız
-gerçek admin MFA/TOTP ve oturum sonlandırma kabulü bekliyor. Faz 4.5 gerçek
-sağlayıcı uygulaması ürün kararıyla Faz 5.2'ye ertelendi.
+Durum: **Tamamlandı — 2 Ağustos 2026.** Faz 4.1–4.9 production kabulünden
+geçti. Gerçek admin MFA/TOTP ve diğer oturumları sonlandırma kabulü tamamlandı;
+ilgili issue'lar ve milestone kapatıldı. Faz 4.5'te ertelenen gerçek sağlayıcı
+Faz 5.2'de Resend ile production'a alındı. Kapanış kanıtı
+`PHASE_5_0_CLOSURE_REPORT.md` dosyasındadır.
 
 Ön koşul: Faz 3.8 production kapanışı tamamlandı (`3a4d66c`).
 
