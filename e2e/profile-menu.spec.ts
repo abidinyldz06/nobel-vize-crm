@@ -62,7 +62,7 @@ test.afterAll(async () => {
 });
 
 test('staff can open, close and use the profile menu', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
   await page.getByLabel('Şifre').fill(testPassword);
   await page.getByRole('button', { name: 'Giriş Yap' }).click();
@@ -93,5 +93,5 @@ test('staff can open, close and use the profile menu', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Profil menüsünü aç' }).click();
   await page.getByRole('menuitem', { name: 'Çıkış Yap' }).click();
-  await expect(page).toHaveURL('/');
+  await expect(page).toHaveURL('/login');
 });

@@ -53,7 +53,7 @@ test('admin versions privacy notices and records separate delivery and consent h
   if (!customerId) throw new Error('Phase 3.6 fixture was not created.');
   const fixtureCustomerId = customerId;
 
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
   await page.getByLabel('Şifre').fill(testPassword);
   await page.getByRole('button', { name: 'Giriş Yap' }).click();

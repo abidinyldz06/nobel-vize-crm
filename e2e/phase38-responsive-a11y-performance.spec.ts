@@ -57,7 +57,7 @@ test("3.8.5 giriş ekranı mobil ve masaüstünde taşmaz, WCAG A/AA ihlali üre
     { width: 1440, height: 900 },
   ]) {
     await page.setViewportSize(viewport);
-    await page.goto("/");
+    await page.goto("/login");
     await expect(page.getByRole("main")).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expectWcagAA(page);

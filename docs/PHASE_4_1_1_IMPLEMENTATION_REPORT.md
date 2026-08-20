@@ -4,8 +4,8 @@ Tarih: 28 Temmuz 2026
 
 Takip: [GitHub Issue #43](https://github.com/abidinyldz06/nobel-vize-crm/issues/43)
 
-Durum: Uygulama paketi ve yerel tam release kapısı tamamlandı; PR/CI ve
-production yayını tamamlanmadan issue kapatılmaz.
+Durum: **Tamamlandı.** PR #44, 28 Temmuz 2026'da ana dala alındı; GitHub
+kalite kapıları ve production yayını tamamlandı, Issue #43 kapatıldı.
 
 ## 1. Amaç
 

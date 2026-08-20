@@ -41,12 +41,6 @@ type GoogleCalendarEvent = {
   extendedProperties?: { private?: Record<string, string> };
 };
 
-type GoogleCalendarEventPage = {
-  items?: GoogleCalendarEvent[];
-  nextPageToken?: string;
-  nextSyncToken?: string;
-};
-
 export type CalendarSyncResult = {
   staffId: string;
   exported: number;
@@ -275,36 +269,35 @@ async function exportAppointments(
   return exported;
 }
 
-async function readCalendarChanges(connection: CalendarConnection, accessToken: string) {
-  const all: GoogleCalendarEvent[] = [];
-  let pageToken: string | undefined;
-  let nextSyncToken: string | undefined;
-  const read = async (syncToken?: string) => {
-    do {
-      const params = new URLSearchParams({ singleEvents: "true", showDeleted: "true", maxResults: "2500" });
-      if (syncToken) params.set("syncToken", syncToken);
-      else params.set("timeMin", new Date(Date.now() - 30 * 24 * 60 * 60_000).toISOString());
-      if (pageToken) params.set("pageToken", pageToken);
-      const page = await googleCalendarRequest<GoogleCalendarEventPage>(
-        googleCalendarApiUrl(connection.calendar_id, "events", params),
+async function readLinkedCalendarEvents(
+  connection: CalendarConnection,
+  accessToken: string,
+  links: CalendarLink[],
+) {
+  const events: GoogleCalendarEvent[] = [];
+  for (const link of links) {
+    if (link.remote_deleted_at) continue;
+    try {
+      events.push(await googleCalendarRequest<GoogleCalendarEvent>(
+        googleCalendarApiUrl(connection.calendar_id, `events/${encodeURIComponent(link.google_event_id)}`),
         accessToken,
-      );
-      all.push(...(page.items ?? []));
-      pageToken = page.nextPageToken;
-      nextSyncToken = page.nextSyncToken ?? nextSyncToken;
-    } while (pageToken);
-  };
-
-  try {
-    await read(connection.sync_token ?? undefined);
-  } catch (error) {
-    if (!(error instanceof GoogleCalendarApiError) || error.status !== 410 || !connection.sync_token) throw error;
-    pageToken = undefined;
-    all.length = 0;
-    nextSyncToken = undefined;
-    await read();
+      ));
+    } catch (error) {
+      if (!(error instanceof GoogleCalendarApiError) || error.status !== 404) throw error;
+      events.push({
+        id: link.google_event_id,
+        status: "cancelled",
+        updated: new Date().toISOString(),
+        extendedProperties: {
+          private: {
+            nobel_application_id: link.application_id,
+            nobel_connection_id: connection.id,
+          },
+        },
+      });
+    }
   }
-  return { events: all, nextSyncToken };
+  return events;
 }
 
 function asRemoteDate(value: string | undefined) {
@@ -445,12 +438,12 @@ async function syncConnection(connection: CalendarConnection): Promise<CalendarS
     // overwrite a Google-side reschedule with the older CRM values before the
     // change reader could observe it. When both sides changed between syncs,
     // the linked Google event is therefore the deterministic winner.
-    const changes = await readCalendarChanges(connection, accessToken);
+    const linkedEvents = await readLinkedCalendarEvents(connection, accessToken, linksBeforeImport);
     const incoming = await importCalendarChanges(
       connection,
       appointmentsBeforeImport,
       linksBeforeImport,
-      changes.events,
+      linkedEvents,
     );
 
     // Import may have changed appointment fields, cancellation state and link
@@ -470,7 +463,7 @@ async function syncConnection(connection: CalendarConnection): Promise<CalendarS
     const { error: connectionError } = await admin
       .from("calendar_connections")
       .update({
-        sync_token: changes.nextSyncToken ?? connection.sync_token,
+        sync_token: null,
         last_synced_at: new Date().toISOString(),
         last_sync_error: null,
       })

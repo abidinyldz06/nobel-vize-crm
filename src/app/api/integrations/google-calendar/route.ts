@@ -3,8 +3,10 @@ import { authorizationErrorResponse } from "@/lib/api-auth";
 import { requireStaff } from "@/lib/authz";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { syncGoogleCalendarForStaff } from "@/lib/google-calendar-sync";
-import { errorCodeFrom } from "@/lib/observability";
+import { errorCodeFrom, structuredLog } from "@/lib/observability";
 import { recordOperationalEvent } from "@/lib/operational-events";
+import { decryptCalendarToken, parseCalendarTokenEncryptionKey } from "@/lib/calendar-token-crypto";
+import { revokeGoogleOAuthToken } from "@/lib/google-oauth-revocation";
 
 export const runtime = "nodejs";
 
@@ -59,11 +61,39 @@ export async function DELETE() {
   } catch (error) {
     return authorizationErrorResponse(error);
   }
-  const { error } = await createSupabaseAdminClient()
+  const admin = createSupabaseAdminClient();
+  const { data: connection, error: connectionError } = await admin
+    .from("calendar_connections")
+    .select("refresh_token_ciphertext")
+    .eq("staff_id", staff.id)
+    .eq("provider", "google")
+    .maybeSingle();
+  if (connectionError) {
+    return NextResponse.json({ error: "Takvim bağlantısı kaldırılamadı." }, { status: 500 });
+  }
+
+  let remoteRevoked = false;
+  if (connection) {
+    try {
+      const key = parseCalendarTokenEncryptionKey(process.env.CALENDAR_TOKEN_ENCRYPTION_KEY);
+      const refreshToken = await decryptCalendarToken(connection.refresh_token_ciphertext, key);
+      remoteRevoked = await revokeGoogleOAuthToken(refreshToken);
+    } catch (error) {
+      structuredLog("warn", "calendar.disconnect.remote_revoke_failed", {
+        actorStaffId: staff.id,
+        errorCode: errorCodeFrom(error),
+      });
+    }
+  }
+
+  // Local encrypted credentials must be removed even if Google's revocation
+  // endpoint is temporarily unavailable. The user can also revoke access from
+  // Google Account settings as documented in the public privacy policy.
+  const { error } = await admin
     .from("calendar_connections")
     .delete()
     .eq("staff_id", staff.id)
     .eq("provider", "google");
   if (error) return NextResponse.json({ error: "Takvim bağlantısı kaldırılamadı." }, { status: 500 });
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, remoteRevoked });
 }

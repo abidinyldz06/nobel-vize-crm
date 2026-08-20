@@ -141,7 +141,7 @@ export async function createAuthenticatedClient(email: string, password: string)
 }
 
 export async function loginFromBrowser(page: Page, email: string, password: string) {
-  await page.goto("/");
+  await page.goto("/login");
   await page.getByRole("textbox", { name: "E-posta Adresi" }).fill(email);
   await page.getByLabel("Şifre").fill(password);
   await page.getByRole("button", { name: "Giriş Yap" }).click();

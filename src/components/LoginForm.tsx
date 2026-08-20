@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link"
 import { useState } from "react"
 import { loginAction } from "@/app/actions/auth"
 import { Globe, Mail, Lock, ArrowRight, Shield, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
@@ -252,11 +253,16 @@ export default function LoginForm({ initialError = null }: { initialError?: stri
         )}
 
         {/* Footer */}
-        <div className="mt-6 text-center flex items-center justify-center gap-2 text-slate-600 text-xs">
+        <div className="mt-6 text-center flex items-center justify-center gap-2 text-slate-500 text-xs">
           <Shield className="w-3.5 h-3.5" />
-          <span>KVKK Uyumlu Güvenli Bağlantı</span>
+          <span>Güvenli personel bağlantısı</span>
         </div>
-        <p className="text-center text-slate-700 text-xs mt-2">© {new Date().getFullYear()} Nobel Vize. Tüm hakları saklıdır.</p>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-slate-500">
+          <Link href="/" className="hover:text-white">Ana Sayfa</Link>
+          <Link href="/privacy-policy" className="hover:text-white">Gizlilik</Link>
+          <Link href="/terms" className="hover:text-white">Kullanım Şartları</Link>
+        </div>
+        <p className="text-center text-slate-600 text-xs mt-2">© {new Date().getFullYear()} Nobel Vize. Tüm hakları saklıdır.</p>
       </div>
     </main>
   )

@@ -122,7 +122,7 @@ test.afterAll(async () => {
 test('staff moves an application through an allowed audited transition', async ({ page }) => {
   if (!testApplicationId) throw new Error('Application fixture was not created.');
 
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
   await page.getByLabel('Şifre').fill(testPassword);
   await page.getByRole('button', { name: 'Giriş Yap' }).click();

@@ -1,13 +1,14 @@
 # Faz 5 — Veri Kalitesi, Gerçek İletişim ve Operasyon Geliştirmeleri
 
-Son güncelleme: 19 Ağustos 2026
+Son güncelleme: 20 Ağustos 2026
 
 Durum: Faz 5.0–5.6 uygulama, GitHub CI ve production kabulünden geçti. Resend
 üzerinden gerçek e-posta teslimi ve Google Takvim gidiş-dönüş eşitlemesi canlıda
 doğrulandı. Google ile giriş, yönetici MFA politikasıyla production'da aktiftir.
-Daha geniş Google kullanıcı yayılımı öncesinde public gizlilik/şartlar sayfaları
-ve hassas kapsam doğrulama başvurusu tamamlanmalıdır; WhatsApp Business ayrı
-ürün ve maliyet kararı olarak kapsam dışındadır.
+Daha geniş Google kullanıcı yayılımı için public ürün/gizlilik/şartlar yüzeyi
+Faz 5.7'de hazırlanmıştır; production yayını, OAuth Branding güncellemesi ve
+hassas kapsam doğrulama başvurusu tamamlanmalıdır. Ürün sahibi 20 Ağustos
+2026'da WhatsApp Business'ın şimdilik ertelenmesine karar vermiştir.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 
@@ -86,7 +87,8 @@ ve hassas kapsam doğrulama başvurusu tamamlanmalıdır; WhatsApp Business ayr�
 - Resend production sağlayıcısı etkinleştirildi. 19 Ağustos 2026 tarihli canlı
   kabul iletisi sağlayıcı tarafından kabul edildi ve delivery webhook'u
   outbox kaydını `delivered` durumuna getirdi; son hata kodu yoktur.
-- WhatsApp Business ayrı ürün/maliyet kararı gerektirdiği için kapsam dışıdır.
+- WhatsApp Business için 20 Ağustos 2026 ürün kararı **ertele** olarak
+  kaydedildi; sağlayıcı hesabı, webhook ve ücretli otomatik teslim açılmaz.
 
 ## 5.3 — Operasyon geliştirmeleri (production'da ve canlı)
 
@@ -115,7 +117,18 @@ ve hassas kapsam doğrulama başvurusu tamamlanmalıdır; WhatsApp Business ayr�
   edildi ve bağlı Google etkinliği kaldırıldı; production'da aktif test müşteri
   bırakılmadı.
 - Ayrıntılı kanıt ve kalan dış yönetişim işi:
-  `docs/PHASE_5_6_LIVE_ACCEPTANCE.md`.
+`docs/PHASE_5_6_LIVE_ACCEPTANCE.md`.
+
+## 5.7 — Google doğrulama hazırlığı
+
+- Public ürün ana sayfası, gizlilik politikası, kullanım şartları ve ayrı
+  personel giriş adresi hazırlandı.
+- Takvim izni `calendar.events.owned` kapsamına daraltıldı; eşitleme yalnız CRM
+  bağlantılı Google etkinliklerini okur.
+- Bağlantı kaldırma Google yetkisini iptal eder ve yerel şifreli tokenlarla
+  etkinlik eşlemelerini siler.
+- Google Cloud alanları, hassas kapsam gerekçesi ve yıkıcı olmayan video kabul
+  senaryosu `docs/PHASE_5_7_GOOGLE_VERIFICATION_READINESS.md` içinde kayıtlıdır.
 
 Faz 5.2–5.3'ün ayrıntılı teknik ve aktivasyon kaydı:
 `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`.

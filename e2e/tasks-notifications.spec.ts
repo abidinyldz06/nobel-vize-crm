@@ -94,7 +94,7 @@ test.afterAll(async () => {
 });
 
 test('staff creates, receives and completes a personal task', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
   await page.getByLabel('Şifre').fill(testPassword);
   await page.getByRole('button', { name: 'Giriş Yap' }).click();
@@ -154,7 +154,7 @@ test('staff creates, receives and completes a personal task', async ({ page }) =
 });
 
 test('admin turns incomplete records into visible data-quality tasks', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
   await page.getByLabel('Şifre').fill(testPassword);
   await page.getByRole('button', { name: 'Giriş Yap' }).click();

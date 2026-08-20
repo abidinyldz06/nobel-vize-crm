@@ -9,7 +9,7 @@ test("cron endpoints reject requests without the server secret", async ({ reques
 
 test("anonymous users cannot open MFA or account security pages", async ({ page }) => {
   await page.goto("/mfa");
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL("/login");
   await page.goto("/account/security");
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL("/login");
 });

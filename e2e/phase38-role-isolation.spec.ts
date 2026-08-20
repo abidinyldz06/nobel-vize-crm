@@ -278,10 +278,10 @@ test("3.8.2 pasif ve staff bağlantısı olmayan Auth hesapları iç CRM'e alın
     const context = await browser.newContext();
     const page = await context.newPage();
     await loginFromBrowser(page, email, password);
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/login");
     await expect(page.getByText(message, { exact: false })).toBeVisible();
     await page.goto("/dashboard");
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/login");
     await context.close();
   }
 });

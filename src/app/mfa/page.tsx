@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 export default async function MfaPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/");
+  if (!user) redirect("/login");
   const [{ data: assurance }, { data: factors }] = await Promise.all([
     supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
     supabase.auth.mfa.listFactors(),

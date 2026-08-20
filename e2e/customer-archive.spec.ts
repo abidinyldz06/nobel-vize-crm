@@ -95,7 +95,7 @@ test.afterAll(async () => {
 test('admin archives and restores a customer without losing the record', async ({ page }) => {
   if (!testCustomerId) throw new Error('Customer fixture was not created.');
 
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByRole('textbox', { name: 'E-posta Adresi' }).fill(testEmail);
   await page.getByLabel('Şifre').fill(testPassword);
   await page.getByRole('button', { name: 'Giriş Yap' }).click();

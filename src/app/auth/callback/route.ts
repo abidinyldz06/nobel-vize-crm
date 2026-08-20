@@ -12,7 +12,7 @@ function redirectUrl(request: Request, path: string) {
 }
 
 function loginFailure(request: Request, failure: AuthFailure) {
-  const url = redirectUrl(request, "/");
+  const url = redirectUrl(request, "/login");
   url.searchParams.set("auth_error", failure);
   const response = NextResponse.redirect(url);
   response.headers.set("Cache-Control", "private, no-store, max-age=0");
