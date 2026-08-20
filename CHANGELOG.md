@@ -6,7 +6,7 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
 > hazırlandığı tarihteki durumunu koruyan tarihsel kayıtlardır. Bu paketlerin
 > production durumu için `docs/PROJECT_REPORT_INDEX.md` esas alınır.
 
-## [Unreleased] — Faz 5.7 Google Doğrulama Hazırlığı ve Proje Raporları
+## [Production — 20 Ağustos 2026] — Faz 5.7 Google Doğrulama Hazırlığı ve Proje Raporları
 
 - Public ürün ana sayfası, ayrı personel giriş sayfası, gizlilik politikası ve
   kullanım şartları eklendi.
@@ -17,6 +17,8 @@ Bu dosyada Nobel Vize CRM projesine eklenen tüm yeni özellikler, düzeltmeler 
 - Başlangıçtan bugüne proje geçmişi, doğrulanmış güncel durum, GitHub kayıt
   dökümü ve öncelikli gelecek yol haritası ayrı raporlarda toplandı.
 - WhatsApp Business ürün kararı `ertele` olarak kaydedildi.
+- PR #68 ana dala alındı; ana dal Quality Gates, Vercel production yayını ve
+  public URL kontrolleri başarılıdır.
 
 ## [Unreleased] — Faz 5.0 Temizlik ve Faz 4 Kapanışı
 

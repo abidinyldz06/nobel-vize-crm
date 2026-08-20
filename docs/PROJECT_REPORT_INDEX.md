@@ -12,12 +12,14 @@ içeren `6839d10` commit'indedir. Ana dalın son Quality Gates koşusu başarıl
 production liveness ve readiness uçları HTTP 200, açık issue ve açık PR sayısı
 sıfırdır. Faz 4 milestone'u 10/10 kapalı issue ile kapanmıştır.
 
-Faz 5.0–5.6 production kabulünden geçmiştir. Resend gerçek e-posta teslimi,
+Faz 5.0–5.7 production kabulünden geçmiştir. Resend gerçek e-posta teslimi,
 Google ile personel girişi ve Google Takvim gidiş-dönüş eşitlemesi canlıda
-doğrulanmıştır. Faz 5.7; public ürün/gizlilik/şartlar sayfaları, daha dar Google
-Takvim kapsamı ve kontrollü yetki iptaliyle bu rapor paketinin yayın adayıdır.
-Bu aday production'a çıkmadan public `/login`, `/privacy-policy` ve `/terms`
-adreslerinin 404 dönmesi beklenen ve doğrulanmış mevcut durumdur.
+doğrulanmıştır. Faz 5.7, PR #68 ve `a1beacc` merge commit'iyle production'a
+alınmıştır. Public ürün, giriş, gizlilik ve şartlar sayfaları HTTP 200; health
+uçları sağlıklıdır. Google Takvim kapsamı `calendar.events.owned` olarak
+daraltılmış, bağlantı kaldırma Google revoke ve yerel şifreli veri temizliğiyle
+güçlendirilmiştir. Google Branding ve hassas kapsam doğrulama başvurusu dış
+yönetişim işi olarak açıktır.
 
 ## 2. Hangi rapor ne için kullanılır?
 
@@ -27,6 +29,7 @@ adreslerinin 404 dönmesi beklenen ve doğrulanmış mevcut durumdur.
 | `PROJECT_ROADMAP_FROM_2026_08_20.md` | Bundan sonraki işlerin öncelik, bağımlılık ve kabul ölçütleri | Yeni ürün kararı veya kapanışta güncellenir |
 | `PHASE_5_PLAN.md` | Faz 5 alt aşamalarının ürün ve uygulama kaydı | Faz bazlı yaşayan plan |
 | `PHASE_5_7_GOOGLE_VERIFICATION_READINESS.md` | Google Branding, Data Access ve hassas kapsam başvuru hazırlığı | Faz 5.7 yayın ve Google inceleme sonucunda güncellenir |
+| `PHASE_5_7_PRODUCTION_CLOSURE.md` | PR #68, ana dal CI, Vercel deployment ve canlı HTTP kanıtları | Faz 5.7 tarihsel production kapanışı |
 | `PHASE_5_6_LIVE_ACCEPTANCE.md` | Resend ve Google Takvim gerçek production kabul kanıtı | Tarihsel kapanış kaydı; değiştirilmez |
 | `PHASE_5_0_CLOSURE_REPORT.md` | Temizlik, kontrollü Dependabot birleştirmeleri ve Faz 4 kapanışı | Tarihsel kapanış kaydı; değiştirilmez |
 | `TECHNICAL_AUDIT_AND_ROADMAP.md` | 26 Temmuz 2026 teknik incelemesi | Tarihsel anlık görüntü; güncel plan değildir |
@@ -45,9 +48,8 @@ sayılmaz:
 6. **Production:** Ana dal CI, deployment, health ve ilgili canlı kabul
    kanıtları tamamlanmıştır.
 
-Bu ayrım özellikle Faz 5.7 gibi yerelde hazır fakat rapor kesim anında henüz
-production'da olmayan paketlerin yanlışlıkla canlı kabul edilmiş sayılmasını
-önler.
+Bu ayrım, tarihli anlık görüntülerde yerelde hazır fakat henüz production'da
+olmayan paketlerin yanlışlıkla canlı kabul edilmiş sayılmasını önler.
 
 ## 4. Faz özeti
 
@@ -64,7 +66,7 @@ production'da olmayan paketlerin yanlışlıkla canlı kabul edilmiş sayılmas�
 | Faz 5.3 | Google Takvim, portal evrakı, kapasite ve tahsilat | Canlı Takvim kabulü doğrulandı | `PHASE_5_6_LIVE_ACCEPTANCE.md` |
 | Faz 5.4–5.5 | Kaynaklı ve katmanlı ülke/vize evrak kataloğu | İlk paket production'da | `PHASE_5_5_COUNTRY_DOCUMENT_CORE.md` |
 | Faz 5.6 | Gerçek sağlayıcı ve production kabulü | Tamamlandı | `PHASE_5_6_LIVE_ACCEPTANCE.md` |
-| Faz 5.7 | Google doğrulama yüzeyi, veri minimizasyonu ve revoke | Bu rapor paketinde yayın adayı | `PHASE_5_7_GOOGLE_VERIFICATION_READINESS.md` |
+| Faz 5.7 | Google doğrulama yüzeyi, veri minimizasyonu ve revoke | 20 Ağustos 2026'da production'a alındı | `PHASE_5_7_PRODUCTION_CLOSURE.md` |
 
 ## 5. Sabit ürün kararları
 

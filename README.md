@@ -117,7 +117,7 @@ korunur; güncel plan yerine kullanılmaz.
 | Faz 2 — Stabilizasyon ve kalite | Tamamlandı | `docs/PHASE_2_IMPLEMENTATION_REPORT.md` |
 | Faz 3 — İç CRM ürünleştirme | Tamamlandı | `docs/PHASE_3_PLAN.md` |
 | Faz 4 — Operasyon otomasyonu ve CRM iyileştirmeleri | Tamamlandı; gerçek admin MFA kabulü, oturum kapatma, production doğrulaması ve kapanış kaydı tamamlandı. Gerçek mesaj sağlayıcısı Faz 5.2'ye ertelendi. | `docs/PHASE_5_0_CLOSURE_REPORT.md` |
-| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.0–5.6 production kabulünden geçti. Veri kalite kuyruğu, şirket iletişim doğrulaması, kaynaklı ülke/evrak kataloğu, Resend gerçek teslimi, Google ile giriş ve Google Takvim gidiş-dönüş kabulü canlıda doğrulandı. Faz 5.7 public doğrulama yüzeyi ve daraltılmış Google kapsamıyla yayın adayıdır; Google yayıncı/hassas kapsam doğrulaması dış yönetişim işi olarak devam eder. WhatsApp Business ertelendi. | `docs/PHASE_5_PLAN.md`, `docs/PHASE_5_6_LIVE_ACCEPTANCE.md`, `docs/PHASE_5_7_GOOGLE_VERIFICATION_READINESS.md` |
+| Faz 5 — Veri kalitesi, gerçek iletişim ve operasyon geliştirmeleri | 5.0–5.7 production kabulünden geçti. Veri kalite kuyruğu, şirket iletişim doğrulaması, kaynaklı ülke/evrak kataloğu, Resend gerçek teslimi, Google ile giriş, Google Takvim gidiş-dönüş kabulü ve public doğrulama sayfaları canlıdır. Takvim kapsamı `calendar.events.owned` olarak daraltılmıştır. Google yayıncı/hassas kapsam doğrulaması dış yönetişim işi olarak devam eder; WhatsApp Business ertelendi. | `docs/PHASE_5_PLAN.md`, `docs/PHASE_5_6_LIVE_ACCEPTANCE.md`, `docs/PHASE_5_7_PRODUCTION_CLOSURE.md` |
 
 Faz 3 alt aşama takibi:
 
