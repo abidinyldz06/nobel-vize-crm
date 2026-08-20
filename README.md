@@ -2,6 +2,19 @@
 
 Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern ve kapsamlı Müşteri İlişkileri Yönetimi (CRM) projesidir. Müşterilerin vize başvuru süreçlerini, evrak takiplerini, ödemelerini ve şirket içi personel yönetimini tek bir platformdan yönetmeyi sağlar.
 
+## Proje durumu ve raporlar
+
+**Güncel durum:** Faz 5.0–5.7 production kabulü tamamlandı. Veri kalitesi,
+kaynaklı ülke/evrak kuralları, gerçek e-posta teslimi, Google ile giriş, Google
+Takvim senkronizasyonu ve public doğrulama sayfaları canlıdır. Google yayıncı
+doğrulaması dış yönetişim işi olarak devam eder; WhatsApp Business ertelenmiştir.
+
+- [Ana proje raporları dizini](docs/PROJECT_REPORT_INDEX.md)
+- [Başlangıçtan bugüne proje geçmişi ve güncel durum](docs/PROJECT_HISTORY_AND_CURRENT_STATUS_2026_08_20.md)
+- [Güncel ürün ve geliştirme yol haritası](docs/PROJECT_ROADMAP_FROM_2026_08_20.md)
+- [Faz 5.7 production kapanış raporu](docs/PHASE_5_7_PRODUCTION_CLOSURE.md)
+- [Canlı uygulama](https://abidinyildiz.com)
+
 ## Özellikler
 
 - **Akıllı Evrak Seçim Sistemi (Kosmosvize Modeli)**: Müşterinin seyahat aracı, konaklama tipi, mesleği ve çocuk durumuna göre dinamik evrak listeleri üretimi.
