@@ -2,13 +2,13 @@
 
 Son güncelleme: 20 Ağustos 2026
 
-Durum: Faz 5.0–5.6 uygulama, GitHub CI ve production kabulünden geçti. Resend
+Durum: Faz 5.0–5.7 uygulama, GitHub CI ve production kabulünden geçti. Resend
 üzerinden gerçek e-posta teslimi ve Google Takvim gidiş-dönüş eşitlemesi canlıda
 doğrulandı. Google ile giriş, yönetici MFA politikasıyla production'da aktiftir.
 Daha geniş Google kullanıcı yayılımı için public ürün/gizlilik/şartlar yüzeyi
-Faz 5.7'de hazırlanmıştır; production yayını, OAuth Branding güncellemesi ve
-hassas kapsam doğrulama başvurusu tamamlanmalıdır. Ürün sahibi 20 Ağustos
-2026'da WhatsApp Business'ın şimdilik ertelenmesine karar vermiştir.
+Faz 5.7'de production'a alınmıştır; OAuth Branding güncellemesi ve hassas kapsam
+doğrulama başvurusu tamamlanmalıdır. Ürün sahibi 20 Ağustos 2026'da WhatsApp
+Business'ın şimdilik ertelenmesine karar vermiştir.
 
 ## 5.0 — Temizlik ve Faz 4 kapanışı
 
@@ -122,13 +122,16 @@ hassas kapsam doğrulama başvurusu tamamlanmalıdır. Ürün sahibi 20 Ağustos
 ## 5.7 — Google doğrulama hazırlığı
 
 - Public ürün ana sayfası, gizlilik politikası, kullanım şartları ve ayrı
-  personel giriş adresi hazırlandı.
+  personel giriş adresi production'a alındı.
 - Takvim izni `calendar.events.owned` kapsamına daraltıldı; eşitleme yalnız CRM
   bağlantılı Google etkinliklerini okur.
 - Bağlantı kaldırma Google yetkisini iptal eder ve yerel şifreli tokenlarla
   etkinlik eşlemelerini siler.
 - Google Cloud alanları, hassas kapsam gerekçesi ve yıkıcı olmayan video kabul
   senaryosu `docs/PHASE_5_7_GOOGLE_VERIFICATION_READINESS.md` içinde kayıtlıdır.
+- PR #68, ana dal Quality Gates ve Vercel production yayını başarılıdır; canlı
+  URL ve yönlendirme kanıtları `docs/PHASE_5_7_PRODUCTION_CLOSURE.md`
+  dosyasındadır.
 
 Faz 5.2–5.3'ün ayrıntılı teknik ve aktivasyon kaydı:
 `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`.

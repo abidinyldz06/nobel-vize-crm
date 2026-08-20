@@ -1,7 +1,7 @@
 # Nobel Vize CRM — 20 Ağustos 2026 Sonrası Yol Haritası
 
 - Başlangıç tarihi: 20 Ağustos 2026
-- Ön koşul: Faz 5.0–5.6 production kabulü tamamlandı
+- Ön koşul: Faz 5.0–5.7 production kabulü tamamlandı
 - Ürün modeli: Tek şirketli Nobel Vize iç CRM
 
 ## 1. Öncelik mantığı
@@ -10,24 +10,29 @@ Sıra; production güvenliği, dış sağlayıcı zorunlulukları, günlük oper
 değeri ve ölçülebilir kullanıcı ihtiyacına göre belirlenmiştir. Bir sonraki
 başlık, önceki başlığın kabul kapısı tamamlanmadan “bitti” sayılmaz.
 
-## 2. P0 — Faz 5.7'yi yayınla ve Google yönetişimini tamamla
+## 2. P0 — Google yönetişimini tamamla
 
-### 2.1 Kod ve public sayfaların yayını
+### 2.1 Kod ve public sayfaların yayını — Tamamlandı, 20 Ağustos 2026
 
-- Public `/`, `/privacy-policy` ve `/terms` sayfalarını production'a çıkar.
-- Personel girişini `/login` adresine taşı; mevcut MFA ve rol korumasını koru.
-- Google Takvim kapsamını `calendar.events.owned` olarak yayınla.
-- Eşitlemenin yalnız CRM bağlantılı etkinlikleri okuduğunu doğrula.
-- Bağlantı kaldırmada Google revoke isteğini ve yerel şifreli token/eşleme
+PR #68, `a1beacc` merge commit'iyle ana dala alındı. Main Quality Gates
+#32339716334, Vercel production deployment `ABJUDCeW2a83SXiYPeJwT31AhBuB`
+ve public HTTP kontrolleri başarılıdır. Ayrıntılı kanıt
+`PHASE_5_7_PRODUCTION_CLOSURE.md` dosyasındadır.
+
+- [x] Public `/`, `/privacy-policy` ve `/terms` sayfalarını production'a çıkar.
+- [x] Personel girişini `/login` adresine taşı; mevcut MFA ve rol korumasını koru.
+- [x] Google Takvim kapsamını `calendar.events.owned` olarak yayınla.
+- [x] Eşitlemenin yalnız CRM bağlantılı etkinlikleri okuduğunu doğrula.
+- [x] Bağlantı kaldırmada Google revoke isteğini ve yerel şifreli token/eşleme
   temizliğini doğrula.
 
 Kabul ölçütleri:
 
-- PR kalite kapıları, ana dal kalite kapıları ve production deployment yeşil.
-- `/`, `/login`, `/privacy-policy`, `/terms`, `/api/health/live` ve
+- [x] PR kalite kapıları, ana dal kalite kapıları ve production deployment yeşil.
+- [x] `/`, `/login`, `/privacy-policy`, `/terms`, `/api/health/live` ve
   `/api/health/ready` HTTP 200.
-- Giriş, Google ile giriş ve mevcut admin MFA akışında regresyon yok.
-- Çalışan canlı Google Takvim bağlantısı yayın sırasında koparılmıyor.
+- [x] Giriş, Google ile giriş ve mevcut admin MFA akışında regresyon yok.
+- [x] Çalışan canlı Google Takvim bağlantısı yayın sırasında koparılmıyor.
 
 ### 2.2 Google Cloud Branding ve Data Access
 

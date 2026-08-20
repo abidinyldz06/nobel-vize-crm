@@ -107,6 +107,15 @@ projesinde yapılır.
 
 ## Yayın kanıtı
 
-Bu bölüm PR, ana dal CI, production deployment ve public HTTP kontrolleri
-tamamlandıktan sonra gerçek kimliklerle doldurulur. Yerel test sonucu tek
-başına production yayını sayılmaz.
+- PR: #68
+- Doğrulanan PR head: `52397ef8a4992759c78dd5ad5091715bdcc2506a`
+- Squash merge commit: `a1beacc6bdfa7a3f5f782f2ae12ca0e462928c75`
+- PR Quality Gates: #32338994374, başarılı
+- Main Quality Gates: #32339716334, başarılı
+- Vercel production deployment: `ABJUDCeW2a83SXiYPeJwT31AhBuB`, başarılı
+- `/`, `/login`, `/privacy-policy`, `/terms`, `/api/health/live` ve
+  `/api/health/ready`: 20 Ağustos 2026'da HTTP 200
+- Anonim `/dashboard` isteği: HTTP 307 ile `/login` yönlendirmesi
+
+Ayrıntılı production kapanış kaydı `PHASE_5_7_PRODUCTION_CLOSURE.md`
+dosyasındadır.
