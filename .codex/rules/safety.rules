@@ -1,0 +1,93 @@
+# Prefix rules supplement AGENTS.md; they are not a complete shell/SQL firewall.
+# Trusted project layer required. Alternate argument order/aliases/wrappers may
+# not match: inspect the actual command and never use them to bypass policy.
+# Broad prompt fallbacks catch git flags placed after a remote/ref argument.
+prefix_rule(
+    pattern = ["git", "push", ["--force", "-f", "--force-with-lease"]],
+    decision = "forbidden",
+    justification = "History rewriting is forbidden. Create a corrective commit and use a normal push after reviewing the remote state.",
+    match = ["git push --force origin main", "git push -f", "git push --force-with-lease"],
+    not_match = ["git push origin HEAD"],
+)
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "Verify publication authorization and remote/ref targets. Reject force, force-with-lease, forced refspecs or remote deletion regardless of argument order.",
+)
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "Hard reset discards work. Inspect git status/diff and use a corrective commit or git revert for committed changes.",
+    match = ["git reset --hard HEAD"],
+    not_match = ["git reset --soft HEAD~1"],
+)
+prefix_rule(
+    pattern = ["git", "reset"],
+    decision = "prompt",
+    justification = "Inspect index/worktree impact and reject hard resets regardless of argument order; preserve user changes.",
+)
+prefix_rule(
+    pattern = ["git", "clean", ["-fd", "-fdx", "-df", "-xdf", "-dxf", "-fxd", "-xfd", "-dfx"]],
+    decision = "forbidden",
+    justification = "Destructive cleanup may delete user work. Use git clean -nd or git status --short to list candidates without deleting them.",
+    match = ["git clean -fd", "git clean -fdx"],
+    not_match = ["git clean -nd", "git status --short"],
+)
+prefix_rule(
+    pattern = ["git", "clean"],
+    decision = "prompt",
+    justification = "Allow only inspection/dry-run; reject destructive cleanup including split or reordered force flags.",
+)
+prefix_rule(
+    pattern = ["rm", ["-rf", "-fr", "-r", "-R", "--recursive"]],
+    decision = "prompt",
+    justification = "Review exact targets and ownership. Approve only disposable build artifacts when authorized; never delete source, user work, secrets or backups as cleanup.",
+    match = ["rm -rf .next", "rm -fr dist", "rm -r -f .next"],
+    not_match = ["git status"],
+)
+prefix_rule(
+    pattern = [["npm", "pnpm", "yarn"], "publish"],
+    decision = "forbidden",
+    justification = "This CRM is private and must not be published as a package. Use npm pack --dry-run to inspect packaging without publishing.",
+    match = ["npm publish", "pnpm publish", "yarn publish"],
+    not_match = ["npm run build", "npm pack --dry-run"],
+)
+
+# Cover the installed CLI plus common npm launchers without blocking local
+# start/lint/test/type generation. Local reset remains prompt, never forbidden.
+for cli in [["supabase"], ["npx", "supabase"], ["npx", "--no-install", "supabase"], ["./node_modules/.bin/supabase"], ["node_modules/.bin/supabase"]]:
+    prefix_rule(
+        pattern = cli + [["link", "unlink"]],
+        decision = "prompt",
+        justification = "Verify the exact project and environment before changing linked-project configuration; do not link production implicitly.",
+    )
+    prefix_rule(
+        pattern = cli + ["db", ["push", "reset", "execute"]],
+        decision = "prompt",
+        justification = "Inspect target and SQL effects. Local reset needs an authorized disposable DB; remote writes/reset require explicit project-specific approval and a recovery plan.",
+    )
+    prefix_rule(
+        pattern = cli + ["migration", ["up", "repair"]],
+        decision = "prompt",
+        justification = "Verify local versus linked/remote target and migration effects; never change production schema/history implicitly.",
+    )
+    prefix_rule(
+        pattern = cli + ["functions", ["deploy", "delete"]],
+        decision = "prompt",
+        justification = "Confirm project, environment and deployment/deletion authorization before changing remote functions.",
+    )
+    prefix_rule(
+        pattern = cli + ["secrets", ["set", "unset"]],
+        decision = "prompt",
+        justification = "Remote secrets/config changes need explicit target-specific authorization; never print or commit secret values.",
+    )
+    prefix_rule(
+        pattern = cli + ["config", "push"],
+        decision = "prompt",
+        justification = "Confirm remote project and auth/config impact before applying configuration.",
+    )
+    prefix_rule(
+        pattern = cli + ["projects", ["create", "delete"]],
+        decision = "prompt",
+        justification = "Confirm exact project, cost/data impact and recovery plan before creating or deleting remote infrastructure.",
+    )
