@@ -28,6 +28,17 @@ function safeToken(value: string | undefined) {
   return value;
 }
 
+// Portal paths contain bearer credentials, not ordinary resource identifiers.
+// Sanitize at the shared log boundary so proxy and observedRoute both use it.
+export function safeLogRoute(value: string | undefined) {
+  if (!value?.startsWith("/")) return undefined;
+  const pathname = value.split(/[?#]/, 1)[0];
+  const normalized = pathname
+    .replace(/^(\/(?:api\/)?portal\/)[^/]+/i, "$1[token]")
+    .replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/gi, "/[id]");
+  return /^[a-zA-Z0-9_./\[\]-]{1,200}$/.test(normalized) ? normalized : undefined;
+}
+
 export function isRequestId(value: string | null | undefined): value is string {
   return Boolean(value && UUID_PATTERN.test(value));
 }
@@ -54,7 +65,7 @@ export function structuredLog(level: LogLevel, event: string, context: LogContex
     level,
     event: safeToken(event) ?? "invalid_event",
     request_id: isRequestId(context.requestId) ? context.requestId : undefined,
-    route: safeToken(context.route),
+    route: safeLogRoute(context.route),
     method: safeToken(context.method?.toUpperCase()),
     status: Number.isInteger(context.status) ? context.status : undefined,
     duration_ms: Number.isFinite(context.durationMs) ? Math.max(0, Math.round(context.durationMs ?? 0)) : undefined,
