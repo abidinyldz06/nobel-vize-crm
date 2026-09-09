@@ -4,10 +4,39 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 
 ## Proje durumu ve raporlar
 
-**Güncel durum:** Faz 5.0–5.7 production kabulü tamamlandı. Veri kalitesi,
-kaynaklı ülke/evrak kuralları, gerçek e-posta teslimi, Google ile giriş, Google
-Takvim senkronizasyonu ve public doğrulama sayfaları canlıdır. Google yayıncı
-doğrulaması dış yönetişim işi olarak devam eder; WhatsApp Business ertelenmiştir.
+**Güncel durum (9 Eylül 2026):** Faz 5.0–5.7 production kabulü tamamlandı;
+üzerine 6–9 Eylül güvenilirlik ve güvenlik paketi (PR #73) merge edildi.
+Veri kalitesi, kaynaklı ülke/evrak kuralları, gerçek e-posta teslimi, Google ile
+giriş, Google Takvim senkronizasyonu, public doğrulama sayfaları, mesaj outbox
+güvenilirliği ve observability canlıdır. Google yayıncı doğrulaması dış
+yönetişim işi olarak devam eder; WhatsApp Business ertelenmiştir.
+
+### Yapılanlar (son güncel)
+
+- **PR #73 (9 Eylül 2026, merge edildi):** portal log koruması, mesaj gönderim
+  izin denetimi, izin denetimli e-posta outbox'ı, observability katmanı,
+  veri kalitesi iç fonksiyonunun anon/Public EXECUTE erişiminin kapatılması
+  (migration `202609090001`), sharp 0.35.4 güvenlik yaması
+  (`docs/SECURITY_REPAIR_2026_09_09.md`).
+- **PR #74 (9 Eylül 2026, merge edildi):** Dependabot patch/minor — 9 paket
+  güncellemesi.
+- **Faz 5.0–5.7 (20 Ağustos 2026):** production kabulü tamamlandı — veri kalite
+  kuyruğu, şirket iletişim doğrulaması, kaynaklı ülke/evrak kataloğu, Resend
+  gerçek teslimi + webhook, Google ile giriş, Google Takvim çift yönlü senkron,
+  public doğrulama sayfaları.
+
+### Yapılacaklar (öncelik sırasıyla)
+
+1. **Ülke kuralları veri girişi** — Almanya tam; Fransa kısmen (France-Visas
+   Assistant çıktısı bekleniyor); İtalya ticari liste güncellemesi; kalan 14
+   Schengen + İngiltere/ABD/Kanada boş. Kaynak: `docs/PROJECT_ROADMAP_FROM_2026_08_20.md`
+2. **1 hafta gerçek müşteri verisiyle kullanım** — veri kalitesi kuyruğunu gerçek
+   veriyle döndürme, Resend bounce/teslim metriklerini izleme.
+3. **Google Branding doğrulaması + unlisted YouTube demo videosu** — dış
+   yönetişim işi (Google Cloud); hassas kapsam onayı sonrası.
+4. **WhatsApp Business** — ertelendi; karar sonrası CRM'e entegrasyon planlanır.
+5. **Periyodik bakım** — Dependabot PR'ları düzenli merge (CI yeşilse),
+   çeyreklik kabul turu, yedek doğrulama alışkanlığı.
 
 - [Ana proje raporları dizini](docs/PROJECT_REPORT_INDEX.md)
 - [Başlangıçtan bugüne proje geçmişi ve güncel durum](docs/PROJECT_HISTORY_AND_CURRENT_STATUS_2026_08_20.md)
