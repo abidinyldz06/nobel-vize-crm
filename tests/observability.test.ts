@@ -7,9 +7,44 @@ import {
   observedRoute,
   requestIdFrom,
   structuredLog,
+  safeLogRoute,
 } from "../src/lib/observability";
 
 describe("observability primitives", () => {
+  it("redacts portal credentials, malformed tokens, IDs and URL parameters", () => {
+    const token = "b1c0a47d-9f4e-4a3e-9a67-f18a87c823b0";
+    assert.equal(safeLogRoute(`/portal/${token}?secret=hidden`), "/portal/[token]");
+    assert.equal(safeLogRoute(`/api/portal/${token}/commit-upload`), "/api/portal/[token]/commit-upload");
+    assert.equal(safeLogRoute("/portal/not-a-uuid"), "/portal/[token]");
+    assert.equal(safeLogRoute(`/customers/${token}/edit`), "/customers/[id]/edit");
+    assert.equal(safeLogRoute("/api/tasks?token=hidden"), "/api/tasks");
+    assert.equal(safeLogRoute("https://example.test/portal/secret"), undefined);
+  });
+
+  it("never emits a portal credential from request, completion or failure logs", async () => {
+    const token = "b1c0a47d-9f4e-4a3e-9a67-f18a87c823b0";
+    const logs: string[] = [];
+    const originalInfo = console.info;
+    const originalError = console.error;
+    console.info = console.error = (value?: unknown) => { logs.push(String(value)); };
+    try {
+      structuredLog("info", "http.request.received", { route: `/portal/${token}` });
+      await observedRoute("portal.upload", async () => Response.json({ ok: true }))(
+        new Request(`https://example.test/api/portal/${token}/commit-upload`), undefined,
+      );
+      await observedRoute("portal.upload", async () => { throw new Error("failure"); })(
+        new Request(`https://example.test/api/portal/${token}/upload-url`), undefined,
+      );
+    } finally {
+      console.info = originalInfo;
+      console.error = originalError;
+    }
+    assert.equal(logs.length, 3);
+    for (const log of logs) {
+      assert.equal(log.includes(token), false);
+      assert.match(JSON.parse(log).route, /\[token\]/);
+    }
+  });
   it("creates UUID request identifiers and ignores malformed incoming values", () => {
     const generated = createRequestId();
     assert.equal(isRequestId(generated), true);

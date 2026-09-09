@@ -40,6 +40,13 @@ SELECT results_eq(
   'anonymous and PUBLIC roles have no public function execution privileges'
 );
 
+-- Preserve the strict zero-grant gate, but identify the routine when a platform
+-- or dependency upgrade changes privileges in a clean database.
+SELECT diag(format('unexpected routine grant: %s.%s role=%s privilege=%s',
+  specific_schema, routine_name, grantee, privilege_type))
+FROM information_schema.role_routine_grants
+WHERE specific_schema = 'public' AND grantee IN ('anon', 'PUBLIC');
+
 SELECT results_eq(
   $$
     SELECT count(*)::BIGINT

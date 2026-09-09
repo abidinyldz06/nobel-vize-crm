@@ -1,5 +1,28 @@
 BEGIN;
-SELECT plan(15);
+SELECT plan(19);
+
+SELECT ok(
+  NOT has_function_privilege('anon', 'public.upsert_data_quality_task_v1(text,text,text,text,timestamptz,uuid,uuid,uuid,uuid)', 'EXECUTE'),
+  'anon cannot execute the internal task writer'
+);
+SELECT ok(
+  NOT has_function_privilege('authenticated', 'public.upsert_data_quality_task_v1(text,text,text,text,timestamptz,uuid,uuid,uuid,uuid)', 'EXECUTE'),
+  'authenticated users cannot bypass the controlled sync via the internal writer'
+);
+SET LOCAL ROLE anon;
+SELECT throws_ok(
+  $$ SELECT public.upsert_data_quality_task_v1('denied-helper', 'Denied', '', 'normal', now(), NULL, NULL, NULL, NULL) $$,
+  '42501', 'permission denied for function upsert_data_quality_task_v1',
+  'anonymous direct task creation is rejected'
+);
+RESET ROLE;
+SET LOCAL ROLE authenticated;
+SELECT throws_ok(
+  $$ SELECT public.upsert_data_quality_task_v1('denied-helper', 'Denied', '', 'normal', now(), NULL, NULL, NULL, NULL) $$,
+  '42501', 'permission denied for function upsert_data_quality_task_v1',
+  'authenticated direct task creation is rejected'
+);
+RESET ROLE;
 
 SELECT has_function('public', 'sync_data_quality_tasks_v1', ARRAY[]::TEXT[], 'data quality task sync exists');
 SELECT has_function('public', 'set_task_assignee_v1', ARRAY['uuid', 'uuid'], 'admin task reassignment workflow exists');
