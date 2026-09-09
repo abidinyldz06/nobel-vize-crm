@@ -3,6 +3,7 @@ import { createCustomerWithApplication } from "@/app/actions/customer";
 import { UserPlus, Save, ArrowLeft, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import SmartDocumentSelector from "@/components/SmartDocumentSelector";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export const revalidate = 0;
 
@@ -171,10 +172,13 @@ export default async function NewCustomerPage({
             <Link href="/customers" className="px-5 py-2.5 bg-white dark:bg-[#0d1420] border border-slate-200 dark:border-[#1f2937] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200 text-sm font-medium rounded-xl transition-colors">
               İptal
             </Link>
-            <button type="submit" className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30">
+            <SubmitButton
+              className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30 disabled:opacity-60 disabled:cursor-not-allowed"
+              pendingLabel="Kaydediliyor..."
+            >
               <Save className="w-4 h-4" />
               Kaydet ve Dosya Aç
-            </button>
+            </SubmitButton>
           </div>
         </form>
       </div>
