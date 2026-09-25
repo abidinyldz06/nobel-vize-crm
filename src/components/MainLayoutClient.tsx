@@ -7,6 +7,7 @@ import NotificationCenter from "@/components/NotificationCenter";
 import GlobalSearch from "@/components/GlobalSearch";
 import ProfileMenu from "@/components/ProfileMenu";
 import type { CurrentStaffProfile } from "@/types/staff-profile";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function MainLayoutClient({ children, profile }: { children: React.ReactNode; profile: CurrentStaffProfile }) {
   const { theme, setTheme } = useTheme();
@@ -113,9 +114,10 @@ export default function MainLayoutClient({ children, profile }: { children: Reac
           </div>
         </header>
 
-        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto focus:outline-none">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto pb-20 focus:outline-none md:pb-0">
           {children}
         </main>
+        <MobileBottomNav />
       </div>
     </div>
   );
