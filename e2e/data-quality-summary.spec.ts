@@ -56,7 +56,7 @@ test("5.8 anonymous and consultant requests are rejected and consultants do not 
   await expect(page.getByTestId("data-quality-panel")).toHaveCount(0);
 });
 
-test("5.8 panel shows insufficient sample, archive warning, mobile layout and explicit read failure", async ({ page }) => {
+test("5.8 panel shows insufficient sample, archive warning, mobile layout and explicit read failure", async ({ page }, testInfo) => {
   await loginFromBrowser(page, emails[0], password);
   await expect(page).toHaveURL("/dashboard");
   await page.goto("/tasks");
@@ -74,7 +74,7 @@ test("5.8 panel shows insufficient sample, archive warning, mobile layout and ex
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   const accessibility = await new AxeBuilder({ page }).include('[data-testid="data-quality-panel"]').withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(accessibility.violations).toEqual([]);
-  await panel.screenshot({ path: "/private/tmp/crm-phase58-panel-mobile.png" });
+  await panel.screenshot({ path: testInfo.outputPath("data-quality-panel-mobile.png") });
   await page.route("**/api/tasks/data-quality", route => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "unavailable" }) }));
   await page.reload();
   await expect(panel.getByRole("alert")).toContainText("sıfır eksiklik anlamına gelmez");
