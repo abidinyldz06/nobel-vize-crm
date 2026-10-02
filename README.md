@@ -4,15 +4,26 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 
 ## Proje durumu ve raporlar
 
-**Güncel durum (9 Eylül 2026):** Faz 5.0–5.7 production kabulü tamamlandı;
-üzerine 6–9 Eylül güvenilirlik ve güvenlik paketi (PR #73) merge edildi.
-Veri kalitesi, kaynaklı ülke/evrak kuralları, gerçek e-posta teslimi, Google ile
-giriş, Google Takvim senkronizasyonu, public doğrulama sayfaları, mesaj outbox
-güvenilirliği ve observability canlıdır. Google yayıncı doğrulaması dış
-yönetişim işi olarak devam eder; WhatsApp Business ertelenmiştir.
+**Güncel durum (2 Ekim 2026):** Faz 5.8.1 salt okunur veri kalite özeti
+production'dadır. PR #81, main `579dcb3`, PR CI `36999111660`, main CI
+`37000098941` ve production deployment `6807186263`. Haftalık gerçek kullanım
+kabulü, arşivli açık başvuruların kayıt kararı, bağımlılık bakımı, ülke/vize
+katalog genişletmesi ve Google hassas izin doğrulaması bu yayınla kapanmamıştır.
+Ayrıntı: `docs/PHASE_5_8_DATA_QUALITY_SUMMARY.md`.
+
+**Önceki durum (9 Eylül 2026):** Faz 5.0–5.7 production kabulü tamamlanmış;
+üzerine 6–9 Eylül güvenilirlik ve güvenlik paketi (PR #73) merge edilmişti.
+Veri kalitesi kuyruğu, kaynaklı ülke/evrak kuralları, gerçek e-posta teslimi,
+Google ile giriş, Google Takvim senkronizasyonu, public doğrulama sayfaları,
+mesaj outbox güvenilirliği ve observability o tarihte canlıdaydı. WhatsApp
+Business ertelenmiş durumunu korur.
 
 ### Yapılanlar (son güncel)
 
+- **PR #81 (2 Ekim 2026, merge edildi):** yöneticiye açık salt okunur veri
+  kalite özeti. Yeni migration, grant veya bağımlılık değişikliği yoktur.
+  Yerel test anlatımı ile PR/main/production kapanışı aynı raporda ayrı
+  bölümlerdedir.
 - **PR #73 (9 Eylül 2026, merge edildi):** portal log koruması, mesaj gönderim
   izin denetimi, izin denetimli e-posta outbox'ı, observability katmanı,
   veri kalitesi iç fonksiyonunun anon/Public EXECUTE erişiminin kapatılması
@@ -27,19 +38,27 @@ yönetişim işi olarak devam eder; WhatsApp Business ertelenmiştir.
 
 ### Yapılacaklar (öncelik sırasıyla)
 
-1. **Ülke kuralları veri girişi** — Almanya tam; Fransa kısmen (France-Visas
-   Assistant çıktısı bekleniyor); İtalya ticari liste güncellemesi; kalan 14
-   Schengen + İngiltere/ABD/Kanada boş. Kaynak: `docs/PROJECT_ROADMAP_FROM_2026_08_20.md`
-2. **1 hafta gerçek müşteri verisiyle kullanım** — veri kalitesi kuyruğunu gerçek
-   veriyle döndürme, Resend bounce/teslim metriklerini izleme.
-3. **Google Branding doğrulaması + unlisted YouTube demo videosu** — dış
-   yönetişim işi (Google Cloud); hassas kapsam onayı sonrası.
-4. **WhatsApp Business** — ertelendi; karar sonrası CRM'e entegrasyon planlanır.
-5. **Periyodik bakım** — Dependabot PR'ları düzenli merge (CI yeşilse),
+1. **Arşivli açık başvuruların karar incelemesi** — önce salt okunur ölçüm ve
+   ürün sahibi kararı. Kayıtlar otomatik kapatılmaz veya geri açılmaz.
+2. **Bağımlılık güvenlik bakımı** — 5.8.1 raporundaki audit uyarıları için ayrı
+   teknik paket. Kör `npm audit fix` veya major yükseltme yok.
+3. **Bir haftalık gerçek kullanım kabulü** — gerçek aktif başvuru ve tanımlı
+   sorumlu/süre gerekir. Sıfır açık başvurudan başarı oranı üretilmez.
+4. **Ülke/vize katalog genişletme** — 2 Ekim'de yeni sayım yapılmadı. 6 Ağustos
+   matrisi güncel envanter değildir. İlk kanıtlı içerik paketi Almanya iş
+   seyahatidir (`docs/PHASE_5_4_COUNTRY_RULE_CATALOG.md`); sonraki Almanya
+   kategorileri `docs/PHASE_5_5_COUNTRY_DOCUMENT_CORE.md` içindedir. Fransa
+   Visa Assistant çıktısı bekler. İngiltere, ABD ve Kanada Schengen
+   listesinden kopyalanmaz.
+5. **Google Branding** ve **Data Access / hassas kapsam** ayrı dış işlerdir.
+   2 Ekim 2026'da Cloud konsolu yeniden açılmadı. Eski hazırlık belgesindeki
+   iletişim adresi körlemesine yeniden ayarlanmaz.
+6. **WhatsApp Business** — ertelendi; karar sonrası CRM'e entegrasyon planlanır.
+7. **Periyodik bakım** — Dependabot PR'ları düzenli merge (CI yeşilse),
    çeyreklik kabul turu, yedek doğrulama alışkanlığı.
 
 - [Ana proje raporları dizini](docs/PROJECT_REPORT_INDEX.md)
-- [Faz 5.8.1 veri kalite özeti — yerel uygulama ve doğrulama](docs/PHASE_5_8_DATA_QUALITY_SUMMARY.md)
+- [Faz 5.8.1 veri kalite özeti — yerel kanıt ve production kapanışı](docs/PHASE_5_8_DATA_QUALITY_SUMMARY.md)
 - [Başlangıçtan bugüne proje geçmişi ve güncel durum](docs/PROJECT_HISTORY_AND_CURRENT_STATUS_2026_08_20.md)
 - [Güncel ürün ve geliştirme yol haritası](docs/PROJECT_ROADMAP_FROM_2026_08_20.md)
 - [Faz 5.7 production kapanış raporu](docs/PHASE_5_7_PRODUCTION_CLOSURE.md)

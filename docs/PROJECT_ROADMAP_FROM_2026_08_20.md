@@ -34,25 +34,39 @@ Kabul ölçütleri:
 - [x] Giriş, Google ile giriş ve mevcut admin MFA akışında regresyon yok.
 - [x] Çalışan canlı Google Takvim bağlantısı yayın sırasında koparılmıyor.
 
-### 2.2 Google Cloud Branding ve Data Access
+### 2.2 Google Cloud Branding
 
 - App home page, Privacy Policy ve Terms bağlantılarını production URL'leriyle
   güncelle.
-- Kullanıcı destek ve geliştirici iletişimini `bilgi@nobelvize.com` olarak
-  doğrula.
-- `abidinyildiz.com` alan adını yetkili alan adı olarak doğrula.
-- Data Access bölümünde eski `calendar.events` iznini kaldırıp
-  `calendar.events.owned` iznini kaydet.
-- Uygulama adı, logo ve alan adı tutarlılığını kontrol et.
+- Uygulama adı, logo ve `abidinyildiz.com` yetkili alan adı tutarlılığını
+  kontrol et.
+- İletişim adresini konsoldaki güncel değerden oku. 20 Ağustos hazırlık belgesi
+  `bilgi@nobelvize.com` adresini aday olarak kaydeder; bu adresi körlemesine
+  yeniden ayarlama. Cloud konsolu iletişim adresi, şirket operasyon maili ve
+  Google Tasks hatırlatıcı hesabı farklı kavramlardır.
+- 2 Ekim 2026'da Google Cloud konsolu yeniden açılmadı. Aşağıdaki kabul
+  ölçütleri bu tarihte güncel onay değildir.
 
 Kabul ölçütleri:
 
 - Google Cloud konsolunda Branding yayınlanmış ve üç public bağlantı açılıyor.
-- OAuth izin ekranı yalnız gerekli giriş kapsamları ile
-  `calendar.events.owned` gösteriyor.
 - Production callback adresleri değiştirilmeden çalışıyor.
 
-### 2.3 Hassas kapsam doğrulaması
+### 2.3 Google Cloud Data Access
+
+- Data Access bölümünde eski `calendar.events` iznini kaldırıp
+  `calendar.events.owned` iznini kaydet.
+- OAuth izin ekranının yalnız gerekli giriş kapsamları ile
+  `calendar.events.owned` gösterdiğini salt okunur doğrula.
+- Branding kaydı, Data Access başvurusunun onaylandığı anlamına gelmez.
+- 2 Ekim 2026 konsol okuması yoktur.
+
+Kabul ölçütleri:
+
+- Güncel konsolda kapsam listesi ve callback adresleri ayrıca kaydedilmiş.
+- Hassas kapsam videosu ve Google sonucu bu maddeden ayrı izlenir.
+
+### 2.4 Hassas kapsam doğrulaması
 
 - Canlı yöneticinin çalışan bağlantısından ayrı bir doğrulama/test kullanıcısı
   hazırla.
@@ -78,12 +92,19 @@ Kabul ölçütleri:
 - Tekrarlanan, çelişkili ve sahipsiz kayıtları yönetici panelinde ayır.
 - Tamamlanma oranını haftalık izlenebilir metrik haline getir.
 
+2 Ekim 2026'da Faz 5.8.1 salt okunur yönetici özeti yayına alındı. Özet
+kategori toplamları verir. Personel kırılımı ve haftalık snapshot geçmişi
+yoktur. Ayrıntı: `docs/PHASE_5_8_DATA_QUALITY_SUMMARY.md`.
+
 Kabul ölçütleri:
 
-- Eksik alanlar kategori ve sorumlu bazında sayılabiliyor.
-- Tamamlanan veri görevi gerçek alan dolunca otomatik kapanıyor.
+- Eksik alanlar kategori bazında sayılabiliyor. Personel kırılımı ayrı iştir
+  ve 5.8.1 ile tamamlanmış sayılmaz.
+- Görev kapanışı, alan kaydı anında olmaz. Veri Kontrolü yeniden
+  çalıştırıldığında değerlendirilir.
 - Otomatik veri uydurma veya sessiz overwrite yok.
-- En az bir gerçek operasyon haftası ölçüm raporuna alınmış.
+- En az bir gerçek operasyon haftası ölçüm raporuna alınmış. Payda sıfırsa
+  oran yazılmaz.
 
 ### 3.2 Ülke ve vize evrak kurallarını genişlet
 
@@ -92,12 +113,15 @@ Kabul ölçütleri:
 - Sonraki ülke/vize paketlerini gerçek başvuru hacmine göre sırala.
 - Her kuralda kaynak, kontrol tarihi, geçerlilik tarihi ve yeniden kontrol
   tarihi tut.
-- Süresi dolan veya çelişen kuralı yönetici uyarısına dönüştür.
+- Süresi dolan veya çelişen kural için önce mevcut uyarının ne yaptığını
+  incele. Eksikse ayrı idempotent görev tasarımı öner. Kaynak uyarısı bu
+  maddenin hâlihazırda kabul edilmiş davranışı değildir.
 
 Kabul ölçütleri:
 
 - Resmî kaynak olmadan kayıt `doğrulandı` durumuna alınmıyor.
-- Süresi geçen kural açıkça görünür ve operasyon görevi üretiyor.
+- Süresi geçen kuralın görünürlüğü ve görev üretimi, mevcut kod incelenmeden
+  tamamlanmış sayılmaz.
 - Genel liste ile profil ekleri çakışmadan birleşiyor.
 - Her ülke paketi için kaynak ve production kabul raporu bulunuyor.
 
@@ -175,6 +199,10 @@ milestone altında issue'lara ayrılmalıdır:
 2. **Faz 5.8 — Veri Kalitesi ve Ülke Kuralı Genişletme**
 3. **Faz 5.9 — Operasyon Ölçümü ve Güvenilirlik**
 4. **Sürekli Bakım — Güvenlik, Bağımlılık ve Recovery**
+
+Faz 5.7 kod yüzeyi 20 Ağustos 2026'da yayındadır. Branding ile Data Access
+konsol doğrulaması ayrı ve açıktır. Faz 5.8.1 özeti 2 Ekim 2026'da yayındadır;
+arşiv kararı, haftalık kabul ve ülke kataloğu aynı başlık altında açık kalır.
 
 Bu rapor milestone veya issue'ları kendiliğinden açmaz. Uygulama kapsamı
 başlatıldığında her issue; amaç, kapsam dışı alan, kabul ölçütü, veri etkisi,

@@ -135,3 +135,38 @@ Business'ın şimdilik ertelenmesine karar vermiştir.
 
 Faz 5.2–5.3'ün ayrıntılı teknik ve aktivasyon kaydı:
 `docs/PHASE_5_2_5_3_IMPLEMENTATION_REPORT.md`.
+
+## 5.8 — Veri kalitesi özeti ve sonraki işletim
+
+### 5.8.1 — Salt okunur özet (production'da, 2 Ekim 2026)
+
+- Görevler ekranında yalnız yöneticiye açık kategori özeti yayındadır.
+- PR #81, main `579dcb3e45e6fd519d392ea63e7c7147f35af68e`, PR CI
+  `36999111660`, main CI `37000098941`, production deployment `6807186263`.
+- Görev kapanışı alan kaydı anında olmaz. Mevcut davranış, Veri Kontrolü
+  yeniden çalıştırıldığında değerlendirmedir.
+- Arşivli açık başvurular sayısal uyarıdır; bu faz onları kapatmaz veya
+  müşteriyi geri açmaz.
+- Kanıt: `docs/PHASE_5_8_DATA_QUALITY_SUMMARY.md`. Yerel test bölümü ile
+  production kapanışı ayrıdır.
+
+### 5.8.2 — Arşivli açık başvurular (başlanmadı)
+
+Kayıt bazında salt okunur inceleme ve ürün sahibi kararı. Toplu düzeltme,
+yeni RPC veya service-role okuması bu maddenin başlangıcı değildir.
+
+### 5.8.3 — Bir haftalık gerçek kullanım kabulü (başlanmadı)
+
+Ön koşul, gerçek aktif başvuru ile tanımlı sorumlu ve süredir. Payda sıfırsa
+oran yazılmaz. Görev tamamlama, alanın doğru doldurulduğunu tek başına
+kanıtlamaz.
+
+### 5.8.4 — Ülke/vize kaynak genişletme (başlanmadı)
+
+Yeni katalog sayımı olmadan “Almanya tam” veya “kalan ülkeler boş” denmez.
+İlk kanıtlı paket Almanya iş seyahatidir. Fransa turistik/öğrenci, resmi
+profil çıktısı yoksa bekliyor kalır. İngiltere, ABD ve Kanada Schengen
+listesinden kopyalanmaz.
+
+Bağımlılık audit bakımı ve Google Cloud konsol doğrulaması 5.8'in içinde
+değildir. İkisi de ayrı paket ve ayrı onay ister.

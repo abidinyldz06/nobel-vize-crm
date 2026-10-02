@@ -1,11 +1,12 @@
 # Nobel Vize CRM — Proje Raporları Ana Dizini
 
 - Rapor kesim tarihi: 20 Ağustos 2026
+- Son ek: 2 Ekim 2026, Faz 5.8.1 production kaydı
 - Production: `https://abidinyildiz.com`
 - GitHub: `abidinyldz06/nobel-vize-crm`
 - Ürün modeli: Nobel Vize için tek şirketli iç CRM
 
-## 1. Bugünkü kısa durum
+## 1. 20 Ağustos 2026 kısa durum
 
 20 Ağustos 2026 tarihli inceleme başlangıcında GitHub `main` dalı PR #67'yi
 içeren `6839d10` commit'indedir. Ana dalın son Quality Gates koşusu başarılı,
@@ -21,15 +22,39 @@ daraltılmış, bağlantı kaldırma Google revoke ve yerel şifreli veri temizl
 güçlendirilmiştir. Google Branding ve hassas kapsam doğrulama başvurusu dış
 yönetişim işi olarak açıktır.
 
+## 1.1 2 Ekim 2026 ek durumu
+
+Faz 5.8.1 salt okunur veri kalite özeti PR #81 ile main
+`579dcb3e45e6fd519d392ea63e7c7147f35af68e` commit'ine alınmıştır. PR CI
+`36999111660` ve main CI `37000098941` application, database ve browser
+işlerinde başarılıdır. Production deployment `6807186263` aynı SHA ile
+success durumundadır. Kanıt ve yorum sınırları
+`PHASE_5_8_DATA_QUALITY_SUMMARY.md` dosyasının kapanış bölümündedir. Yerel
+test sayıları bu CI koşusunun yerine geçmez.
+
+Açık kalan işler:
+
+- Arşivli açık başvurular için kayıt bazında ürün sahibi kararı.
+- Bağımlılık audit uyarılarının ayrı bakım paketi.
+- Bir haftalık gerçek kullanım kabulü; payda sıfırsa oran yok.
+- Ülke/vize katalog genişletmesi; 6 Ağustos matrisi yeni sayım değildir.
+- Google Branding ile Data Access ayrıdır. 2 Ekim 2026'da Cloud konsolu
+  yeniden açılmamıştır; Ağustos hazırlık notu güncel onay değildir.
+- WhatsApp Business, Outlook ve çok kiracılı ürün kapsamı ertelenmiş veya
+  kapsam dışıdır.
+
+Açık GitHub PR ve issue listesinin boş olması bu işlerin bittiği anlamına
+gelmez.
+
 ## 2. Hangi rapor ne için kullanılır?
 
 | Belge | Amaç | Güncellik kuralı |
 |---|---|---|
-| `PHASE_5_8_DATA_QUALITY_SUMMARY.md` | Yönetici veri kalite özeti, arşiv uyarısı ve yerel doğrulama | 2 Ekim 2026 yerel paket; production kapanışı değildir |
+| `PHASE_5_8_DATA_QUALITY_SUMMARY.md` | Yönetici veri kalite özeti ve arşiv uyarısı | Yerel bölüm tarihli kanıttır; PR/main/production kapanışı aynı dosyada ayrı bölümdedir |
 | `PROJECT_HISTORY_AND_CURRENT_STATUS_2026_08_20.md` | Başlangıçtan bugüne yapılanlar, GitHub PR/issue dökümü ve mevcut kanıtlar | 20 Ağustos 2026 denetim anlık görüntüsü |
 | `PROJECT_ROADMAP_FROM_2026_08_20.md` | Bundan sonraki işlerin öncelik, bağımlılık ve kabul ölçütleri | Yeni ürün kararı veya kapanışta güncellenir |
 | `PHASE_5_PLAN.md` | Faz 5 alt aşamalarının ürün ve uygulama kaydı | Faz bazlı yaşayan plan |
-| `PHASE_5_7_GOOGLE_VERIFICATION_READINESS.md` | Google Branding, Data Access ve hassas kapsam başvuru hazırlığı | Faz 5.7 yayın ve Google inceleme sonucunda güncellenir |
+| `PHASE_5_7_GOOGLE_VERIFICATION_READINESS.md` | Google Branding, Data Access ve hassas kapsam başvuru hazırlığı | 20 Ağustos hazırlık kaydı. Branding ile Data Access ayrıdır; 2 Ekim 2026'da konsol yeniden okunmadı |
 | `PHASE_5_7_PRODUCTION_CLOSURE.md` | PR #68, ana dal CI, Vercel deployment ve canlı HTTP kanıtları | Faz 5.7 tarihsel production kapanışı |
 | `PHASE_5_6_LIVE_ACCEPTANCE.md` | Resend ve Google Takvim gerçek production kabul kanıtı | Tarihsel kapanış kaydı; değiştirilmez |
 | `PHASE_5_0_CLOSURE_REPORT.md` | Temizlik, kontrollü Dependabot birleştirmeleri ve Faz 4 kapanışı | Tarihsel kapanış kaydı; değiştirilmez |
@@ -68,6 +93,7 @@ olmayan paketlerin yanlışlıkla canlı kabul edilmiş sayılmasını önler.
 | Faz 5.4–5.5 | Kaynaklı ve katmanlı ülke/vize evrak kataloğu | İlk paket production'da | `PHASE_5_5_COUNTRY_DOCUMENT_CORE.md` |
 | Faz 5.6 | Gerçek sağlayıcı ve production kabulü | Tamamlandı | `PHASE_5_6_LIVE_ACCEPTANCE.md` |
 | Faz 5.7 | Google doğrulama yüzeyi, veri minimizasyonu ve revoke | 20 Ağustos 2026'da production'a alındı | `PHASE_5_7_PRODUCTION_CLOSURE.md` |
+| Faz 5.8.1 | Salt okunur yönetici veri kalite özeti | 2 Ekim 2026'da production'a alındı | `PHASE_5_8_DATA_QUALITY_SUMMARY.md` |
 
 ## 5. Sabit ürün kararları
 
