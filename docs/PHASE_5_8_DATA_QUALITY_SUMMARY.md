@@ -1,8 +1,9 @@
 # Faz 5.8.1 — Salt okunur veri kalite özeti
 
-Tarih: 2 Ekim 2026. Teslim sınırı: yerel uygulama ve yerel doğrulama.
-Dal: `codex/phase58-data-quality-summary`; başlangıç main SHA: `18a698a`.
-Bu belge production kapanışı değildir.
+Tarih: 2 Ekim 2026.
+Yerel doğrulama bölümü, dal `codex/phase58-data-quality-summary` ve başlangıç
+main SHA `18a698a` için yazılmış yerel kanıttır. O bölüm production kapanışı
+değildir. PR, main ve production kaydı bu belgenin sonundaki ayrı bölümdedir.
 
 ## Amaç ve kapsam
 
@@ -95,7 +96,10 @@ başarısız oldu: mobil kanıt görüntüsü macOS'a özgü `/private/tmp` yolu
 kaydediliyordu; Linux runner'da ENOENT oluştu. Test görüntüsü Playwright
 `testInfo.outputPath()` ile platform bağımsız çıktı klasörüne taşındı. Test
 ve erişilebilirlik assertion'ları korunur; yeni head için tüm kapılar yeniden
-çalıştırılır. CI sonucu PR #81 üzerinden ayrıca doğrulanmalıdır.
+çalıştırılır. Bu paragraf yerel bölüm yazılırken açıktı. CI sonucu aşağıdaki
+kapanış bölümündedir. Buradaki 105 birim testi ve 19 güvenlik testi, CI
+tarayıcı koşusunun yerine geçmez. 19 güvenlik testi ana birim koşusuyla
+örtüşür; toplam bağımsız test sayısı olarak 124 yazılmaz.
 
 Test fixture sayıları kapanışta sıfır olarak doğrulandı. Yalnız bu çalışmaya
 ait yerel stack durduruldu; verisi/yedeği korundu ve geçici project_id geri
@@ -111,12 +115,48 @@ sessiz audit fix veya bağımlılık yükseltmesi içermez. Ayrı bakım işi ge
 
 ## Teslim ve geri dönüş
 
+Bu bölüm yerel doğrulama anındaki teslim sınırını korur. Yayın, aşağıdaki
+kapanış bölümündedir.
+
 Yeni migration, şema, RLS/grant veya bağımlılık değişikliği yok. Yerel test
 project_id ayarı teslim diff'ine alınmaz. Mevcut asıl checkout değişiklikleri
 korundu. Remote push, PR, merge, CI ve production yayını bu yerel doğrulama
 adımında yapılmadı. Yayın için ayrı onay ve kontrollü CI/merge kapıları gerekir.
 Uygulama paketini geri almak yeni commit revert'iyle mümkündür; DB geri
 dönüşü gerektirmez.
+
+## PR, main ve production kapanışı
+
+Bu bölüm 2 Ekim 2026'da, yayın tamamlandıktan sonra eklenmiştir. Yukarıdaki
+yerel test sayıları burada yeniden koşulmuş gibi okunmaz.
+
+- PR: https://github.com/abidinyldz06/nobel-vize-crm/pull/81 — MERGED.
+- Son PR head: `b15c64a7107d35aa541f0cb13fa8178632e82391`.
+- Squash merge / main: `579dcb3e45e6fd519d392ea63e7c7147f35af68e`.
+- Merge zamanı: 2026-10-02 11:16:23 UTC.
+- PR CI: https://github.com/abidinyldz06/nobel-vize-crm/actions/runs/36999111660
+  — application, database ve browser başarılı. Head, son PR head ile aynıdır.
+- Main CI: https://github.com/abidinyldz06/nobel-vize-crm/actions/runs/37000098941
+  — application, database ve browser başarılı. Head, main SHA ile aynıdır.
+- Production deployment `6807186263`: aynı main SHA, GitHub kaydı success.
+- Yayın yorumu: https://github.com/abidinyldz06/nobel-vize-crm/pull/81#issuecomment-5951390839
+
+2 Ekim 2026 11:45 UTC'te yeniden bakılan canlı yüzey:
+`/api/health/live` 200, `/api/health/ready` 200, anonim
+`GET /api/tasks/data-quality` 401 ve `cache-control: private, no-store`.
+Yönetici oturumuyla toplamlar bu doküman turunda yeniden okunmadı.
+
+Yayın yorumu, 11:27 UTC yönetici oturumunda şu toplamları yazar: aktif müşteri
+1, aktif açık başvuru 0, eksik kontrol 0, açık veri kalite görevi 0,
+arşivlenmiş müşterilere bağlı kapanmamış başvuru 5. Aynı yorum, PR ve main
+tam Chromium koşularında 36 testin geçtiğini yazar. Bu bölüm Actions
+logundan test adedini yeniden saymamıştır; job sonuçları success olarak
+doğrulanmıştır. Sıfır eksiklik operasyon kabulü değildir. Beş arşivli açık
+başvuru silinecek kayıt değildir.
+
+Bu kapanış haftalık gerçek kullanım kabulünü, ülke kuralı veri girişini,
+bağımlılık yükseltmesini veya Google hassas izin doğrulamasını tamamlamaz.
+Uygulama kodunda migration yoktur; geri dönüş yeni commit revert'idir.
 
 ## Kaynaklar
 
