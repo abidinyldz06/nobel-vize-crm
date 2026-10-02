@@ -39,6 +39,7 @@ yönetişim işi olarak devam eder; WhatsApp Business ertelenmiştir.
    çeyreklik kabul turu, yedek doğrulama alışkanlığı.
 
 - [Ana proje raporları dizini](docs/PROJECT_REPORT_INDEX.md)
+- [Faz 5.8.1 veri kalite özeti — yerel uygulama ve doğrulama](docs/PHASE_5_8_DATA_QUALITY_SUMMARY.md)
 - [Başlangıçtan bugüne proje geçmişi ve güncel durum](docs/PROJECT_HISTORY_AND_CURRENT_STATUS_2026_08_20.md)
 - [Güncel ürün ve geliştirme yol haritası](docs/PROJECT_ROADMAP_FROM_2026_08_20.md)
 - [Faz 5.7 production kapanış raporu](docs/PHASE_5_7_PRODUCTION_CLOSURE.md)

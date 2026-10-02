@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import DataQualityPanel from "@/components/DataQualityPanel";
 
 type TaskStatus = "pending" | "in_progress" | "completed" | "cancelled";
 type TaskPriority = "low" | "normal" | "high" | "urgent";
@@ -94,6 +95,7 @@ export default function TaskBoard({
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [syncingQuality, setSyncingQuality] = useState(false);
+  const [qualityRefreshKey, setQualityRefreshKey] = useState(0);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -103,7 +105,7 @@ export default function TaskBoard({
     customer_id: "",
   });
 
-  const loadTasks = useCallback(async () => {
+  const loadTasks = useCallback(async (refreshQuality = true) => {
     setLoading(true);
     setLoadError(null);
     try {
@@ -111,6 +113,7 @@ export default function TaskBoard({
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Görevler yüklenemedi.");
       setTasks(payload.tasks ?? []);
+      if (refreshQuality) setQualityRefreshKey(value => value + 1);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Görevler yüklenemedi.";
       setLoadError(message);
@@ -122,7 +125,7 @@ export default function TaskBoard({
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadTasks();
+    void loadTasks(false);
   }, [loadTasks]);
 
   const grouped = useMemo(() => {
@@ -258,6 +261,8 @@ export default function TaskBoard({
           </button>
         </div>
       </div>
+
+      {isAdmin && <DataQualityPanel refreshKey={qualityRefreshKey} />}
 
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {tabs.map(tab => (
