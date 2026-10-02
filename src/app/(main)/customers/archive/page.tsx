@@ -1,9 +1,33 @@
 import Link from "next/link";
 import { Archive, ArrowLeft } from "lucide-react";
 import CustomerArchiveTable, { type ArchivedCustomer } from "@/components/CustomerArchiveTable";
+import { reviewArchivedOpenApplications, type ArchivedApplicationRow } from "@/lib/archived-application-review";
 import { requireAdminPage } from "@/lib/page-auth";
+import { readAllPages } from "@/lib/read-all-pages";
 
 export const revalidate = 0;
+
+async function readArchivedApplicationReview(supabase: Awaited<ReturnType<typeof requireAdminPage>>["supabase"], customers: ArchivedCustomer[]) {
+  if (customers.length === 0) return [];
+  const applications: ArchivedApplicationRow[] = [];
+  for (let index = 0; index < customers.length; index += 80) {
+    const ids = customers.slice(index, index + 80).map(customer => customer.id);
+    applications.push(...await readAllPages((from, to) => supabase.from("applications")
+      .select("id,customer_id,status,updated_at,assigned_staff_id", { count: "exact" })
+      .in("customer_id", ids)
+      .order("id")
+      .range(from, to)));
+  }
+  const staff = await readAllPages((from, to) => supabase.from("staff")
+    .select("id,is_active", { count: "exact" })
+    .order("id")
+    .range(from, to));
+  return reviewArchivedOpenApplications({
+    applications,
+    customers: customers.map(customer => ({ id: customer.id, assignedStaffId: customer.assigned_staff_id })),
+    staff,
+  });
+}
 
 export default async function CustomerArchivePage() {
   const { supabase } = await requireAdminPage();
@@ -11,6 +35,16 @@ export default async function CustomerArchivePage() {
     supabase.rpc("list_archived_customers_v1"),
     supabase.rpc("list_archived_customer_privacy_v1"),
   ]);
+  const customers = (data ?? []) as ArchivedCustomer[];
+  let openApplications: ReturnType<typeof reviewArchivedOpenApplications> = [];
+  let reviewUnavailable = false;
+  if (!error && !privacyError) {
+    try {
+      openApplications = await readArchivedApplicationReview(supabase, customers);
+    } catch {
+      reviewUnavailable = true;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white p-6 dark:bg-[#060d1a]">
@@ -31,7 +65,7 @@ export default async function CustomerArchivePage() {
           Arşiv yüklenemedi: {error?.message || privacyError?.message}
         </div>
       ) : (
-        <CustomerArchiveTable customers={(data ?? []) as ArchivedCustomer[]} privacyCandidates={privacyCandidates ?? []} />
+        <CustomerArchiveTable customers={customers} privacyCandidates={privacyCandidates ?? []} openApplications={openApplications} reviewUnavailable={reviewUnavailable} />
       )}
     </div>
   );

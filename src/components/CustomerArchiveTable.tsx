@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { maskEmail, maskPhone } from "@/lib/masking";
+import { APPLICATION_STATUS_META, isApplicationStatus } from "@/lib/application-status";
+import type { ArchivedOpenApplicationReview } from "@/lib/archived-application-review";
 
 export type ArchivedCustomer = {
   id: string;
@@ -23,6 +25,35 @@ type PendingAction =
   | { type: "purge"; customer: ArchivedCustomer }
   | null;
 
+const assigneeLabel = {
+  active: "aktif sorumlu var",
+  inactive: "sorumlu pasif",
+  none: "sorumlu yok",
+} as const;
+
+function applicationStatusLabel(status: string) {
+  return isApplicationStatus(status) ? APPLICATION_STATUS_META[status].label : status;
+}
+
+function lastActivityLabel(value: string) {
+  const time = Date.parse(value);
+  if (Number.isNaN(time)) return "son işlem zamanı yok";
+  return `son işlem ${new Date(time).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}`;
+}
+
+function OpenApplicationNotes({ rows }: { rows: ArchivedOpenApplicationReview[] }) {
+  if (rows.length === 0) return <p className="mt-1 text-xs text-slate-500">Kapanmamış başvuru yok.</p>;
+  return (
+    <ul className="mt-2 space-y-1">
+      {rows.map(row => (
+        <li key={row.id} data-testid={`archived-open-application-${row.id}`} className="text-xs text-amber-700 dark:text-amber-300">
+          {applicationStatusLabel(row.status)} · {lastActivityLabel(row.updatedAt)} · {assigneeLabel[row.assignee]}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 type PrivacyCandidate = {
   customer_id: string;
   request_id: string | null;
@@ -33,12 +64,28 @@ type PrivacyCandidate = {
   retention_hold_active: boolean;
 };
 
-export default function CustomerArchiveTable({ customers, privacyCandidates }: { customers: ArchivedCustomer[]; privacyCandidates: PrivacyCandidate[] }) {
+export default function CustomerArchiveTable({
+  customers,
+  privacyCandidates,
+  openApplications,
+  reviewUnavailable,
+}: {
+  customers: ArchivedCustomer[];
+  privacyCandidates: PrivacyCandidate[];
+  openApplications: ArchivedOpenApplicationReview[];
+  reviewUnavailable: boolean;
+}) {
   const router = useRouter();
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [processing, setProcessing] = useState(false);
   const [privacyProcessing, setPrivacyProcessing] = useState<string | null>(null);
   const privacyMap = new Map(privacyCandidates.map(candidate => [candidate.customer_id, candidate]));
+  const openByCustomer = new Map<string, ArchivedOpenApplicationReview[]>();
+  for (const application of openApplications) {
+    const rows = openByCustomer.get(application.customerId) ?? [];
+    rows.push(application);
+    openByCustomer.set(application.customerId, rows);
+  }
 
   const eligibleCount = customers.filter(customer => customer.purge_eligible).length;
 
@@ -103,6 +150,15 @@ export default function CustomerArchiveTable({ customers, privacyCandidates }: {
           {customers.length} arşiv kaydı · {eligibleCount} kayıt kalıcı silme için uygun
         </p>
       </div>
+      {reviewUnavailable ? (
+        <p role="alert" data-testid="archive-review-unavailable" className="mb-4 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+          Kapanmamış başvuru incelemesi okunamadı. Bu, açık başvuru olmadığı anlamına gelmez. Kayıtlar değiştirilmedi.
+        </p>
+      ) : (
+        <p data-testid="archive-review-summary" className="mb-4 text-xs text-slate-500">
+          {openApplications.length} kapanmamış başvuru listeleniyor. Bu liste başvuru kapatmaz. Müşteriyi geri yüklemek aşağıdaki ayrı onaylı işlemdir.
+        </p>
+      )}
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg dark:border-[#1f2937] dark:bg-[#0d1420]">
         <div className="hidden overflow-x-auto md:block">
@@ -123,6 +179,7 @@ export default function CustomerArchiveTable({ customers, privacyCandidates }: {
                   <tr key={customer.id} data-testid={`archived-customer-${customer.id}`}>
                     <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-200">
                       {customer.first_name} {customer.last_name}
+                      {!reviewUnavailable && <OpenApplicationNotes rows={openByCustomer.get(customer.id) ?? []} />}
                     </td>
                     <td className="px-6 py-4 text-slate-500">
                       <p>{customer.phone ? maskPhone(customer.phone) : "—"}</p>
@@ -177,6 +234,7 @@ export default function CustomerArchiveTable({ customers, privacyCandidates }: {
               <div>
                 <p className="font-medium text-slate-900 dark:text-slate-200">{customer.first_name} {customer.last_name}</p>
                 <p className="text-xs text-slate-500">{new Date(customer.deleted_at).toLocaleString("tr-TR")}</p>
+                {!reviewUnavailable && <OpenApplicationNotes rows={openByCustomer.get(customer.id) ?? []} />}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {privacyMap.get(customer.id)?.request_id && !privacyMap.get(customer.id)?.anonymized_at && Boolean(privacyMap.get(customer.id)?.storage_file_count) && <button onClick={() => runPrivacyAction(customer, "documents")} disabled={!privacyMap.get(customer.id)?.grace_eligible || Boolean(privacyMap.get(customer.id)?.retention_hold_active) || privacyProcessing !== null} className="col-span-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-600 disabled:opacity-35"><FileX2 className="h-4 w-4" />Evrakları Temizle</button>}

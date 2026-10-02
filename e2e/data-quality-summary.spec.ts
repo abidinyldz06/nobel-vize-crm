@@ -63,6 +63,7 @@ test("5.8 panel shows insufficient sample, archive warning, mobile layout and ex
   const panel = page.getByTestId("data-quality-panel");
   await expect(panel.getByText(/operasyon başarısı için yeterli veri yok/)).toBeVisible();
   await expect(page.getByTestId("archived-open-applications")).toContainText("1 kapanmamış başvuru");
+  await expect(page.getByRole("link", { name: "Arşivde incele" })).toHaveAttribute("href", "/customers/archive");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: 'Ana menüyü aç' })).toHaveAttribute('aria-expanded', 'false');

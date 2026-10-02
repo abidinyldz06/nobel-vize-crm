@@ -13,6 +13,12 @@ export const APPLICATION_STATUSES = [
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
+const closedApplicationStatuses = new Set<string>(["onaylandi", "reddedildi", "kapandi"]);
+
+export function isOpenApplicationStatus(status: string) {
+  return !closedApplicationStatuses.has(status);
+}
+
 export const APPLICATION_STATUS_META: Record<ApplicationStatus, { label: string; color: string; column: string }> = {
   profil_analizi: { label: "Profil Analizi", color: "bg-slate-500/10 text-slate-600 dark:text-slate-300", column: "Profil" },
   evrak_bekleniyor: { label: "Evrak Bekleniyor", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400", column: "Evrak" },
