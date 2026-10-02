@@ -1,4 +1,5 @@
 import type { Database } from "../types/database";
+import { isOpenApplicationStatus } from "./application-status";
 
 type Row<Table extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][Table]["Row"];
 export type QualityCustomer = Pick<Row<"customers">, "id" | "is_deleted" | "phone" | "email" | "passport_no" | "passport_expiry" | "assigned_staff_id">;
@@ -22,7 +23,6 @@ const categories = [
   { key: "profile", label: "Başvuru profili", days: 7 },
 ] as const;
 type Category = typeof categories[number]["key"];
-const closedStatuses = new Set(["onaylandi", "reddedildi", "kapandi"]);
 const isOpenTask = (task: QualityTask) => task.status === "pending" || task.status === "in_progress";
 const isBlank = (value: string | null) => !value?.trim();
 
@@ -34,7 +34,7 @@ export function summarizeDataQuality(dataset: QualityDataset, now = new Date()) 
   const archivedCustomers = new Set(dataset.archivedCustomerIds ?? dataset.customers.filter(customer => customer.is_deleted === true).map(customer => customer.id));
   const activeStaff = new Set(dataset.staff.filter(staff => staff.is_active).map(staff => staff.id));
   const openApplications = dataset.applications.filter(application =>
-    !closedStatuses.has(application.status) && customers.get(application.customer_id)?.is_deleted === false
+    isOpenApplicationStatus(application.status) && customers.get(application.customer_id)?.is_deleted === false
   );
   const applicants = new Set(openApplications.map(application => application.customer_id));
   const findings = new Map<string, Category>();
@@ -77,7 +77,7 @@ export function summarizeDataQuality(dataset: QualityDataset, now = new Date()) 
     activeCustomers: activeCustomers.length,
     openApplications: openApplications.length,
     archivedOpenApplications: dataset.applications.filter(application =>
-      !closedStatuses.has(application.status) && archivedCustomers.has(application.customer_id)
+      isOpenApplicationStatus(application.status) && archivedCustomers.has(application.customer_id)
     ).length,
     insufficientSample: openApplications.length === 0,
     missingFields: findings.size,

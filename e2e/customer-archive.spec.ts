@@ -120,6 +120,7 @@ test('admin archives and restores a customer without losing the record', async (
   await page.getByRole('link', { name: 'Arşiv' }).click();
   await expect(page).toHaveURL('/customers/archive');
   await expect(page.getByTestId(`archived-customer-${testCustomerId}`)).toContainText(customerName);
+  await expect(page.getByTestId(`archived-customer-${testCustomerId}`)).toContainText("Kapanmamış başvuru yok");
   await page.getByTestId(`restore-customer-${testCustomerId}`).click();
   await page.getByTestId('confirm-archive-action').click();
   await expect(page.getByTestId(`archived-customer-${testCustomerId}`)).toHaveCount(0);

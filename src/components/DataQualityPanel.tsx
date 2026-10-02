@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { DataQualitySummary } from "@/lib/data-quality-summary";
 
 export default function DataQualityPanel({ refreshKey }: { refreshKey: number }) {
@@ -47,7 +48,7 @@ export default function DataQualityPanel({ refreshKey }: { refreshKey: number })
             ].map(([label, value]) => <div key={label} className="rounded-xl bg-slate-50 p-3 dark:bg-[#060c18]"><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{value}</dd></div>)}
           </dl>
           {summary.insufficientSample && <p className="mb-3 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">Aktif müşterilere bağlı açık başvuru yok; operasyon başarısı için yeterli veri yok. Sıfır eksiklik, bir haftalık kabulün tamamlandığı anlamına gelmez.</p>}
-          {summary.archivedOpenApplications > 0 && <p role="alert" data-testid="archived-open-applications" className="mb-3 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">Arşivlenmiş müşterilere bağlı {summary.archivedOpenApplications} kapanmamış başvuru var. Bunlar aktif veri taramasına dahil değildir; kayıtları otomatik açmadan veya kapatmadan inceleyin.</p>}
+          {summary.archivedOpenApplications > 0 && <p role="alert" data-testid="archived-open-applications" className="mb-3 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">Arşivlenmiş müşterilere bağlı {summary.archivedOpenApplications} kapanmamış başvuru var. Bunlar aktif veri taramasına dahil değildir; kayıtları otomatik açmadan veya kapatmadan inceleyin. <Link href="/customers/archive" className="font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Arşivde incele</Link></p>}
           <div tabIndex={0} role="region" aria-label="Veri kalite kontrol tablosu" className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
             <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
               <caption className="sr-only">Kategori bazlı eksiklik ve görev kapsamı</caption>
