@@ -178,4 +178,6 @@ test('admin turns incomplete records into visible data-quality tasks', async ({ 
     if (error) throw error;
     return count;
   }).toBe(5);
+  const contactSummary = page.getByTestId('data-quality-panel').getByRole('row', { name: /İletişim kanalı/ });
+  await expect(contactSummary.getByRole('cell').nth(1)).toHaveText('1');
 });

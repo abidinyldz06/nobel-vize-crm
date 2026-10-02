@@ -25,6 +25,7 @@ yönetişim işi olarak açıktır.
 
 | Belge | Amaç | Güncellik kuralı |
 |---|---|---|
+| `PHASE_5_8_DATA_QUALITY_SUMMARY.md` | Yönetici veri kalite özeti, arşiv uyarısı ve yerel doğrulama | 2 Ekim 2026 yerel paket; production kapanışı değildir |
 | `PROJECT_HISTORY_AND_CURRENT_STATUS_2026_08_20.md` | Başlangıçtan bugüne yapılanlar, GitHub PR/issue dökümü ve mevcut kanıtlar | 20 Ağustos 2026 denetim anlık görüntüsü |
 | `PROJECT_ROADMAP_FROM_2026_08_20.md` | Bundan sonraki işlerin öncelik, bağımlılık ve kabul ölçütleri | Yeni ürün kararı veya kapanışta güncellenir |
 | `PHASE_5_PLAN.md` | Faz 5 alt aşamalarının ürün ve uygulama kaydı | Faz bazlı yaşayan plan |
