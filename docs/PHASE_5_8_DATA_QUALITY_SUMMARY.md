@@ -90,6 +90,13 @@ etiketi ve klavye odağı eklenerek tekrar geçirildi. Son build tekrarında san
 port/IPC izni hatası oluştu; hatalı derleme önbelleği silinmeden ayrı geçici
 konuma taşındı ve izinli temiz build başarılı oldu. Kontroller kapatılmadı.
 
+İlk GitHub PR CI koşusunda application/database geçti, browser 35 geçti / 1
+başarısız oldu: mobil kanıt görüntüsü macOS'a özgü `/private/tmp` yoluna
+kaydediliyordu; Linux runner'da ENOENT oluştu. Test görüntüsü Playwright
+`testInfo.outputPath()` ile platform bağımsız çıktı klasörüne taşındı. Test
+ve erişilebilirlik assertion'ları korunur; yeni head için tüm kapılar yeniden
+çalıştırılır. CI sonucu PR #81 üzerinden ayrıca doğrulanmalıdır.
+
 Test fixture sayıları kapanışta sıfır olarak doğrulandı. Yalnız bu çalışmaya
 ait yerel stack durduruldu; verisi/yedeği korundu ve geçici project_id geri
 alındı. Asıl checkout'taki kullanıcı değişiklikleri korunur.
