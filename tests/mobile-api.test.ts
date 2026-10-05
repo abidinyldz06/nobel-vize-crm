@@ -5,9 +5,12 @@ import test from "node:test";
 
 import {
   assuranceFromAccessToken,
+  bodySuppliesStaffId,
   clientSuppliedStaffId,
   decodeTaskCursor,
   encodeTaskCursor,
+  mapMobileApplication,
+  mapMobileCustomer,
   mapMobileTask,
   mobileMfaRequired,
   publicAuthMessage,
@@ -62,6 +65,34 @@ test("sayfa imi ve istemci personel parametresi denetlenir", () => {
 test("hata metni parolayı geri vermez", () => {
   assert.equal(publicAuthMessage("olmadı gizli-parola", "gizli-parola"), "Giriş tamamlanamadı.");
 });
+
+test("müşteri ve başvuru cevapları kimlik belgesi taşımaz", () => {
+  const id = "5f6d7c2a-1b34-4a5e-8c90-123456789abc";
+  const customer = mapMobileCustomer({ id, first_name: "Demo", last_name: "Müşteri" });
+  assert.deepEqual(customer, { id, fullName: "Demo Müşteri" });
+  assert.equal(JSON.stringify(customer).includes("passport"), false);
+  const application = mapMobileApplication({
+    id,
+    country: "Almanya",
+    visa_type: "Turistik",
+    status: "evrak_bekleniyor",
+    customers: { first_name: "Demo", last_name: "Müşteri" },
+  });
+  assert.equal(application?.customerName, "Demo Müşteri");
+  assert.equal(mapMobileApplication({ ...applicationInput(id), status: "gizli" }), null);
+  assert.equal(bodySuppliesStaffId({ staff_id: id }), true);
+  assert.equal(bodySuppliesStaffId({}), false);
+});
+
+function applicationInput(id: string) {
+  return {
+    id,
+    country: "Almanya",
+    visa_type: "Turistik",
+    status: "evrak_bekleniyor",
+    customers: { first_name: "Demo", last_name: "Müşteri" },
+  };
+}
 
 test("mobil görev okuması senkronizasyon ve service-role kullanmaz", async () => {
   const files = [

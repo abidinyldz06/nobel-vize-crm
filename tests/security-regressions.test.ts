@@ -235,6 +235,21 @@ describe("security regression guards", () => {
     assert.match(tasks, /assigned_staff_id/);
     assert.match(tasks, /staff_id_rejected|clientSuppliedStaffId/);
   });
+
+  it("keeps mobile customer and application reads free of identity documents", async () => {
+    const [customers, applications, complete] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/customers/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/applications/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/tasks/[id]/complete/route.ts"), "utf8"),
+    ]);
+    for (const source of [customers, applications, complete]) {
+      assert.doesNotMatch(source, /passport|phone|email|supabase-admin|SERVICE_ROLE|sync_operational_tasks/);
+    }
+    assert.match(customers, /assigned_staff_id/);
+    assert.match(applications, /assigned_staff_id/);
+    assert.match(complete, /set_task_status_v1/);
+    assert.match(complete, /"completed"/);
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {

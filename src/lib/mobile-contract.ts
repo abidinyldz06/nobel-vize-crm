@@ -91,3 +91,62 @@ export function decodeTaskCursor(cursor: string): { dueAt: string; id: string } 
 export function isUuid(value: string) {
   return UUID.test(value);
 }
+
+export function quoteFilter(value: string) {
+  return `"${value.replaceAll('"', "")}"`;
+}
+
+export function cursorFilter(column: "due_at" | "updated_at", cursor: { dueAt: string; id: string }, direction: "asc" | "desc") {
+  const at = quoteFilter(cursor.dueAt);
+  const id = quoteFilter(cursor.id);
+  const compare = direction === "asc" ? "gt" : "lt";
+  return `${column}.${compare}.${at},and(${column}.eq.${at},id.${compare}.${id})`;
+}
+
+const APPLICATION_STATUSES = new Set([
+  "profil_analizi",
+  "evrak_bekleniyor",
+  "randevu_bekleniyor",
+  "randevu_alindi",
+  "evrak_hazirlaniyor",
+  "basvuru_yapildi",
+  "onaylandi",
+  "reddedildi",
+  "itiraz",
+  "kapandi",
+]);
+
+export type MobileCustomerDto = { id: string; fullName: string };
+export type MobileApplicationDto = {
+  id: string;
+  customerName: string;
+  country: string;
+  visaType: string;
+  status: string;
+};
+
+export function mapMobileCustomer(row: { id: string; first_name: string; last_name: string }): MobileCustomerDto | null {
+  const fullName = `${row.first_name} ${row.last_name}`.replace(/\s+/g, " ").trim();
+  if (!isUuid(row.id) || !fullName) return null;
+  return { id: row.id, fullName };
+}
+
+export function mapMobileApplication(row: {
+  id: string;
+  country: string;
+  visa_type: string;
+  status: string;
+  customers: { first_name: string; last_name: string } | { first_name: string; last_name: string }[] | null;
+}): MobileApplicationDto | null {
+  const customer = Array.isArray(row.customers) ? row.customers[0] : row.customers;
+  if (!customer || !isUuid(row.id) || !APPLICATION_STATUSES.has(row.status)) return null;
+  const customerName = `${customer.first_name} ${customer.last_name}`.replace(/\s+/g, " ").trim();
+  if (!customerName || !row.country || !row.visa_type) return null;
+  return { id: row.id, customerName, country: row.country, visaType: row.visa_type, status: row.status };
+}
+
+export function bodySuppliesStaffId(body: unknown) {
+  if (!body || typeof body !== "object") return false;
+  const record = body as Record<string, unknown>;
+  return "staff_id" in record || "staffId" in record || "assigned_staff_id" in record;
+}
