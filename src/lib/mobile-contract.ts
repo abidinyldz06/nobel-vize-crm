@@ -96,7 +96,7 @@ export function quoteFilter(value: string) {
   return `"${value.replaceAll('"', "")}"`;
 }
 
-export function cursorFilter(column: "due_at" | "updated_at", cursor: { dueAt: string; id: string }, direction: "asc" | "desc") {
+export function cursorFilter(column: "due_at" | "updated_at" | "appointment_date", cursor: { dueAt: string; id: string }, direction: "asc" | "desc") {
   const at = quoteFilter(cursor.dueAt);
   const id = quoteFilter(cursor.id);
   const compare = direction === "asc" ? "gt" : "lt";
@@ -149,4 +149,114 @@ export function bodySuppliesStaffId(body: unknown) {
   if (!body || typeof body !== "object") return false;
   const record = body as Record<string, unknown>;
   return "staff_id" in record || "staffId" in record || "assigned_staff_id" in record;
+}
+
+const APPOINTMENT_STATUSES = new Set(["scheduled", "rescheduled", "cancelled", "no_show", "completed"]);
+const APPLICATION_STATUS_LIST = [
+  "profil_analizi",
+  "evrak_bekleniyor",
+  "randevu_bekleniyor",
+  "randevu_alindi",
+  "evrak_hazirlaniyor",
+  "basvuru_yapildi",
+  "onaylandi",
+  "reddedildi",
+  "itiraz",
+  "kapandi",
+] as const;
+
+export type MobileAppointmentDto = {
+  id: string;
+  customerName: string;
+  startsAt: string;
+  location: string;
+  country: string;
+  visaType: string;
+  appointmentStatus: string;
+};
+
+export function isMobileTimestamp(value: string) {
+  return DUE_AT.test(value);
+}
+
+export function mapMobileAppointment(row: {
+  id: string;
+  appointment_date: string | null;
+  appointment_location: string | null;
+  appointment_status: string | null;
+  country: string;
+  visa_type: string;
+  customers: { first_name: string; last_name: string } | { first_name: string; last_name: string }[] | null;
+}): MobileAppointmentDto | null {
+  const customer = Array.isArray(row.customers) ? row.customers[0] : row.customers;
+  if (!customer || !isUuid(row.id) || !row.appointment_date || !isMobileTimestamp(row.appointment_date)) return null;
+  if (!row.appointment_status || !APPOINTMENT_STATUSES.has(row.appointment_status)) return null;
+  const customerName = `${customer.first_name} ${customer.last_name}`.replace(/\s+/g, " ").trim();
+  if (!customerName || !row.country || !row.visa_type) return null;
+  return {
+    id: row.id,
+    customerName,
+    startsAt: row.appointment_date,
+    location: (row.appointment_location ?? "").slice(0, 200),
+    country: row.country,
+    visaType: row.visa_type,
+    appointmentStatus: row.appointment_status,
+  };
+}
+
+export function applicationStatusInput(body: unknown):
+  | { ok: true; status: (typeof APPLICATION_STATUS_LIST)[number]; rejectionReason: string | null }
+  | { ok: false; message: string } {
+  if (bodySuppliesStaffId(body) || linksCustomer(body)) return { ok: false, message: "Personel kimliği istemciden alınmaz." };
+  if (!body || typeof body !== "object") return { ok: false, message: "Başvuru bilgisi geçersiz." };
+  const record = body as Record<string, unknown>;
+  const status = typeof record.status === "string" ? record.status : "";
+  if (!APPLICATION_STATUS_LIST.includes(status as (typeof APPLICATION_STATUS_LIST)[number])) {
+    return { ok: false, message: "Durum geçersiz." };
+  }
+  const reason = typeof record.rejectionReason === "string" ? record.rejectionReason.trim() : "";
+  if (reason.length > 2000) return { ok: false, message: "Ret sebebi en fazla 2000 karakter olabilir." };
+  if (status === "reddedildi" && reason.length === 0) return { ok: false, message: "Ret sebebi gereklidir." };
+  return {
+    ok: true,
+    status: status as (typeof APPLICATION_STATUS_LIST)[number],
+    rejectionReason: status === "reddedildi" ? reason : null,
+  };
+}
+
+export function appointmentStatusInput(body: unknown):
+  | { ok: true; status: "cancelled" | "no_show" | "completed"; note: string | null }
+  | { ok: false; message: string } {
+  if (bodySuppliesStaffId(body) || linksCustomer(body)) return { ok: false, message: "Personel kimliği istemciden alınmaz." };
+  if (!body || typeof body !== "object") return { ok: false, message: "Randevu bilgisi geçersiz." };
+  const record = body as Record<string, unknown>;
+  const status = record.status;
+  if (status !== "cancelled" && status !== "no_show" && status !== "completed") {
+    return { ok: false, message: "Randevu durumu geçersiz." };
+  }
+  const note = typeof record.note === "string" ? record.note.trim() : "";
+  if (note.length > 1000) return { ok: false, message: "Not en fazla 1000 karakter olabilir." };
+  return { ok: true, status, note: note || null };
+}
+
+export function taskCreateInput(body: unknown):
+  | { ok: true; payload: { title: string; description: string | null; due_at: string; priority: "low" | "normal" | "high" } }
+  | { ok: false; message: string } {
+  if (bodySuppliesStaffId(body) || linksCustomer(body)) return { ok: false, message: "Görev bu ekrandan başkasına bağlanmaz." };
+  if (!body || typeof body !== "object") return { ok: false, message: "Görev bilgisi geçersiz." };
+  const record = body as Record<string, unknown>;
+  const title = typeof record.title === "string" ? record.title.trim() : "";
+  if (title.length < 1 || title.length > 200) return { ok: false, message: "Başlık 1-200 karakter olmalı." };
+  const detail = typeof record.detail === "string" ? record.detail.trim() : "";
+  if (detail.length > 2000) return { ok: false, message: "Açıklama en fazla 2000 karakter olabilir." };
+  const dueAt = typeof record.dueAt === "string" ? record.dueAt : "";
+  if (!isMobileTimestamp(dueAt)) return { ok: false, message: "Son tarih geçersiz." };
+  const priority = record.priority === "low" || record.priority === "high" ? record.priority : "normal";
+  return { ok: true, payload: { title, description: detail || null, due_at: dueAt, priority } };
+}
+
+function linksCustomer(body: unknown) {
+  if (!body || typeof body !== "object") return false;
+  const record = body as Record<string, unknown>;
+  return "customer_id" in record || "customerId" in record || "application_id" in record || "applicationId" in record;
 }

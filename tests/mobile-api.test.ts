@@ -9,9 +9,12 @@ import {
   clientSuppliedStaffId,
   decodeTaskCursor,
   encodeTaskCursor,
+  appointmentStatusInput,
   mapMobileApplication,
+  mapMobileAppointment,
   mapMobileCustomer,
   mapMobileTask,
+  taskCreateInput,
   mobileMfaRequired,
   publicAuthMessage,
 } from "../src/lib/mobile-contract";
@@ -82,7 +85,36 @@ test("müşteri ve başvuru cevapları kimlik belgesi taşımaz", () => {
   assert.equal(mapMobileApplication({ ...applicationInput(id), status: "gizli" }), null);
   assert.equal(bodySuppliesStaffId({ staff_id: id }), true);
   assert.equal(bodySuppliesStaffId({}), false);
+  const appointment = mapMobileAppointment({
+    id,
+    appointment_date: "2026-10-06T07:00:00.000Z",
+    appointment_location: "Konsolosluk",
+    appointment_status: "scheduled",
+    country: "Almanya",
+    visa_type: "Turistik",
+    customers: { first_name: "Demo", last_name: "Müşteri" },
+  });
+  assert.equal(appointment?.customerName, "Demo Müşteri");
+  assert.equal(JSON.stringify(appointment).includes("passport"), false);
+  assert.equal(mapMobileAppointment({ ...appointmentInput(id), appointment_date: null }), null);
+  assert.equal(taskCreateInput({ title: "Ara", dueAt: "2026-10-06T07:00:00.000Z", staff_id: id }).ok, false);
+  assert.equal(taskCreateInput({ title: "Ara", dueAt: "2026-10-06T07:00:00.000Z", customer_id: id }).ok, false);
+  assert.equal(taskCreateInput({ title: "Ara", dueAt: "2026-10-06T07:00:00.000Z" }).ok, true);
+  assert.equal(appointmentStatusInput({ status: "cancelled" }).ok, true);
+  assert.equal(appointmentStatusInput({ status: "scheduled" }).ok, false);
 });
+
+function appointmentInput(id: string) {
+  return {
+    id,
+    appointment_date: "2026-10-06T07:00:00.000Z",
+    appointment_location: "Konsolosluk",
+    appointment_status: "scheduled",
+    country: "Almanya",
+    visa_type: "Turistik",
+    customers: { first_name: "Demo", last_name: "Müşteri" },
+  };
+}
 
 function applicationInput(id: string) {
   return {

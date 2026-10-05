@@ -250,6 +250,22 @@ describe("security regression guards", () => {
     assert.match(complete, /set_task_status_v1/);
     assert.match(complete, /"completed"/);
   });
+
+  it("keeps mobile writes on existing workflows and out of identity documents", async () => {
+    const [appointments, applicationStatus, appointmentStatus, tasks] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/appointments/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/applications/[id]/status/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/appointments/[id]/status/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/tasks/route.ts"), "utf8"),
+    ]);
+    for (const source of [appointments, applicationStatus, appointmentStatus, tasks]) {
+      assert.doesNotMatch(source, /passport|phone|email|supabase-admin|SERVICE_ROLE|sync_operational_tasks/);
+    }
+    assert.match(appointments, /assigned_staff_id/);
+    assert.match(applicationStatus, /update_application_status_v1/);
+    assert.match(appointmentStatus, /set_appointment_status_v1/);
+    assert.match(tasks, /create_task_v1/);
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {
