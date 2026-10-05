@@ -1,7 +1,7 @@
 # Nobel Vize CRM — Proje Raporları Ana Dizini
 
 - Rapor kesim tarihi: 20 Ağustos 2026
-- Son ek: 2 Ekim 2026, Faz 5.8.1 production kaydı
+- Son ek: 5 Ekim 2026, Cursor teslimleri ve PR #85 devam kaydı
 - Production: `https://abidinyildiz.com`
 - GitHub: `abidinyldz06/nobel-vize-crm`
 - Ürün modeli: Nobel Vize için tek şirketli iç CRM
@@ -42,6 +42,18 @@ Açık kalan işler:
   yeniden açılmamıştır; Ağustos hazırlık notu güncel onay değildir.
 - WhatsApp Business, Outlook ve çok kiracılı ürün kapsamı ertelenmiş veya
   kapsam dışıdır.
+
+## 1.2 5 Ekim 2026 devam durumu
+
+PR #82 doküman eşitlemesi, #83 salt okunur arşiv incelemesi ve #84 hedefli
+bağımlılık bakımı birleşmiştir. Güncel main `0bcf4d4`, main CI `37189258830`
+ve production deployment `6838768635` başarılıdır. Yukarıdaki 2 Ekim audit
+bakımı maddesi tarihsel kalmıştır; yeni bakım adayı PR #85'tir ve tip üretimi
+kontrolü nedeniyle henüz birleşmemiştir. Arşiv UI teslimi kayıt bazındaki
+ürün sahibi kararını veya haftalık gerçek kullanım kabulünü kapatmaz.
+
+Güncel kanıtlar, yerel düzeltmenin teslim sınırı ve kalan işler:
+[`PROJECT_CONTINUATION_2026_10_05.md`](PROJECT_CONTINUATION_2026_10_05.md).
 
 Açık GitHub PR ve issue listesinin boş olması bu işlerin bittiği anlamına
 gelmez.
