@@ -4,12 +4,14 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 
 ## Proje durumu ve raporlar
 
-**Güncel durum (2 Ekim 2026):** Faz 5.8.1 salt okunur veri kalite özeti
-production'dadır. PR #81, main `579dcb3`, PR CI `36999111660`, main CI
-`37000098941` ve production deployment `6807186263`. Haftalık gerçek kullanım
-kabulü, arşivli açık başvuruların kayıt kararı, bağımlılık bakımı, ülke/vize
-katalog genişletmesi ve Google hassas izin doğrulaması bu yayınla kapanmamıştır.
-Ayrıntı: `docs/PHASE_5_8_DATA_QUALITY_SUMMARY.md`.
+**Güncel durum (5 Ekim 2026):** Faz 5.8.1 veri kalite özeti ve PR #83'ün
+salt okunur arşiv incelemesi production'dadır. PR #84 bağımlılık bakımı da
+birleştirilmiştir: main `0bcf4d4`, başarılı main CI `37189258830`, başarılı
+production deployment `6838768635`. PR #85 yeni bağımlılık güncellemelerini
+içerir; veritabanı tip üretimi kontrolü başarısız olduğundan henüz birleşmemiştir.
+Haftalık gerçek kullanım kabulü, arşivli başvuruların kayıt kararı, ülke/vize
+katalog genişletmesi ve Google hassas izin doğrulaması açık kalır.
+Ayrıntı: `docs/PROJECT_CONTINUATION_2026_10_05.md`.
 
 **Önceki durum (9 Eylül 2026):** Faz 5.0–5.7 production kabulü tamamlanmış;
 üzerine 6–9 Eylül güvenilirlik ve güvenlik paketi (PR #73) merge edilmişti.
@@ -20,6 +22,13 @@ Business ertelenmiş durumunu korur.
 
 ### Yapılanlar (son güncel)
 
+- **PR #84 (4 Ekim 2026, merge edildi):** hedefli bağımlılık güvenlik bakımı.
+  Production bağımlılık denetimi sıfır açık ile geçmiştir; bu, geliştirme
+  bağımlılıklarının veya tüm uygulama güvenliğinin risksiz olduğu anlamına gelmez.
+- **PR #83 (2 Ekim 2026, merge edildi):** yönetici arşiv ekranında açık
+  başvurular için salt okunur karar incelemesi. Kayıtlar otomatik değiştirilmez.
+- **PR #82 (2 Ekim 2026, merge edildi):** README ve raporların 5.8.1 yayın
+  kanıtlarıyla eşitlenmesi.
 - **PR #81 (2 Ekim 2026, merge edildi):** yöneticiye açık salt okunur veri
   kalite özeti. Yeni migration, grant veya bağımlılık değişikliği yoktur.
   Yerel test anlatımı ile PR/main/production kapanışı aynı raporda ayrı
@@ -40,8 +49,9 @@ Business ertelenmiş durumunu korur.
 
 1. **Arşivli açık başvuruların karar incelemesi** — önce salt okunur ölçüm ve
    ürün sahibi kararı. Kayıtlar otomatik kapatılmaz veya geri açılmaz.
-2. **Bağımlılık güvenlik bakımı** — 5.8.1 raporundaki audit uyarıları için ayrı
-   teknik paket. Kör `npm audit fix` veya major yükseltme yok.
+2. **PR #85 uyumluluk ve güvenlik güncellemesi** — #84 bakım paketi tamamlandı.
+   Yeni Supabase CLI'nin ürettiği tipler eşitlenmeli; uygulama, veritabanı ve
+   tarayıcı kapıları geçmeden #85 birleştirilmez. Kör `npm audit fix` yok.
 3. **Bir haftalık gerçek kullanım kabulü** — gerçek aktif başvuru ve tanımlı
    sorumlu/süre gerekir. Sıfır açık başvurudan başarı oranı üretilmez.
 4. **Ülke/vize katalog genişletme** — 2 Ekim'de yeni sayım yapılmadı. 6 Ağustos
