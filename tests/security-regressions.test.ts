@@ -223,6 +223,18 @@ describe("security regression guards", () => {
       assert.match(restore, new RegExp(`public\\.${table}`));
     }
   });
+
+  it("keeps the mobile task read free of sync and service-role access", async () => {
+    const [tasks, session] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/tasks/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/lib/mobile-session.ts"), "utf8"),
+    ]);
+    assert.doesNotMatch(tasks, /sync_operational_tasks/);
+    assert.doesNotMatch(tasks, /supabase-admin|SERVICE_ROLE|customers\(/);
+    assert.doesNotMatch(session, /supabase-admin|SERVICE_ROLE/);
+    assert.match(tasks, /assigned_staff_id/);
+    assert.match(tasks, /staff_id_rejected|clientSuppliedStaffId/);
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {
