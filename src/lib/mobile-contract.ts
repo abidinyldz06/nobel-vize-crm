@@ -98,7 +98,7 @@ export function quoteFilter(value: string) {
   return `"${value.replaceAll('"', "")}"`;
 }
 
-export function cursorFilter(column: "due_at" | "updated_at" | "appointment_date", cursor: { dueAt: string; id: string }, direction: "asc" | "desc") {
+export function cursorFilter(column: "due_at" | "updated_at" | "appointment_date" | "created_at", cursor: { dueAt: string; id: string }, direction: "asc" | "desc") {
   const at = quoteFilter(cursor.dueAt);
   const id = quoteFilter(cursor.id);
   const compare = direction === "asc" ? "gt" : "lt";
@@ -265,6 +265,34 @@ export function taskCreateInput(body: unknown):
   if (!isMobileTimestamp(dueAt)) return { ok: false, message: "Son tarih geçersiz." };
   const priority = record.priority === "low" || record.priority === "high" ? record.priority : "normal";
   return { ok: true, payload: { title, description: detail || null, due_at: dueAt, priority } };
+}
+
+export type MobileNoteDto = {
+  id: string;
+  content: string;
+  author: string;
+  createdAt: string;
+};
+
+export function mapMobileNote(row: {
+  id: string;
+  content: string | null;
+  author: string | null;
+  created_at: string;
+}): MobileNoteDto | null {
+  const content = row.content?.trim() ?? "";
+  if (!isUuid(row.id) || content.length < 1 || content.length > 2000 || !isMobileTimestamp(row.created_at)) return null;
+  const author = (row.author ?? "").trim().slice(0, 120);
+  return { id: row.id, content, author: author || "Personel", createdAt: row.created_at };
+}
+
+export function noteCreateInput(body: unknown): { ok: true; content: string } | { ok: false; message: string } {
+  if (bodySuppliesStaffId(body) || linksCustomer(body)) return { ok: false, message: "Not bu ekrandan kayda bağlanmaz." };
+  if (!body || typeof body !== "object") return { ok: false, message: "Not geçersiz." };
+  const raw = (body as Record<string, unknown>).content;
+  const content = typeof raw === "string" ? raw.trim() : "";
+  if (content.length < 1 || content.length > 2000) return { ok: false, message: "Not 1-2000 karakter olmalı." };
+  return { ok: true, content };
 }
 
 function linksCustomer(body: unknown) {

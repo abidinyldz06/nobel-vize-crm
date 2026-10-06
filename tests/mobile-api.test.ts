@@ -14,7 +14,9 @@ import {
   mapMobileAppointment,
   mapMobileCustomer,
   googleStartUrlAllowed,
+  mapMobileNote,
   mapMobileTask,
+  noteCreateInput,
   taskCreateInput,
   mobileMfaRequired,
   publicAuthMessage,
@@ -110,6 +112,18 @@ test("müşteri ve başvuru cevapları kimlik belgesi taşımaz", () => {
   assert.equal(taskCreateInput({ title: "Ara", dueAt: "2026-10-06T07:00:00.000Z" }).ok, true);
   assert.equal(appointmentStatusInput({ status: "cancelled" }).ok, true);
   assert.equal(appointmentStatusInput({ status: "scheduled" }).ok, false);
+  const note = mapMobileNote({
+    id,
+    content: "Evrak eksik",
+    author: "Demo Personel",
+    created_at: "2026-10-06T07:00:00.000Z",
+  });
+  assert.equal(note?.content, "Evrak eksik");
+  assert.equal(JSON.stringify(note).includes("passport"), false);
+  assert.equal(noteCreateInput({ content: "Evrak eksik" }).ok, true);
+  assert.equal(noteCreateInput({ content: "Evrak eksik", staff_id: id }).ok, false);
+  assert.equal(noteCreateInput({ content: "Evrak eksik", application_id: id }).ok, false);
+  assert.equal(noteCreateInput({ content: " " }).ok, false);
 });
 
 function appointmentInput(id: string) {
