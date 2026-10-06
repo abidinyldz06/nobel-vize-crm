@@ -13,6 +13,7 @@ import {
   mapMobileApplication,
   mapMobileAppointment,
   mapMobileCustomer,
+  googleStartUrlAllowed,
   mapMobileTask,
   taskCreateInput,
   mobileMfaRequired,
@@ -20,6 +21,13 @@ import {
 } from "../src/lib/mobile-contract";
 
 const root = process.cwd();
+
+test("Google başlangıç adresi yalnız Supabase hostuna izin verir", () => {
+  const supabase = "https://project.supabase.co";
+  assert.equal(googleStartUrlAllowed(`${supabase}/auth/v1/authorize`, supabase), true);
+  assert.equal(googleStartUrlAllowed("http://project.supabase.co/auth/v1/authorize", supabase), false);
+  assert.equal(googleStartUrlAllowed("https://evil.example/auth", supabase), false);
+});
 
 test("admin MFA boş politikada da zorunlu kalır", () => {
   assert.equal(mobileMfaRequired("admin", { admin_mfa_required: null, consultant_mfa_required: null }), true);

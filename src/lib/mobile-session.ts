@@ -43,6 +43,26 @@ export function createMobileAuthClient() {
   });
 }
 
+type PkceStorage = {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+  removeItem: (key: string) => void;
+};
+
+export function createMobilePkceClient(storage: PkceStorage) {
+  const env = authEnv();
+  if (!env) return null;
+  return createClient<Database>(env.url, env.anon, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      flowType: "pkce",
+      detectSessionInUrl: false,
+      storage,
+    },
+  });
+}
+
 export function createMobileBearerClient(accessToken: string) {
   const env = authEnv();
   if (!env) return null;

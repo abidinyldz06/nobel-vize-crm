@@ -266,6 +266,20 @@ describe("security regression guards", () => {
     assert.match(appointmentStatus, /set_appointment_status_v1/);
     assert.match(tasks, /create_task_v1/);
   });
+
+  it("keeps mobile Google login on the system browser and off calendar scope", async () => {
+    const [start, finish, contract] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/auth/google/start/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/auth/google/finish/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/lib/mobile-contract.ts"), "utf8"),
+    ]);
+    assert.match(contract, /nobelcrm:\/\/auth/);
+    assert.match(start, /MOBILE_GOOGLE_REDIRECT/);
+    assert.match(start, /openid email profile/);
+    assert.doesNotMatch(start, /calendar|webview|WebView|SERVICE_ROLE|supabase-admin/);
+    assert.doesNotMatch(finish, /calendar|webview|WebView|refresh_token/);
+    assert.match(finish, /grant_type=pkce/);
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {

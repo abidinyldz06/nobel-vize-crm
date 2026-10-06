@@ -1,4 +1,5 @@
 export const MOBILE_TASK_PAGE_SIZE = 50;
+export const MOBILE_GOOGLE_REDIRECT = "nobelcrm://auth";
 
 const DUE_AT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -38,9 +39,10 @@ export function assuranceFromAccessToken(accessToken: string): "aal1" | "aal2" |
   }
 }
 
-export function publicAuthMessage(message: string, secret: string) {
+export function publicAuthMessage(message: string, secret: string | readonly string[]) {
   const trimmed = message.trim();
-  if (!trimmed || (secret && trimmed.includes(secret))) return "Giriş tamamlanamadı.";
+  const secrets = typeof secret === "string" ? [secret] : secret;
+  if (!trimmed || secrets.some((item) => item && trimmed.includes(item))) return "Giriş tamamlanamadı.";
   return trimmed.slice(0, 200);
 }
 
@@ -174,6 +176,16 @@ export type MobileAppointmentDto = {
   visaType: string;
   appointmentStatus: string;
 };
+
+export function googleStartUrlAllowed(url: string, supabaseUrl: string) {
+  try {
+    const target = new URL(url);
+    const supabase = new URL(supabaseUrl);
+    return target.protocol === "https:" && target.host === supabase.host && target.username === "" && target.password === "";
+  } catch {
+    return false;
+  }
+}
 
 export function isMobileTimestamp(value: string) {
   return DUE_AT.test(value);
