@@ -147,6 +147,81 @@ export function mapMobileApplication(row: {
   return { id: row.id, customerName, country: row.country, visaType: row.visa_type, status: row.status };
 }
 
+export type MobileApplicationSummaryDto = {
+  id: string;
+  country: string;
+  visaType: string;
+  status: string;
+  registeredAt: string;
+};
+
+export type MobileCustomerDetailDto = {
+  id: string;
+  fullName: string;
+  registeredAt: string;
+  applications: MobileApplicationSummaryDto[];
+};
+
+export type MobileApplicationDetailDto = MobileApplicationDto & { registeredAt: string };
+
+type CustomerDetailSource = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  created_at: string;
+  assigned_staff_id: string | null;
+  is_deleted: boolean;
+};
+
+type ApplicationDetailSource = {
+  id: string;
+  customer_id: string;
+  country: string;
+  visa_type: string;
+  status: string;
+  created_at: string;
+  assigned_staff_id: string | null;
+};
+
+type ApplicationRecordSource = ApplicationDetailSource & {
+  customers: { first_name: string; last_name: string; is_deleted: boolean } | { first_name: string; last_name: string; is_deleted: boolean }[] | null;
+};
+
+export function projectCustomerDetail(
+  staffId: string,
+  customer: CustomerDetailSource | null,
+  applications: readonly ApplicationDetailSource[],
+): MobileCustomerDetailDto | null {
+  if (!customer || customer.is_deleted || customer.assigned_staff_id !== staffId) return null;
+  const mapped = mapMobileCustomer(customer);
+  if (!mapped || !isMobileTimestamp(customer.created_at)) return null;
+  const visible = applications.flatMap((row) => {
+    if (row.assigned_staff_id !== staffId || row.customer_id !== customer.id) return [];
+    if (!isUuid(row.id) || !APPLICATION_STATUSES.has(row.status) || !isMobileTimestamp(row.created_at)) return [];
+    if (!row.country || !row.visa_type) return [];
+    return [{
+      id: row.id,
+      country: row.country,
+      visaType: row.visa_type,
+      status: row.status,
+      registeredAt: row.created_at,
+    }];
+  });
+  return { id: mapped.id, fullName: mapped.fullName, registeredAt: customer.created_at, applications: visible };
+}
+
+export function projectApplicationDetail(
+  staffId: string,
+  row: ApplicationRecordSource | null,
+): MobileApplicationDetailDto | null {
+  if (!row || row.assigned_staff_id !== staffId) return null;
+  const customer = Array.isArray(row.customers) ? row.customers[0] : row.customers;
+  if (!customer || customer.is_deleted !== false) return null;
+  const mapped = mapMobileApplication({ ...row, customers: customer });
+  if (!mapped || !isMobileTimestamp(row.created_at)) return null;
+  return { ...mapped, registeredAt: row.created_at };
+}
+
 export function bodySuppliesStaffId(body: unknown) {
   if (!body || typeof body !== "object") return false;
   const record = body as Record<string, unknown>;

@@ -251,6 +251,23 @@ describe("security regression guards", () => {
     assert.match(complete, /"completed"/);
   });
 
+  it("keeps mobile detail reads on the caller's own assigned records", async () => {
+    const [customer, application] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/customers/[id]/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/api/mobile/v1/applications/[id]/route.ts"), "utf8"),
+    ]);
+    for (const source of [customer, application]) {
+      assert.match(source, /requireMobileAccess/);
+      assert.match(source, /assigned_staff_id/);
+      assert.match(source, /mobileJson/);
+      assert.doesNotMatch(source, /passport|phone|email|financial|supabase-admin|SERVICE_ROLE|sync_operational_tasks|isAdmin|role === "admin"/);
+      assert.doesNotMatch(source, /\.(insert|update|delete|rpc)\(/);
+    }
+    assert.match(customer, /projectCustomerDetail/);
+    assert.match(application, /projectApplicationDetail/);
+    assert.match(customer, /is_deleted/);
+  });
+
   it("keeps mobile writes on existing workflows and out of identity documents", async () => {
     const [appointments, applicationStatus, appointmentStatus, tasks, notes] = await Promise.all([
       readFile(path.join(projectRoot, "src/app/api/mobile/v1/appointments/route.ts"), "utf8"),
