@@ -48,7 +48,7 @@
   "overrides": {
     "postcss": "8.5.23",
     "next": {
-      "sharp": "0.35.4",
+      "sharp": "0.35.5",
       "baseline-browser-mapping": "2.11.27"
     },
     "minimatch@3": {
