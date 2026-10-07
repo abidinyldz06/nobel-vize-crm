@@ -13,6 +13,8 @@ import {
   mapMobileApplication,
   mapMobileAppointment,
   mapMobileCustomer,
+  projectApplicationDetail,
+  projectCustomerDetail,
   googleStartUrlAllowed,
   mapMobileNote,
   mapMobileTask,
@@ -147,6 +149,71 @@ function applicationInput(id: string) {
     customers: { first_name: "Demo", last_name: "Müşteri" },
   };
 }
+
+test("müşteri detayı başka personele ait kaydı düşürür", () => {
+  const mine = "5f6d7c2a-1b34-4a5e-8c90-123456789abc";
+  const other = "6f6d7c2a-1b34-4a5e-8c90-123456789abd";
+  const customer = {
+    id: mine,
+    first_name: "Demo",
+    last_name: "Müşteri",
+    created_at: "2026-10-01T07:00:00.000Z",
+    assigned_staff_id: mine,
+    is_deleted: false,
+    passport_no: "gizli",
+    phone: "gizli",
+    email: "gizli@example.test",
+  };
+  const detail = projectCustomerDetail(mine, customer, [
+    {
+      id: other,
+      customer_id: mine,
+      country: "Fransa",
+      visa_type: "turistik",
+      status: "profil_analizi",
+      created_at: "2026-10-02T07:00:00.000Z",
+      assigned_staff_id: other,
+    },
+    {
+      id: mine,
+      customer_id: mine,
+      country: "Almanya",
+      visa_type: "turistik",
+      status: "kapandi",
+      created_at: "2026-10-03T07:00:00.000Z",
+      assigned_staff_id: mine,
+    },
+  ]);
+  assert.equal(detail?.fullName, "Demo Müşteri");
+  assert.deepEqual(detail?.applications.map((item) => item.id), [mine]);
+  assert.equal(JSON.stringify(detail).includes("gizli"), false);
+  assert.equal(JSON.stringify(detail).includes("passport"), false);
+  assert.equal(projectCustomerDetail(other, customer, []), null);
+  assert.equal(projectCustomerDetail(mine, { ...customer, is_deleted: true }, []), null);
+  const application = projectApplicationDetail(mine, {
+    id: mine,
+    customer_id: mine,
+    country: "Almanya",
+    visa_type: "turistik",
+    status: "evrak_bekleniyor",
+    created_at: "2026-10-03T07:00:00.000Z",
+    assigned_staff_id: mine,
+    customers: { first_name: "Demo", last_name: "Müşteri", is_deleted: false },
+  });
+  assert.equal(application?.customerName, "Demo Müşteri");
+  assert.equal(application?.registeredAt, "2026-10-03T07:00:00.000Z");
+  assert.equal(JSON.stringify(application).includes("gizli"), false);
+  assert.equal(projectApplicationDetail(other, {
+    id: mine,
+    customer_id: mine,
+    country: "Almanya",
+    visa_type: "turistik",
+    status: "evrak_bekleniyor",
+    created_at: "2026-10-03T07:00:00.000Z",
+    assigned_staff_id: mine,
+    customers: { first_name: "Demo", last_name: "Müşteri", is_deleted: false },
+  }), null);
+});
 
 test("mobil görev okuması senkronizasyon ve service-role kullanmaz", async () => {
   const files = [
