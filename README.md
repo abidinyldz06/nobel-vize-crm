@@ -4,14 +4,14 @@ Nobel Vize acentesi için geliştirilmiş, Next.js ve Supabase tabanlı, modern 
 
 ## Proje durumu ve raporlar
 
-**Güncel durum (5 Ekim 2026):** Faz 5.8.1 veri kalite özeti ve PR #83'ün
-salt okunur arşiv incelemesi production'dadır. PR #84 bağımlılık bakımı da
-birleştirilmiştir: main `0bcf4d4`, başarılı main CI `37189258830`, başarılı
-production deployment `6838768635`. PR #85 yeni bağımlılık güncellemelerini
-içerir; veritabanı tip üretimi kontrolü başarısız olduğundan henüz birleşmemiştir.
-Haftalık gerçek kullanım kabulü, arşivli başvuruların kayıt kararı, ülke/vize
-katalog genişletmesi ve Google hassas izin doğrulaması açık kalır.
-Ayrıntı: `docs/PROJECT_CONTINUATION_2026_10_05.md`.
+**Güncel durum (15 Ekim 2026):** main `bf8b3f4`. Ekim'de personel kapsamlı mobil
+okuma katmanı ve bağımlılık bakımı main'e alındı: salt okunur mobil API (#86,
+5 Ekim), M3 ilk dilim (#87, 6 Ekim), staff-scoped müşteri ve başvuru detayı
+(#88, 7 Ekim), sharp 0.35.5 yaması (#89, 7 Ekim) ve Dependabot patch/minor
+turu (#90, 15 Ekim). #90 sonrası main Quality Gates yeşildir. Haftalık gerçek
+kullanım kabulü, ülke/vize katalog genişletmesi ve Google hassas izin
+doğrulaması açık kalır. 5 Ekim ara kaydı:
+`docs/PROJECT_CONTINUATION_2026_10_05.md`.
 
 **Önceki durum (9 Eylül 2026):** Faz 5.0–5.7 production kabulü tamamlanmış;
 üzerine 6–9 Eylül güvenilirlik ve güvenlik paketi (PR #73) merge edilmişti.
@@ -22,6 +22,15 @@ Business ertelenmiş durumunu korur.
 
 ### Yapılanlar (son güncel)
 
+- **PR #90 (15 Ekim 2026, merge edildi):** Dependabot patch/minor turu. main
+  `bf8b3f4`; bu push'un Quality Gates koşusu yeşildir.
+- **PR #89 (7 Ekim 2026, merge edildi):** sharp 0.35.5 güvenlik yaması
+  (`next` override).
+- **PR #88 (7 Ekim 2026, merge edildi):** staff-scoped mobil müşteri ve başvuru
+  detay okumaları.
+- **PR #87 (6 Ekim 2026, merge edildi):** mobil M3 ilk dilim; personelin kendi
+  randevu, görev ve başvuru notu yazmaları.
+- **PR #86 (5 Ekim 2026, merge edildi):** bearer korumalı salt okunur mobil API.
 - **PR #84 (4 Ekim 2026, merge edildi):** hedefli bağımlılık güvenlik bakımı.
   Production bağımlılık denetimi sıfır açık ile geçmiştir; bu, geliştirme
   bağımlılıklarının veya tüm uygulama güvenliğinin risksiz olduğu anlamına gelmez.
@@ -49,9 +58,9 @@ Business ertelenmiş durumunu korur.
 
 1. **Arşivli açık başvuruların karar incelemesi** — önce salt okunur ölçüm ve
    ürün sahibi kararı. Kayıtlar otomatik kapatılmaz veya geri açılmaz.
-2. **PR #85 uyumluluk ve güvenlik güncellemesi** — #84 bakım paketi tamamlandı.
-   Yeni Supabase CLI'nin ürettiği tipler eşitlenmeli; uygulama, veritabanı ve
-   tarayıcı kapıları geçmeden #85 birleştirilmez. Kör `npm audit fix` yok.
+2. **Üretilen veritabanı tiplerinin CI kapısı** — #85 ve #90 birleşti. Kapı
+   hâlâ CLI biçim farkında kırılgan; şema farkını yakalamaya devam etmeli,
+   yalnız boşluk farkında düşmemelidir. Kör `npm audit fix` yok.
 3. **Bir haftalık gerçek kullanım kabulü** — gerçek aktif başvuru ve tanımlı
    sorumlu/süre gerekir. Sıfır açık başvurudan başarı oranı üretilmez.
 4. **Ülke/vize katalog genişletme** — 2 Ekim'de yeni sayım yapılmadı. 6 Ağustos

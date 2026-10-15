@@ -4,6 +4,13 @@
 - Ön koşul: Faz 5.0–5.7 production kabulü tamamlandı
 - Ürün modeli: Tek şirketli Nobel Vize iç CRM
 
+15 Ekim 2026 itibarıyla main `bf8b3f4`. Ekim dilimi personel kapsamlı mobil
+okumayı açtı: salt okunur mobil API (#86), M3 ilk dilim (#87), staff-scoped
+müşteri ve başvuru detayı (#88). Aynı pencerede sharp 0.35.5 yaması (#89) ve
+Dependabot turu (#90) main'e alındı; #90 sonrası Quality Gates yeşildir. Ülke
+kataloğu, haftalık gerçek kullanım kabulü ve Google hassas izin doğrulaması
+bu özetten sonra da açıktır.
+
 ## 1. Öncelik mantığı
 
 Sıra; production güvenliği, dış sağlayıcı zorunlulukları, günlük operasyon iş
