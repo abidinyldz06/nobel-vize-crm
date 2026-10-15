@@ -31,8 +31,10 @@ if [ "$attempt" -eq 30 ]; then
   exit 1
 fi
 LOCAL_DB_URL="$(npx supabase status -o json | jq -r '.DB_URL')"
-npx supabase gen types typescript --db-url "$LOCAL_DB_URL" | sed '${/^$/d;}' > /tmp/nobel-vize-database.ts
-diff -u src/types/database.ts /tmp/nobel-vize-database.ts
+npx supabase gen types typescript --db-url "$LOCAL_DB_URL" > /tmp/nobel-vize-database.generated.ts
+cp src/types/database.ts /tmp/nobel-vize-database.committed.ts
+sh scripts/normalize-database-types.sh /tmp/nobel-vize-database.generated.ts /tmp/nobel-vize-database.committed.ts
+diff -u /tmp/nobel-vize-database.committed.ts /tmp/nobel-vize-database.generated.ts
 npm run db:lint
 npm run db:test
 npm run restore:drill
