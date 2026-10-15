@@ -27,6 +27,7 @@ export type Database = {
                   Row: {
                     "action": string,"application_id": string | null,"created_at": string,"customer_id": string | null,"id": string,"is_read": boolean,"performed_by": string,"performed_by_staff_id": string | null,"type": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "action": string,"application_id"?: string | null,"created_at"?: string,"customer_id"?: string | null,"id"?: string,"is_read"?: boolean,"performed_by"?: string,"performed_by_staff_id"?: string | null,"type"?: string
                   }
@@ -58,6 +59,7 @@ isOneToOne: false
                   Row: {
                     "accommodation": string | null,"appointment_date": string | null,"appointment_duration_minutes": number,"appointment_location": string | null,"appointment_status": string | null,"appointment_timezone": string,"assigned_staff_id": string | null,"consulate_fee": number,"country": string,"country_id": string | null,"created_at": string,"customer_id": string,"id": string,"matched_rule_ids": (string)[] | null,"nationality": string | null,"occupation": string | null,"rejection_reason": string | null,"service_fee": number,"status": string,"total_fee": number,"travel_method": string | null,"updated_at": string,"visa_type": string,"with_children": boolean | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "accommodation"?: string | null,"appointment_date"?: string | null,"appointment_duration_minutes"?: number,"appointment_location"?: string | null,"appointment_status"?: string | null,"appointment_timezone"?: string,"assigned_staff_id"?: string | null,"consulate_fee"?: number,"country": string,"country_id"?: string | null,"created_at"?: string,"customer_id": string,"id"?: string,"matched_rule_ids"?: (string)[] | null,"nationality"?: string | null,"occupation"?: string | null,"rejection_reason"?: string | null,"service_fee"?: number,"status"?: string,"total_fee"?: number,"travel_method"?: string | null,"updated_at"?: string,"visa_type"?: string,"with_children"?: boolean | null
                   }
@@ -89,6 +91,7 @@ isOneToOne: false
                   Row: {
                     "actor_staff_id": string | null,"application_id": string,"appointment_date": string | null,"created_at": string,"customer_id": string,"duration_minutes": number | null,"event_type": string,"id": string,"location": string | null,"note": string | null,"previous_date": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actor_staff_id"?: string | null,"application_id": string,"appointment_date"?: string | null,"created_at"?: string,"customer_id": string,"duration_minutes"?: number | null,"event_type": string,"id"?: string,"location"?: string | null,"note"?: string | null,"previous_date"?: string | null
                   }
@@ -120,6 +123,7 @@ isOneToOne: false
                   Row: {
                     "failure_count": number,"key_hash": string,"last_attempt_at": string,"locked_until": string | null,"window_started_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "failure_count"?: number,"key_hash": string,"last_attempt_at"?: string,"locked_until"?: string | null,"window_started_at"?: string
                   }
@@ -133,6 +137,7 @@ isOneToOne: false
                   Row: {
                     "artifact_label": string,"backup_kind": string,"checksum_sha256": string | null,"completed_at": string | null,"created_by_staff_id": string | null,"database_row_count": number | null,"database_table_count": number | null,"error_code": string | null,"format_version": string,"id": string,"started_at": string,"status": string,"storage_bytes": number | null,"storage_object_count": number | null,"trigger_type": string,"verified_at": string | null,"verified_by_staff_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "artifact_label": string,"backup_kind": string,"checksum_sha256"?: string | null,"completed_at"?: string | null,"created_by_staff_id"?: string | null,"database_row_count"?: number | null,"database_table_count"?: number | null,"error_code"?: string | null,"format_version"?: string,"id"?: string,"started_at"?: string,"status"?: string,"storage_bytes"?: number | null,"storage_object_count"?: number | null,"trigger_type"?: string,"verified_at"?: string | null,"verified_by_staff_id"?: string | null
                   }
@@ -158,6 +163,7 @@ isOneToOne: false
                   Row: {
                     "access_token_ciphertext": string,"access_token_expires_at": string,"calendar_id": string,"created_at": string,"id": string,"last_sync_error": string | null,"last_synced_at": string | null,"provider": string,"refresh_token_ciphertext": string,"staff_id": string,"sync_enabled": boolean,"sync_token": string | null,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "access_token_ciphertext": string,"access_token_expires_at": string,"calendar_id"?: string,"created_at"?: string,"id"?: string,"last_sync_error"?: string | null,"last_synced_at"?: string | null,"provider"?: string,"refresh_token_ciphertext": string,"staff_id": string,"sync_enabled"?: boolean,"sync_token"?: string | null,"updated_at"?: string
                   }
@@ -177,6 +183,7 @@ isOneToOne: false
                   Row: {
                     "application_id": string,"connection_id": string,"created_at": string,"google_event_etag": string | null,"google_event_id": string,"id": string,"last_synced_at": string,"remote_deleted_at": string | null,"remote_updated_at": string | null,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "application_id": string,"connection_id": string,"created_at"?: string,"google_event_etag"?: string | null,"google_event_id": string,"id"?: string,"last_synced_at"?: string,"remote_deleted_at"?: string | null,"remote_updated_at"?: string | null,"updated_at"?: string
                   }
@@ -202,6 +209,7 @@ isOneToOne: false
                   Row: {
                     "allowed": boolean,"channel": string,"customer_id": string,"evidence_note": string | null,"purpose": string,"recorded_at": string,"recorded_by_staff_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "allowed"?: boolean,"channel": string,"customer_id": string,"evidence_note"?: string | null,"purpose"?: string,"recorded_at"?: string,"recorded_by_staff_id"?: string | null
                   }
@@ -227,6 +235,7 @@ isOneToOne: false
                   Row: {
                     "application_id": string | null,"content": string | null,"created_at": string,"customer_id": string | null,"direction": string,"failure_reason": string | null,"id": string,"performed_by": string | null,"performed_by_staff_id": string | null,"recipient": string | null,"sent_at": string | null,"status": string,"subject": string | null,"template_id": string | null,"type": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "application_id"?: string | null,"content"?: string | null,"created_at"?: string,"customer_id"?: string | null,"direction"?: string,"failure_reason"?: string | null,"id"?: string,"performed_by"?: string | null,"performed_by_staff_id"?: string | null,"recipient"?: string | null,"sent_at"?: string | null,"status"?: string,"subject"?: string | null,"template_id"?: string | null,"type": string
                   }
@@ -264,6 +273,7 @@ isOneToOne: false
                   Row: {
                     "active": boolean,"appointment_system": string | null,"base_fee_service": number,"base_fee_visa": number,"created_at": string,"id": string,"name": string,"notes": string | null,"updated_at": string,"visa_system": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "active"?: boolean,"appointment_system"?: string | null,"base_fee_service"?: number,"base_fee_visa"?: number,"created_at"?: string,"id"?: string,"name": string,"notes"?: string | null,"updated_at"?: string,"visa_system"?: string | null
                   }
@@ -277,6 +287,7 @@ isOneToOne: false
                   Row: {
                     "accommodation": string | null,"country_id": string,"created_at": string,"documents": NonNullable<Json>,"id": string,"max_stay": string | null,"multiple_entry": boolean,"nationality": string | null,"notes": string | null,"occupation": string | null,"processing_time": string | null,"sources": Json | null,"sources_last_reviewed_at": string | null,"sources_reviewed_by_staff_id": string | null,"travel_method": string | null,"updated_at": string,"validity": string | null,"visa_category": string,"with_children": boolean | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "accommodation"?: string | null,"country_id": string,"created_at"?: string,"documents"?: NonNullable<Json>,"id"?: string,"max_stay"?: string | null,"multiple_entry"?: boolean,"nationality"?: string | null,"notes"?: string | null,"occupation"?: string | null,"processing_time"?: string | null,"sources"?: Json | null,"sources_last_reviewed_at"?: string | null,"sources_reviewed_by_staff_id"?: string | null,"travel_method"?: string | null,"updated_at"?: string,"validity"?: string | null,"visa_category"?: string,"with_children"?: boolean | null
                   }
@@ -302,6 +313,7 @@ isOneToOne: false
                   Row: {
                     "consent_type": string,"created_at": string,"customer_id": string,"decision": string,"decision_at": string,"evidence_note": string | null,"id": string,"notice_version_id": string | null,"recorded_by_staff_id": string | null,"source": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "consent_type": string,"created_at"?: string,"customer_id": string,"decision": string,"decision_at"?: string,"evidence_note"?: string | null,"id"?: string,"notice_version_id"?: string | null,"recorded_by_staff_id"?: string | null,"source": string
                   }
@@ -333,6 +345,7 @@ isOneToOne: false
                   Row: {
                     "acknowledged_at": string | null,"created_at": string,"customer_id": string,"delivered_at": string,"delivery_method": string,"evidence_note": string | null,"id": string,"notice_version_id": string,"recorded_by_staff_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "acknowledged_at"?: string | null,"created_at"?: string,"customer_id": string,"delivered_at"?: string,"delivery_method": string,"evidence_note"?: string | null,"id"?: string,"notice_version_id": string,"recorded_by_staff_id"?: string | null
                   }
@@ -364,6 +377,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"created_by": string | null,"customer_id": string,"tag_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"created_by"?: string | null,"customer_id": string,"tag_id": string
                   }
@@ -395,6 +409,7 @@ isOneToOne: false
                   Row: {
                     "anonymized_at": string | null,"anonymized_by_staff_id": string | null,"assigned_staff_id": string | null,"created_at": string,"deleted_at": string | null,"email": string | null,"financial_status": string | null,"first_name": string,"id": string,"is_deleted": boolean,"last_name": string,"monthly_income": number | null,"notes": string | null,"passport_expiry": string | null,"passport_issuing_country": string | null,"passport_no": string | null,"phone": string | null,"portal_access_enabled": boolean,"portal_last_accessed_at": string | null,"portal_token": string | null,"portal_token_expires_at": string | null,"retention_hold_reason": string | null,"retention_hold_until": string | null,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "anonymized_at"?: string | null,"anonymized_by_staff_id"?: string | null,"assigned_staff_id"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"email"?: string | null,"financial_status"?: string | null,"first_name": string,"id"?: string,"is_deleted"?: boolean,"last_name": string,"monthly_income"?: number | null,"notes"?: string | null,"passport_expiry"?: string | null,"passport_issuing_country"?: string | null,"passport_no"?: string | null,"phone"?: string | null,"portal_access_enabled"?: boolean,"portal_last_accessed_at"?: string | null,"portal_token"?: string | null,"portal_token_expires_at"?: string | null,"retention_hold_reason"?: string | null,"retention_hold_until"?: string | null,"updated_at"?: string
                   }
@@ -420,6 +435,7 @@ isOneToOne: false
                   Row: {
                     "completed_at": string | null,"created_at": string,"created_by_staff_id": string | null,"customer_id": string,"due_at": string | null,"handled_by_staff_id": string | null,"id": string,"notes": string | null,"request_type": string,"requested_at": string,"requested_via": string,"resolution_note": string | null,"status": string,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "completed_at"?: string | null,"created_at"?: string,"created_by_staff_id"?: string | null,"customer_id": string,"due_at"?: string | null,"handled_by_staff_id"?: string | null,"id"?: string,"notes"?: string | null,"request_type": string,"requested_at"?: string,"requested_via": string,"resolution_note"?: string | null,"status"?: string,"updated_at"?: string
                   }
@@ -451,6 +467,7 @@ isOneToOne: false
                   Row: {
                     "application_id": string,"category": string,"content_type": string | null,"created_at": string,"description": string | null,"document_type": string,"file_size_bytes": number | null,"file_url": string | null,"id": string,"is_required": boolean,"original_file_name": string | null,"requested_at": string,"status": string,"storage_deleted_at": string | null,"updated_at": string,"upload_source": string | null,"uploaded_at": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "application_id": string,"category"?: string,"content_type"?: string | null,"created_at"?: string,"description"?: string | null,"document_type": string,"file_size_bytes"?: number | null,"file_url"?: string | null,"id"?: string,"is_required"?: boolean,"original_file_name"?: string | null,"requested_at"?: string,"status"?: string,"storage_deleted_at"?: string | null,"updated_at"?: string,"upload_source"?: string | null,"uploaded_at"?: string | null
                   }
@@ -470,6 +487,7 @@ isOneToOne: false
                   Row: {
                     "birth_date": string | null,"created_at": string,"customer_id": string,"full_name": string,"id": string,"passport_no": string | null,"relationship": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "birth_date"?: string | null,"created_at"?: string,"customer_id": string,"full_name": string,"id"?: string,"passport_no"?: string | null,"relationship"?: string | null
                   }
@@ -489,6 +507,7 @@ isOneToOne: false
                   Row: {
                     "actor_staff_id": string | null,"created_at": string,"event_type": string,"from_status": string | null,"id": string,"lead_id": string,"note": string | null,"to_status": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actor_staff_id"?: string | null,"created_at"?: string,"event_type": string,"from_status"?: string | null,"id"?: string,"lead_id": string,"note"?: string | null,"to_status"?: string | null
                   }
@@ -514,6 +533,7 @@ isOneToOne: false
                   Row: {
                     "assigned_staff_id": string,"campaign": string | null,"converted_application_id": string | null,"converted_at": string | null,"converted_customer_id": string | null,"created_at": string,"created_by_staff_id": string,"email": string | null,"email_normalized": string | null,"first_name": string,"follow_up_due_at": string | null,"id": string,"last_contacted_at": string | null,"last_name": string,"notes": string | null,"passport_no": string | null,"passport_normalized": string | null,"phone": string | null,"phone_normalized": string | null,"referral": string | null,"source": string,"status": string,"target_country": string | null,"updated_at": string,"visa_type": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "assigned_staff_id": string,"campaign"?: string | null,"converted_application_id"?: string | null,"converted_at"?: string | null,"converted_customer_id"?: string | null,"created_at"?: string,"created_by_staff_id": string,"email"?: string | null,"email_normalized"?: never,"first_name": string,"follow_up_due_at"?: string | null,"id"?: string,"last_contacted_at"?: string | null,"last_name": string,"notes"?: string | null,"passport_no"?: string | null,"passport_normalized"?: never,"phone"?: string | null,"phone_normalized"?: never,"referral"?: string | null,"source"?: string,"status"?: string,"target_country"?: string | null,"updated_at"?: string,"visa_type"?: string
                   }
@@ -551,6 +571,7 @@ isOneToOne: false
                   Row: {
                     "accepted_at": string | null,"application_id": string | null,"attempt_count": number,"body": string,"channel": string,"communication_id": string,"created_by_staff_id": string | null,"customer_id": string,"delivered_at": string | null,"failed_at": string | null,"id": string,"idempotency_key": string,"last_error_code": string | null,"next_attempt_at": string,"processing_started_at": string | null,"provider_message_id": string | null,"provider_name": string | null,"purpose": string,"queued_at": string,"recipient": string,"status": string,"subject": string | null,"template_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "accepted_at"?: string | null,"application_id"?: string | null,"attempt_count"?: number,"body": string,"channel": string,"communication_id": string,"created_by_staff_id"?: string | null,"customer_id": string,"delivered_at"?: string | null,"failed_at"?: string | null,"id"?: string,"idempotency_key": string,"last_error_code"?: string | null,"next_attempt_at"?: string,"processing_started_at"?: string | null,"provider_message_id"?: string | null,"provider_name"?: string | null,"purpose"?: string,"queued_at"?: string,"recipient": string,"status"?: string,"subject"?: string | null,"template_id"?: string | null
                   }
@@ -594,6 +615,7 @@ isOneToOne: false
                   Row: {
                     "body_template": string,"channel": string,"created_at": string,"created_by_staff_id": string | null,"id": string,"is_active": boolean,"name": string,"subject_template": string | null,"system_key": string | null,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "body_template": string,"channel": string,"created_at"?: string,"created_by_staff_id"?: string | null,"id"?: string,"is_active"?: boolean,"name": string,"subject_template"?: string | null,"system_key"?: string | null,"updated_at"?: string
                   }
@@ -613,6 +635,7 @@ isOneToOne: false
                   Row: {
                     "application_id": string,"author": string | null,"content": string,"created_at": string,"created_by": string | null,"id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "application_id": string,"author"?: string | null,"content": string,"created_at"?: string,"created_by"?: string | null,"id"?: string
                   }
@@ -638,6 +661,7 @@ isOneToOne: false
                   Row: {
                     "application_id": string | null,"created_at": string,"customer_id": string | null,"href": string | null,"id": string,"idempotency_key": string | null,"is_read": boolean,"message": string | null,"read_at": string | null,"recipient_staff_id": string,"task_id": string | null,"title": string,"type": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "application_id"?: string | null,"created_at"?: string,"customer_id"?: string | null,"href"?: string | null,"id"?: string,"idempotency_key"?: string | null,"is_read"?: boolean,"message"?: string | null,"read_at"?: string | null,"recipient_staff_id": string,"task_id"?: string | null,"title": string,"type"?: string
                   }
@@ -675,6 +699,7 @@ isOneToOne: false
                   Row: {
                     "error_code": string | null,"event_key": string,"first_seen_at": string,"id": string,"last_seen_at": string,"occurrence_count": number,"request_id": string | null,"resolved_at": string | null,"resolved_by_staff_id": string | null,"route": string | null,"severity": string,"source": string,"status": string,"summary": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "error_code"?: string | null,"event_key": string,"first_seen_at"?: string,"id"?: string,"last_seen_at"?: string,"occurrence_count"?: number,"request_id"?: string | null,"resolved_at"?: string | null,"resolved_by_staff_id"?: string | null,"route"?: string | null,"severity": string,"source": string,"status"?: string,"summary": string
                   }
@@ -694,6 +719,7 @@ isOneToOne: false
                   Row: {
                     "amount": number,"application_id": string,"created_at": string,"currency": string,"due_at": string | null,"id": string,"method": string | null,"note": string | null,"status": string | null,"type": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "amount": number,"application_id": string,"created_at"?: string,"currency"?: string,"due_at"?: string | null,"id"?: string,"method"?: string | null,"note"?: string | null,"status"?: string | null,"type"?: string
                   }
@@ -713,6 +739,7 @@ isOneToOne: false
                   Row: {
                     "action_id": string,"created_at": string,"id": string,"reason": string,"staff_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "action_id": string,"created_at"?: string,"id"?: string,"reason": string,"staff_id": string
                   }
@@ -738,6 +765,7 @@ isOneToOne: false
                   Row: {
                     "action_type": string,"approved_at": string | null,"completed_at": string | null,"created_at": string,"customer_id": string | null,"failure_code": string | null,"id": string,"reason": string,"request_id": string | null,"requested_by_staff_id": string,"required_approvals": number,"status": string,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "action_type": string,"approved_at"?: string | null,"completed_at"?: string | null,"created_at"?: string,"customer_id"?: string | null,"failure_code"?: string | null,"id"?: string,"reason": string,"request_id"?: string | null,"requested_by_staff_id": string,"required_approvals": number,"status"?: string,"updated_at"?: string
                   }
@@ -769,6 +797,7 @@ isOneToOne: false
                   Row: {
                     "action_id": string | null,"actor_staff_id": string | null,"created_at": string,"customer_id": string | null,"event_type": string,"id": string,"metadata": NonNullable<Json>,"reason": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "action_id"?: string | null,"actor_staff_id"?: string | null,"created_at"?: string,"customer_id"?: string | null,"event_type": string,"id"?: string,"metadata"?: NonNullable<Json>,"reason"?: string | null
                   }
@@ -800,6 +829,7 @@ isOneToOne: false
                   Row: {
                     "content": string,"created_at": string,"created_by_staff_id": string | null,"effective_at": string,"id": string,"is_active": boolean,"title": string,"updated_at": string,"version": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "content": string,"created_at"?: string,"created_by_staff_id"?: string | null,"effective_at": string,"id"?: string,"is_active"?: boolean,"title": string,"updated_at"?: string,"version": string
                   }
@@ -819,6 +849,7 @@ isOneToOne: false
                   Row: {
                     "archive_grace_days": number,"automatic_actions_enabled": boolean,"created_at": string,"customer_retention_days": number | null,"document_retention_days": number | null,"id": string,"updated_at": string,"updated_by_staff_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "archive_grace_days"?: number,"automatic_actions_enabled"?: boolean,"created_at"?: string,"customer_retention_days"?: number | null,"document_retention_days"?: number | null,"id": string,"updated_at"?: string,"updated_by_staff_id"?: string | null
                   }
@@ -838,6 +869,7 @@ isOneToOne: false
                   Row: {
                     "completed_at": string | null,"error_code": string | null,"id": string,"inserted_count": number,"job_name": string,"started_at": string,"status": string,"window_key": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "completed_at"?: string | null,"error_code"?: string | null,"id"?: string,"inserted_count"?: number,"job_name": string,"started_at"?: string,"status"?: string,"window_key": string
                   }
@@ -851,6 +883,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"event_type": string,"id": string,"metadata": NonNullable<Json>,"outcome": string,"session_id": string | null,"staff_id": string | null,"user_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"event_type": string,"id"?: string,"metadata"?: NonNullable<Json>,"outcome": string,"session_id"?: string | null,"staff_id"?: string | null,"user_id"?: string | null
                   }
@@ -870,6 +903,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"email": string,"full_name": string,"id": string,"is_active": boolean,"phone": string | null,"role": string,"user_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"email": string,"full_name": string,"id"?: string,"is_active"?: boolean,"phone"?: string | null,"role"?: string,"user_id"?: string | null
                   }
@@ -883,6 +917,7 @@ isOneToOne: false
                   Row: {
                     "max_active_applications": number,"max_open_tasks": number,"staff_id": string,"updated_at": string,"updated_by_staff_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "max_active_applications"?: number,"max_open_tasks"?: number,"staff_id": string,"updated_at"?: string,"updated_by_staff_id"?: string | null
                   }
@@ -908,6 +943,7 @@ isOneToOne: false
                   Row: {
                     "color": string,"created_at": string,"id": string,"name": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "color": string,"created_at"?: string,"id"?: string,"name": string
                   }
@@ -921,6 +957,7 @@ isOneToOne: false
                   Row: {
                     "application_id": string | null,"assigned_staff_id": string,"completed_at": string | null,"created_at": string,"created_by_staff_id": string | null,"customer_id": string | null,"description": string | null,"due_at": string,"id": string,"idempotency_key": string | null,"priority": string,"source_id": string | null,"source_type": string,"status": string,"task_type": string,"title": string,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "application_id"?: string | null,"assigned_staff_id": string,"completed_at"?: string | null,"created_at"?: string,"created_by_staff_id"?: string | null,"customer_id"?: string | null,"description"?: string | null,"due_at": string,"id"?: string,"idempotency_key"?: string | null,"priority"?: string,"source_id"?: string | null,"source_type"?: string,"status"?: string,"task_type"?: string,"title": string,"updated_at"?: string
                   }
@@ -958,6 +995,7 @@ isOneToOne: false
                   Row: {
                     "admin_mfa_required": boolean,"company_name": string,"consultant_mfa_required": boolean,"contact_source_url": string | null,"contact_verified_at": string | null,"contact_verified_by_staff_id": string | null,"created_at": string,"email": string | null,"id": string,"phone": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "admin_mfa_required"?: boolean,"company_name"?: string,"consultant_mfa_required"?: boolean,"contact_source_url"?: string | null,"contact_verified_at"?: string | null,"contact_verified_by_staff_id"?: string | null,"created_at"?: string,"email"?: string | null,"id"?: string,"phone"?: string | null
                   }
@@ -977,6 +1015,7 @@ isOneToOne: false
                   Row: {
                     "application_date": string | null,"country": string | null,"created_at": string,"customer_id": string,"expiry_date": string | null,"id": string,"notes": string | null,"result": string | null,"visa_type": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "application_date"?: string | null,"country"?: string | null,"created_at"?: string,"customer_id": string,"expiry_date"?: string | null,"id"?: string,"notes"?: string | null,"result"?: string | null,"visa_type"?: string | null
                   }
@@ -996,6 +1035,7 @@ isOneToOne: false
                   Row: {
                     "event_id": string,"processed_at": string | null,"received_at": string,"source": string,"status": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "event_id": string,"processed_at"?: string | null,"received_at"?: string,"source": string,"status"?: string
                   }
@@ -1012,6 +1052,7 @@ isOneToOne: false
                   Row: {
                     "country_id": string | null,"created_at": string | null,"documents": Json | null,"id": string | null,"max_stay": string | null,"multiple_entry": boolean | null,"notes": string | null,"processing_time": string | null,"validity": string | null,"visa_type": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                            "country_id"?: string | null,"created_at"?: string | null,"documents"?: Json | null,"id"?: string | null,"max_stay"?: string | null,"multiple_entry"?: boolean | null,"notes"?: string | null,"processing_time"?: string | null,"validity"?: string | null,"visa_type"?: string | null
                          }
