@@ -2,7 +2,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  
+
   "graphql_public": {
           Tables: {
             [_ in never]: never
@@ -131,7 +131,7 @@ isOneToOne: false
                     "failure_count"?: number,"key_hash"?: string,"last_attempt_at"?: string,"locked_until"?: string | null,"window_started_at"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 },"backup_runs": {
                   Row: {
@@ -281,7 +281,7 @@ isOneToOne: false
                     "active"?: boolean,"appointment_system"?: string | null,"base_fee_service"?: number,"base_fee_visa"?: number,"created_at"?: string,"id"?: string,"name"?: string,"notes"?: string | null,"updated_at"?: string,"visa_system"?: string | null
                   }
                   Relationships: [
-                    
+
                   ]
                 },"country_visa_rules": {
                   Row: {
@@ -877,7 +877,7 @@ isOneToOne: false
                     "completed_at"?: string | null,"error_code"?: string | null,"id"?: string,"inserted_count"?: number,"job_name"?: string,"started_at"?: string,"status"?: string,"window_key"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 },"security_events": {
                   Row: {
@@ -911,7 +911,7 @@ isOneToOne: false
                     "created_at"?: string,"email"?: string,"full_name"?: string,"id"?: string,"is_active"?: boolean,"phone"?: string | null,"role"?: string,"user_id"?: string | null
                   }
                   Relationships: [
-                    
+
                   ]
                 },"staff_capacity": {
                   Row: {
@@ -951,7 +951,7 @@ isOneToOne: false
                     "color"?: string,"created_at"?: string,"id"?: string,"name"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 },"tasks": {
                   Row: {
@@ -1043,7 +1043,7 @@ isOneToOne: false
                     "event_id"?: string,"processed_at"?: string | null,"received_at"?: string,"source"?: string,"status"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 }
           }
@@ -1488,11 +1488,11 @@ export type CompositeTypes<
 export const Constants = {
   "graphql_public": {
           Enums: {
-            
+
           }
         },"public": {
           Enums: {
-            
+
           }
         }
 } as const
