@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
+import { appointmentStatusSchema } from "@/lib/api-input";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { requireStaff } from "@/lib/authz";
+import { readValidJson } from "@/lib/request-json";
 import { observedRoute } from "@/lib/observability";
-
-const statuses = new Set(["scheduled", "cancelled", "no_show", "completed"]);
 
 async function updateStatus(
   request: Request,
@@ -17,15 +17,13 @@ async function updateStatus(
   }
 
   const { id } = await context.params;
-  const body = await request.json().catch(() => null) as { status?: string; note?: string } | null;
-  if (!body?.status || !statuses.has(body.status)) {
-    return NextResponse.json({ error: "Geçersiz randevu durumu." }, { status: 400 });
-  }
+  const parsed = await readValidJson(request, appointmentStatusSchema);
+  if (!parsed.ok) return parsed.response;
 
   const { error } = await supabase.rpc("set_appointment_status_v1", {
     p_application_id: id,
-    p_status: body.status,
-    p_note: body.note?.trim() || undefined,
+    p_status: parsed.data.status,
+    p_note: parsed.data.note?.trim() || undefined,
   });
   if (error) {
     return NextResponse.json({ error: "Randevu durumu güncellenemedi.", code: error.code }, { status: 400 });

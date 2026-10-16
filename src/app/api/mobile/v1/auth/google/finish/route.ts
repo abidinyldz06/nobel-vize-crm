@@ -1,3 +1,4 @@
+import { mobileGoogleFinishSchema } from "@/lib/api-input";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { loginAttemptKey, retryAfterMessage } from "@/lib/login-security";
 import { publicAuthMessage } from "@/lib/mobile-contract";
@@ -12,10 +13,9 @@ export async function POST(request: Request) {
   let code = "";
   let verifier = "";
   try {
-    const body = await request.json().catch(() => null);
-    const record = body && typeof body === "object" ? body as Record<string, unknown> : {};
-    code = typeof record.code === "string" ? record.code : "";
-    verifier = typeof record.verifier === "string" ? record.verifier : "";
+    const parsed = mobileGoogleFinishSchema.safeParse(await request.json().catch(() => null));
+    code = parsed.success ? parsed.data.code : "";
+    verifier = parsed.success ? parsed.data.verifier : "";
     if (code.length < 8 || code.length > 2048 || verifier.length < 43 || verifier.length > 128) {
       return mobileJson(request, { code: "invalid_google", message: "Google ile giriş tamamlanamadı." }, 400);
     }

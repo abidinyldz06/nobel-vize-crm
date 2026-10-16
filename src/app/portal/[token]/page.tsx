@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+import { getActivePortalCustomer } from "@/lib/portal-access";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
 import { Check, Clock, AlertCircle, Calendar, FileText, CreditCard, MapPin, Phone, MessageCircle, CheckCircle2, Globe, Mail } from "lucide-react";
@@ -32,19 +34,13 @@ interface PortalPayment {
 
 export default async function PortalPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  
+  const requestHeaders = await headers();
+
   // Portal reads run only on the server. The public browser never receives a
   // Supabase session or direct anonymous table access.
+  const customer = await getActivePortalCustomer(token, requestHeaders.get("x-forwarded-for"));
   const supabase = createSupabaseAdminClient();
-  const { data: customer } = await supabase
-    .from('customers')
-    .select('id, first_name, last_name, portal_access_enabled, portal_token_expires_at')
-    .eq('portal_token', token)
-    .eq('is_deleted', false)
-    .eq('portal_access_enabled', true)
-    .gt('portal_token_expires_at', new Date().toISOString())
-    .single();
-  
+
   if (!customer) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#060d1a] p-6 print:bg-white print:p-0">

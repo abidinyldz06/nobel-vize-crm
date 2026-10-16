@@ -2446,6 +2446,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      consume_portal_rate_limit_v1: {
+        Args: { p_ip_hash: string; p_outcome: string; p_pair_hash: string };
+        Returns: Json;
+      };
       convert_lead_v1: { Args: { p_lead_id: string; p_payload: Json }; Returns: Json };
       create_customer_application_v1: { Args: { p_payload: Json }; Returns: Json };
       create_customer_application_v1_core: { Args: { p_payload: Json }; Returns: Json };

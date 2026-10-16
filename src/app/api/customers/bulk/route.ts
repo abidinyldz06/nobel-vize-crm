@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { bulkCustomerSchema } from "@/lib/api-input";
 import { requireStaff } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
+import { readValidJson } from "@/lib/request-json";
 import { observedRoute } from "@/lib/observability";
 
 const ALLOWED_STATUSES = new Set([
@@ -27,31 +29,9 @@ async function updateCustomersBulk(req: Request) {
   const { supabase, staff } = context;
   const performed_by = staff.full_name;
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Geçersiz JSON gövdesi" }, { status: 400 });
-  }
-
-  if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 });
-  }
-
-  const { action, customerIds, applicationIds, value } = body as {
-    action?: string;
-    customerIds?: unknown;
-    applicationIds?: unknown;
-    value?: unknown;
-  };
-
-  if (!customerIds || !Array.isArray(customerIds) || customerIds.length === 0) {
-    return NextResponse.json({ error: "Eksik parametreler" }, { status: 400 });
-  }
-
-  if (!customerIds.every(id => typeof id === "string")) {
-    return NextResponse.json({ error: "Geçersiz müşteri kimliği" }, { status: 400 });
-  }
+  const parsed = await readValidJson(req, bulkCustomerSchema);
+  if (!parsed.ok) return parsed.response;
+  const { action, customerIds, applicationIds, value } = parsed.data;
 
   if (action === "archive") {
     if (staff.role !== "admin") {

@@ -17,6 +17,13 @@ export function maskPassport(value: string) {
   return `${normalized.slice(0, 2)}${"•".repeat(Math.min(6, normalized.length - 4))}${normalized.slice(-2)}`;
 }
 
+export function maskPassportNumber(value: string) {
+  const normalized = value.trim();
+  if (normalized.length <= 4) return "****";
+  const visible = normalized.slice(-4);
+  return `${"*".repeat(Math.max(5, normalized.length - 4))}${visible}`;
+}
+
 export function maskSensitive(value: string, kind: "phone" | "email" | "passport") {
   if (kind === "phone") return maskPhone(value);
   if (kind === "email") return maskEmail(value);

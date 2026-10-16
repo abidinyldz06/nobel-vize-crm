@@ -1,3 +1,4 @@
+import { mobileCompleteSchema } from "@/lib/api-input";
 import { bodySuppliesStaffId, clientSuppliedStaffId, isUuid } from "@/lib/mobile-contract";
 import { mobileAccessResponse, mobileJson } from "@/lib/mobile-http";
 import { bearerToken, requireMobileAccess } from "@/lib/mobile-session";
@@ -17,6 +18,9 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const body = await request.json().catch(() => null);
   if (bodySuppliesStaffId(body)) {
     return mobileJson(request, { code: "staff_id_rejected", message: "Personel kimliği istemciden alınmaz." }, 400);
+  }
+  if (body !== null && !mobileCompleteSchema.safeParse(body).success) {
+    return mobileJson(request, { code: "invalid_task", message: "Görev bilgisi geçersiz." }, 400);
   }
 
   try {

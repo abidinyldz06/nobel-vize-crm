@@ -1,30 +1,22 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
+import { portalUploadSchema } from "@/lib/api-input";
 import { getActivePortalCustomer } from "@/lib/portal-access";
 import { validatePortalUploadInput } from "@/lib/portal-upload-policy";
+import { readValidJson } from "@/lib/request-json";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
-
-type UploadUrlPayload = {
-  documentId?: string;
-  fileName?: string;
-  contentType?: string;
-  size?: number;
-};
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const customer = await getActivePortalCustomer(token);
+  const customer = await getActivePortalCustomer(token, request.headers.get("x-forwarded-for"));
   if (!customer) return NextResponse.json({ error: "Portal bağlantısı geçersiz veya süresi dolmuş." }, { status: 404 });
 
-  let payload: UploadUrlPayload;
-  try {
-    payload = await request.json() as UploadUrlPayload;
-  } catch {
-    return NextResponse.json({ error: "Geçersiz yükleme isteği." }, { status: 400 });
-  }
-  if (!payload.documentId || !/^[0-9a-f-]{36}$/i.test(payload.documentId)) {
+  const parsed = await readValidJson(request, portalUploadSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
+  if (!/^[0-9a-f-]{36}$/i.test(payload.documentId)) {
     return NextResponse.json({ error: "Evrak seçimi geçersiz." }, { status: 400 });
   }
   const input = validatePortalUploadInput({
