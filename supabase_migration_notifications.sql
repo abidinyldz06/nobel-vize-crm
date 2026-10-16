@@ -1,2 +1,0 @@
-ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'general';
-ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT false;
