@@ -1,3 +1,4 @@
+import { mobilePasswordSchema } from "@/lib/api-input";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { loginAttemptKey, retryAfterMessage } from "@/lib/login-security";
 import { isUuid, mobileMfaRequired, publicAuthMessage, type MobileRole } from "@/lib/mobile-contract";
@@ -14,9 +15,9 @@ export async function POST(request: Request) {
   const startedAt = Date.now();
   let password = "";
   try {
-    const body = await readBody(request);
-    const email = typeof body?.email === "string" ? body.email.trim() : "";
-    password = typeof body?.password === "string" ? body.password : "";
+    const parsed = mobilePasswordSchema.safeParse(await readBody(request));
+    const email = parsed.success ? parsed.data.email.trim() : "";
+    password = parsed.success ? parsed.data.password : "";
     if (!email || email.length > 320 || !password || password.length > 200) {
       return mobileJson(request, { code: "invalid_body", message: "E-posta ve parola gereklidir." }, 400);
     }

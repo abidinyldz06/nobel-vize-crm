@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
+import { portalCommitSchema } from "@/lib/api-input";
 import { getActivePortalCustomer } from "@/lib/portal-access";
 import { validatePortalUploadInput } from "@/lib/portal-upload-policy";
+import { readValidJson } from "@/lib/request-json";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
-
-type CommitUploadPayload = {
-  documentId?: string;
-  path?: string;
-  fileName?: string;
-  contentType?: string;
-  size?: number;
-};
 
 function storageMetadata(value: unknown) {
   if (!value || typeof value !== "object") return { size: null, contentType: null };
@@ -27,16 +21,13 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const customer = await getActivePortalCustomer(token);
+  const customer = await getActivePortalCustomer(token, request.headers.get("x-forwarded-for"));
   if (!customer) return NextResponse.json({ error: "Portal bağlantısı geçersiz veya süresi dolmuş." }, { status: 404 });
 
-  let payload: CommitUploadPayload;
-  try {
-    payload = await request.json() as CommitUploadPayload;
-  } catch {
-    return NextResponse.json({ error: "Geçersiz yükleme isteği." }, { status: 400 });
-  }
-  if (!payload.documentId || !/^[0-9a-f-]{36}$/i.test(payload.documentId) || typeof payload.path !== "string") {
+  const parsed = await readValidJson(request, portalCommitSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
+  if (!/^[0-9a-f-]{36}$/i.test(payload.documentId)) {
     return NextResponse.json({ error: "Evrak yükleme kaydı geçersiz." }, { status: 400 });
   }
   const input = validatePortalUploadInput({

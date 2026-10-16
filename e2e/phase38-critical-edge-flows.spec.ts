@@ -351,7 +351,7 @@ test("3.8.4 bozuk istekler veri değiştirmez, eşzamanlı geçiş tek audit ür
     return { status: response.status, body: await response.json() };
   });
   expect(malformed.status).toBe(400);
-  expect(malformed.body).toMatchObject({ error: "Geçersiz JSON gövdesi." });
+  expect(malformed.body).toMatchObject({ error: "Geçersiz istek verisi" });
 
   const invalidTask = await page.request.post("/api/tasks", { data: {} });
   expect(invalidTask.status()).toBe(400);

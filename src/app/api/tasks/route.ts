@@ -7,11 +7,10 @@ import {
   requestIdFrom,
   structuredLog,
 } from "@/lib/observability";
+import { taskCreateSchema, taskUpdateSchema } from "@/lib/api-input";
 import { recordOperationalEvent } from "@/lib/operational-events";
+import { readValidJson } from "@/lib/request-json";
 import type { Json } from "@/types/database";
-
-const TASK_STATUSES = new Set(["pending", "in_progress", "completed", "cancelled"]);
-const TASK_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
 
 async function listTasks(request: Request) {
   let context;
@@ -68,19 +67,10 @@ async function createTask(request: Request) {
     return authorizationErrorResponse(error);
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Geçersiz JSON gövdesi." }, { status: 400 });
-  }
-
-  if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "Geçersiz görev bilgisi." }, { status: 400 });
-  }
-
-  const payload = body as Record<string, unknown>;
-  if (payload.action === "sync_data_quality") {
+  const parsed = await readValidJson(request, taskCreateSchema);
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
+  if ("action" in payload) {
     if (context.staff.role !== "admin") {
       return NextResponse.json({ error: "Veri kontrolünü yalnız yöneticiler çalıştırabilir." }, { status: 403 });
     }
@@ -92,23 +82,6 @@ async function createTask(request: Request) {
     }
 
     return NextResponse.json({ summary: data ?? { open_tasks: 0 } });
-  }
-
-  if (typeof payload.title !== "string" || payload.title.trim().length === 0 || payload.title.length > 160) {
-    return NextResponse.json({ error: "Görev başlığı 1-160 karakter olmalıdır." }, { status: 400 });
-  }
-  if (typeof payload.due_at !== "string" || Number.isNaN(Date.parse(payload.due_at))) {
-    return NextResponse.json({ error: "Geçerli bir görev tarihi gereklidir." }, { status: 400 });
-  }
-  if (payload.priority !== undefined && (typeof payload.priority !== "string" || !TASK_PRIORITIES.has(payload.priority))) {
-    return NextResponse.json({ error: "Geçersiz görev önceliği." }, { status: 400 });
-  }
-  if (
-    payload.description !== undefined
-    && payload.description !== null
-    && (typeof payload.description !== "string" || payload.description.length > 2000)
-  ) {
-    return NextResponse.json({ error: "Geçersiz görev açıklaması." }, { status: 400 });
   }
 
   const { data, error } = await context.supabase.rpc("create_task_v1", {
@@ -130,30 +103,11 @@ async function updateTask(request: Request) {
     return authorizationErrorResponse(error);
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Geçersiz JSON gövdesi." }, { status: 400 });
-  }
-
-  if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "Geçersiz görev güncellemesi." }, { status: 400 });
-  }
-
-  const { id, status, assigned_staff_id: assignedStaffId } = body as {
-    id?: unknown;
-    status?: unknown;
-    assigned_staff_id?: unknown;
-  };
-  if (typeof id !== "string") {
-    return NextResponse.json({ error: "Geçersiz görev bilgisi." }, { status: 400 });
-  }
-
-  if (assignedStaffId !== undefined) {
-    if (typeof assignedStaffId !== "string" || assignedStaffId.length === 0) {
-      return NextResponse.json({ error: "Geçerli bir personel seçmelisiniz." }, { status: 400 });
-    }
+  const parsed = await readValidJson(request, taskUpdateSchema);
+  if (!parsed.ok) return parsed.response;
+  const { id } = parsed.data;
+  if ("assigned_staff_id" in parsed.data) {
+    const assignedStaffId = parsed.data.assigned_staff_id;
     if (context.staff.role !== "admin") {
       return NextResponse.json({ error: "Görev devretme yetkiniz yok." }, { status: 403 });
     }
@@ -173,10 +127,7 @@ async function updateTask(request: Request) {
     return NextResponse.json({ success: true });
   }
 
-  if (typeof status !== "string" || !TASK_STATUSES.has(status)) {
-    return NextResponse.json({ error: "Geçersiz görev durumu." }, { status: 400 });
-  }
-
+  const status = parsed.data.status;
   const { data, error } = await context.supabase.rpc("set_task_status_v1", {
     p_task_id: id,
     p_status: status,

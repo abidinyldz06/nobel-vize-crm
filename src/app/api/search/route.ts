@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireStaff } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
+import { maskPassportNumber } from "@/lib/masking";
 import { observedRoute } from "@/lib/observability";
 
 async function search(request: Request) {
@@ -56,7 +57,10 @@ async function search(request: Request) {
   ).slice(0, 5);
 
   return NextResponse.json({
-    customers,
+    customers: customers.map((customer) => ({
+      ...customer,
+      passport_no: customer.passport_no ? maskPassportNumber(customer.passport_no) : null,
+    })),
     countries: (countries || []).map(country => ({
       id: country.id,
       country: country.name,

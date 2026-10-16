@@ -1,3 +1,10 @@
+import {
+  mobileApplicationStatusSchema,
+  mobileAppointmentStatusSchema,
+  mobileNoteSchema,
+  mobileTaskSchema,
+} from "@/lib/api-input";
+
 export const MOBILE_TASK_PAGE_SIZE = 50;
 export const MOBILE_GOOGLE_REDIRECT = "nobelcrm://auth";
 
@@ -295,13 +302,13 @@ export function applicationStatusInput(body: unknown):
   | { ok: true; status: (typeof APPLICATION_STATUS_LIST)[number]; rejectionReason: string | null }
   | { ok: false; message: string } {
   if (bodySuppliesStaffId(body) || linksCustomer(body)) return { ok: false, message: "Personel kimliği istemciden alınmaz." };
-  if (!body || typeof body !== "object") return { ok: false, message: "Başvuru bilgisi geçersiz." };
-  const record = body as Record<string, unknown>;
-  const status = typeof record.status === "string" ? record.status : "";
+  const parsed = mobileApplicationStatusSchema.safeParse(body);
+  if (!parsed.success) return { ok: false, message: "Başvuru bilgisi geçersiz." };
+  const status = parsed.data.status;
   if (!APPLICATION_STATUS_LIST.includes(status as (typeof APPLICATION_STATUS_LIST)[number])) {
     return { ok: false, message: "Durum geçersiz." };
   }
-  const reason = typeof record.rejectionReason === "string" ? record.rejectionReason.trim() : "";
+  const reason = parsed.data.rejectionReason?.trim() ?? "";
   if (reason.length > 2000) return { ok: false, message: "Ret sebebi en fazla 2000 karakter olabilir." };
   if (status === "reddedildi" && reason.length === 0) return { ok: false, message: "Ret sebebi gereklidir." };
   return {
@@ -315,13 +322,13 @@ export function appointmentStatusInput(body: unknown):
   | { ok: true; status: "cancelled" | "no_show" | "completed"; note: string | null }
   | { ok: false; message: string } {
   if (bodySuppliesStaffId(body) || linksCustomer(body)) return { ok: false, message: "Personel kimliği istemciden alınmaz." };
-  if (!body || typeof body !== "object") return { ok: false, message: "Randevu bilgisi geçersiz." };
-  const record = body as Record<string, unknown>;
-  const status = record.status;
+  const parsed = mobileAppointmentStatusSchema.safeParse(body);
+  if (!parsed.success) return { ok: false, message: "Randevu bilgisi geçersiz." };
+  const status = parsed.data.status;
   if (status !== "cancelled" && status !== "no_show" && status !== "completed") {
     return { ok: false, message: "Randevu durumu geçersiz." };
   }
-  const note = typeof record.note === "string" ? record.note.trim() : "";
+  const note = parsed.data.note?.trim() ?? "";
   if (note.length > 1000) return { ok: false, message: "Not en fazla 1000 karakter olabilir." };
   return { ok: true, status, note: note || null };
 }
@@ -330,15 +337,15 @@ export function taskCreateInput(body: unknown):
   | { ok: true; payload: { title: string; description: string | null; due_at: string; priority: "low" | "normal" | "high" } }
   | { ok: false; message: string } {
   if (bodySuppliesStaffId(body) || linksCustomer(body)) return { ok: false, message: "Görev bu ekrandan başkasına bağlanmaz." };
-  if (!body || typeof body !== "object") return { ok: false, message: "Görev bilgisi geçersiz." };
-  const record = body as Record<string, unknown>;
-  const title = typeof record.title === "string" ? record.title.trim() : "";
+  const parsed = mobileTaskSchema.safeParse(body);
+  if (!parsed.success) return { ok: false, message: "Görev bilgisi geçersiz." };
+  const title = parsed.data.title.trim();
   if (title.length < 1 || title.length > 200) return { ok: false, message: "Başlık 1-200 karakter olmalı." };
-  const detail = typeof record.detail === "string" ? record.detail.trim() : "";
+  const detail = parsed.data.detail?.trim() ?? "";
   if (detail.length > 2000) return { ok: false, message: "Açıklama en fazla 2000 karakter olabilir." };
-  const dueAt = typeof record.dueAt === "string" ? record.dueAt : "";
+  const dueAt = parsed.data.dueAt;
   if (!isMobileTimestamp(dueAt)) return { ok: false, message: "Son tarih geçersiz." };
-  const priority = record.priority === "low" || record.priority === "high" ? record.priority : "normal";
+  const priority = parsed.data.priority === "low" || parsed.data.priority === "high" ? parsed.data.priority : "normal";
   return { ok: true, payload: { title, description: detail || null, due_at: dueAt, priority } };
 }
 
@@ -363,9 +370,9 @@ export function mapMobileNote(row: {
 
 export function noteCreateInput(body: unknown): { ok: true; content: string } | { ok: false; message: string } {
   if (bodySuppliesStaffId(body) || linksCustomer(body)) return { ok: false, message: "Not bu ekrandan kayda bağlanmaz." };
-  if (!body || typeof body !== "object") return { ok: false, message: "Not geçersiz." };
-  const raw = (body as Record<string, unknown>).content;
-  const content = typeof raw === "string" ? raw.trim() : "";
+  const parsed = mobileNoteSchema.safeParse(body);
+  if (!parsed.success) return { ok: false, message: "Not geçersiz." };
+  const content = parsed.data.content.trim();
   if (content.length < 1 || content.length > 2000) return { ok: false, message: "Not 1-2000 karakter olmalı." };
   return { ok: true, content };
 }

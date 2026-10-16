@@ -301,6 +301,50 @@ describe("security regression guards", () => {
     assert.doesNotMatch(finish, /calendar|webview|WebView|refresh_token/);
     assert.match(finish, /grant_type=pkce/);
   });
+
+  it("keeps the service role client out of browser components", async () => {
+    const sources = await collectSourceFiles(path.join(projectRoot, "src"));
+    for (const sourcePath of sources) {
+      const source = await readFile(sourcePath, "utf8");
+      if (!source.includes('process.env.SUPABASE_SERVICE_ROLE_KEY')) continue;
+      assert.match(source, /import "server-only"/, sourcePath);
+    }
+    const clientSources = await Promise.all(sources.map(async (sourcePath) => ({
+      sourcePath,
+      source: await readFile(sourcePath, "utf8"),
+    })));
+    for (const { sourcePath, source } of clientSources) {
+      if (!source.includes('"use client"') && !source.includes("'use client'")) continue;
+      assert.doesNotMatch(
+        source,
+        /supabase-admin|portal-access|passport-access|request-json|SUPABASE_SERVICE_ROLE_KEY/,
+        sourcePath,
+      );
+      assert.doesNotMatch(source, /NEXT_PUBLIC_[A-Z0-9_]*(SECRET|SERVICE_ROLE|PASSWORD|PRIVATE)/);
+    }
+  });
+
+  it("masks passport numbers before search results leave the server", async () => {
+    const [search, detail] = await Promise.all([
+      readFile(path.join(projectRoot, "src/app/api/search/route.ts"), "utf8"),
+      readFile(path.join(projectRoot, "src/app/(main)/customers/[id]/page.tsx"), "utf8"),
+    ]);
+    assert.match(search, /maskPassportNumber/);
+    assert.match(detail, /recordPassportRead/);
+    assert.match(detail, /customer_detail/);
+  });
+
+  it("limits extranet attempts by address and reference", async () => {
+    const [access, migration] = await Promise.all([
+      readFile(path.join(projectRoot, "src/lib/portal-access.ts"), "utf8"),
+      readFile(path.join(projectRoot, "supabase/migrations/202610160001_portal_access_rate_limit.sql"), "utf8"),
+    ]);
+    assert.match(access, /consume_portal_rate_limit_v1/);
+    assert.match(access, /PORTAL_ERROR_PAD_MS/);
+    assert.match(migration, /GRANT EXECUTE ON FUNCTION public.consume_portal_rate_limit_v1/);
+    assert.match(migration, /FROM PUBLIC, anon, authenticated/);
+    assert.doesNotMatch(migration, /GRANT EXECUTE ON FUNCTION public.consume_portal_rate_limit_v1[\s\S]*TO anon/);
+  });
 });
 
 async function collectSourceFiles(directory: string): Promise<string[]> {

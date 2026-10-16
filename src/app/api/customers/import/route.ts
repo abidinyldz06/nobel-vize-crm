@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { customerImportSchema } from "@/lib/api-input";
 import { requireStaff } from "@/lib/authz";
 import { authorizationErrorResponse } from "@/lib/api-auth";
 import { runCustomerApplicationWorkflow } from "@/lib/customer-workflow";
+import { readValidJson } from "@/lib/request-json";
 import { observedRoute } from "@/lib/observability";
 
 interface ImportRow {
@@ -30,17 +32,9 @@ async function importCustomers(req: Request) {
   const { supabase, staff } = context;
   const staffId = staff.id;
 
-  let body: { rows?: unknown; resolutionMode?: unknown };
-  try {
-    body = await req.json() as { rows?: unknown; resolutionMode?: unknown };
-  } catch {
-    return NextResponse.json({ error: "Geçersiz JSON gövdesi" }, { status: 400 });
-  }
-  const { rows, resolutionMode } = body;
-  
-  if (!rows || !Array.isArray(rows) || rows.length === 0 || rows.length > 1000) {
-    return NextResponse.json({ error: "Geçersiz veri" }, { status: 400 });
-  }
+  const parsed = await readValidJson(req, customerImportSchema);
+  if (!parsed.ok) return parsed.response;
+  const { rows, resolutionMode } = parsed.data;
 
   const importRows = rows as ImportRow[];
   if (!importRows.every(row => row

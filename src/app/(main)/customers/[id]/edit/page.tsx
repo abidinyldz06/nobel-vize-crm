@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { updateCustomer } from "@/app/actions/update-customer";
+import { recordPassportRead } from "@/lib/passport-access";
 import { Edit2, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { VISA_TYPE_LABELS } from "@/lib/visa-types";
@@ -31,6 +32,9 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
 
   if (!customer) return <div className="p-6 text-slate-500 dark:text-slate-400">Müşteri bulunamadı.</div>;
   if (!activeApp) return <div className="p-6 text-slate-500 dark:text-slate-400">Bu müşteriye ait düzenlenebilir bir başvuru bulunamadı.</div>;
+  if (customer.passport_no || customer.passport_expiry || customer.passport_issuing_country) {
+    await recordPassportRead(supabase, customer.id, "customer_edit");
+  }
 
   const currentStatus = isApplicationStatus(activeApp.status) ? activeApp.status : 'profil_analizi';
   const availableStatuses = [currentStatus, ...APPLICATION_TRANSITIONS[currentStatus]];

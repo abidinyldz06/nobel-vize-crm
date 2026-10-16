@@ -17,6 +17,8 @@ import CustomerActionMenu from "@/components/CustomerActionMenu";
 import PortalShareButton from "@/components/PortalShareButton";
 import CustomerPrivacyPanel from "@/components/CustomerPrivacyPanel";
 import SensitiveValue from "@/components/SensitiveValue";
+import { maskPassportNumber } from "@/lib/masking";
+import { recordPassportRead } from "@/lib/passport-access";
 import { messageProviderStatus } from "@/lib/message-provider";
 import {
   ACCOMMODATION_OPTIONS,
@@ -50,6 +52,10 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
         </div>
       </div>
     );
+  }
+
+  if (customer.passport_no || customer.passport_expiry || customer.passport_issuing_country) {
+    await recordPassportRead(supabase, customer.id, "customer_detail");
   }
 
   const { data: applications } = await supabase
@@ -242,7 +248,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
           <VisaHistoryPanel customerId={customer.id} initialHistory={visaHistory ?? []} />
 
           {/* Family Members */}
-          <FamilyMembersPanel customerId={customer.id} initialMembers={familyMembers ?? []} />
+          <FamilyMembersPanel customerId={customer.id} initialMembers={(familyMembers ?? []).map((member) => ({ ...member, passport_no: member.passport_no ? maskPassportNumber(member.passport_no) : member.passport_no }))} />
         </div>
 
         {/* RIGHT COLUMN */}

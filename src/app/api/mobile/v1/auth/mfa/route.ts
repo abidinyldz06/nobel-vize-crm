@@ -1,3 +1,4 @@
+import { mobileMfaSchema } from "@/lib/api-input";
 import { isUuid, publicAuthMessage } from "@/lib/mobile-contract";
 import { mobileAccessResponse, mobileJson } from "@/lib/mobile-http";
 import { bearerToken, requireMobileAccess } from "@/lib/mobile-session";
@@ -12,10 +13,10 @@ export async function POST(request: Request) {
 
   let code = "";
   try {
-    const body = await readBody(request);
-    const challengeId = typeof body?.challengeId === "string" ? body.challengeId : "";
-    const factorId = typeof body?.factorId === "string" ? body.factorId : "";
-    code = typeof body?.code === "string" ? body.code.trim() : "";
+    const parsed = mobileMfaSchema.safeParse(await readBody(request));
+    const challengeId = parsed.success ? parsed.data.challengeId : "";
+    const factorId = parsed.success ? parsed.data.factorId : "";
+    code = parsed.success ? parsed.data.code.trim() : "";
     if (!isUuid(challengeId) || !isUuid(factorId) || !/^\d{6}$/.test(code)) {
       return mobileJson(request, { code: "invalid_mfa", message: "Kod 6 haneli olmalı." }, 400);
     }
